@@ -1,0 +1,424 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useDarkMode } from '@/contexts/DarkModeContext'
+import { useAuth } from '@/contexts/AuthContext'
+import AdvancedSidebar from '@/components/layout/AdvancedSidebar'
+import {
+  TrendingUp,
+  Users,
+  Activity,
+  Zap,
+  GitCompare,
+  Database,
+  BarChart3,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  ArrowUpRight,
+  Brain,
+  Sparkles
+} from 'lucide-react'
+
+interface MetricCard {
+  title: string
+  value: string
+  change: string
+  trend: 'up' | 'down'
+  icon: any
+  color: string
+}
+
+interface RecentActivity {
+  id: string
+  type: string
+  description: string
+  timestamp: string
+  status: 'success' | 'pending' | 'error'
+}
+
+export default function DashboardPage() {
+  const { darkMode } = useDarkMode()
+  const { user } = useAuth()
+  const [metrics, setMetrics] = useState<MetricCard[]>([])
+  const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    // Simulate loading dashboard data
+    const loadDashboardData = async () => {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      setMetrics([
+        {
+          title: 'Total Comparisons',
+          value: '2,847',
+          change: '+12.5%',
+          trend: 'up',
+          icon: GitCompare,
+          color: 'blue'
+        },
+        {
+          title: 'Models Analyzed',
+          value: '156',
+          change: '+8.2%',
+          trend: 'up',
+          icon: Brain,
+          color: 'purple'
+        },
+        {
+          title: 'Accuracy Score',
+          value: '94.6%',
+          change: '+2.1%',
+          trend: 'up',
+          icon: TrendingUp,
+          color: 'green'
+        },
+        {
+          title: 'API Usage',
+          value: '78.3%',
+          change: '-5.4%',
+          trend: 'down',
+          icon: Activity,
+          color: 'orange'
+        }
+      ])
+
+      setRecentActivities([
+        {
+          id: '1',
+          type: 'Model Comparison',
+          description: 'Compared GPT-4 vs Claude-3 on classification task',
+          timestamp: '2 minutes ago',
+          status: 'success'
+        },
+        {
+          id: '2',
+          type: 'Dataset Analysis',
+          description: 'Processed customer sentiment dataset (10,000 records)',
+          timestamp: '15 minutes ago',
+          status: 'success'
+        },
+        {
+          id: '3',
+          type: 'Hyperparameter Tuning',
+          description: 'Running grid search optimization',
+          timestamp: '1 hour ago',
+          status: 'pending'
+        },
+        {
+          id: '4',
+          type: 'Model Export',
+          description: 'Downloaded comparison report for project X',
+          timestamp: '2 hours ago',
+          status: 'success'
+        }
+      ])
+
+      setIsLoading(false)
+    }
+
+    loadDashboardData()
+  }, [])
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'success':
+        return <CheckCircle className="w-4 h-4 text-green-500" />
+      case 'pending':
+        return <Clock className="w-4 h-4 text-orange-500" />
+      case 'error':
+        return <AlertCircle className="w-4 h-4 text-red-500" />
+      default:
+        return <CheckCircle className="w-4 h-4 text-green-500" />
+    }
+  }
+
+  const getMetricColorClasses = (color: string) => {
+    const colors = {
+      blue: darkMode 
+        ? 'from-blue-600 to-blue-700 text-white' 
+        : 'from-blue-500 to-blue-600 text-white',
+      purple: darkMode 
+        ? 'from-purple-600 to-purple-700 text-white' 
+        : 'from-purple-500 to-purple-600 text-white',
+      green: darkMode 
+        ? 'from-green-600 to-green-700 text-white' 
+        : 'from-green-500 to-green-600 text-white',
+      orange: darkMode 
+        ? 'from-orange-600 to-orange-700 text-white' 
+        : 'from-orange-500 to-orange-600 text-white'
+    }
+    return colors[color as keyof typeof colors] || colors.blue
+  }
+
+  if (isLoading) {
+    return (
+      <div className={`min-h-screen transition-colors duration-200 ${
+        darkMode 
+          ? 'bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900' 
+          : 'bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50'
+      }`}>
+        <AdvancedSidebar />
+        <div className="ml-16 lg:ml-72 transition-all duration-300">
+          <div className="flex items-center justify-center h-screen">
+            <div className="flex flex-col items-center space-y-4">
+              <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+              <p className={`text-lg font-medium ${
+                darkMode ? 'text-white' : 'text-slate-900'
+              }`}>
+                Loading Dashboard...
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className={`min-h-screen transition-colors duration-200 ${
+      darkMode 
+        ? 'bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900' 
+        : 'bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50'
+    }`}>
+      <AdvancedSidebar />
+      
+      <div className="ml-16 lg:ml-72 transition-all duration-300">
+        {/* Header */}
+        <div className={`backdrop-blur-sm border-b transition-colors duration-200 ${
+          darkMode 
+            ? 'bg-gray-800/60 border-gray-700/30' 
+            : 'bg-white/60 border-slate-200/30'
+        }`}>
+          <div className="px-6 py-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className={`text-3xl font-bold transition-colors duration-200 ${
+                  darkMode ? 'text-white' : 'text-slate-900'
+                }`}>
+                  Dashboard
+                </h1>
+                <p className={`mt-1 transition-colors duration-200 ${
+                  darkMode ? 'text-gray-300' : 'text-slate-600'
+                }`}>
+                  Welcome back, {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'}! Here's your AI platform overview.
+                </p>
+              </div>
+              
+              <div className="flex items-center space-x-4">
+                <div className={`px-4 py-2 rounded-xl transition-colors duration-200 ${
+                  darkMode 
+                    ? 'bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-700/30' 
+                    : 'bg-gradient-to-r from-blue-100 to-purple-100 border border-blue-200'
+                }`}>
+                  <div className="flex items-center space-x-2">
+                    <Sparkles className={`w-4 h-4 ${
+                      darkMode ? 'text-blue-400' : 'text-blue-600'
+                    }`} />
+                    <span className={`text-sm font-medium ${
+                      darkMode ? 'text-blue-300' : 'text-blue-700'
+                    }`}>
+                      Pro Plan Active
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="p-6 space-y-6">
+          {/* Metrics Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {metrics.map((metric, index) => {
+              const Icon = metric.icon
+              return (
+                <div
+                  key={index}
+                  className={`rounded-2xl p-6 transition-all duration-200 hover:scale-105 ${
+                    darkMode 
+                      ? 'bg-gray-800/60 border border-gray-700/50' 
+                      : 'bg-white/80 border border-slate-200/50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-4">
+                    <div className={`p-3 rounded-xl bg-gradient-to-r ${getMetricColorClasses(metric.color)}`}>
+                      <Icon className="w-6 h-6" />
+                    </div>
+                    <div className={`flex items-center space-x-1 text-sm ${
+                      metric.trend === 'up' ? 'text-green-500' : 'text-red-500'
+                    }`}>
+                      <ArrowUpRight className={`w-4 h-4 ${
+                        metric.trend === 'down' ? 'rotate-180' : ''
+                      }`} />
+                      <span>{metric.change}</span>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className={`text-2xl font-bold mb-1 transition-colors duration-200 ${
+                      darkMode ? 'text-white' : 'text-slate-900'
+                    }`}>
+                      {metric.value}
+                    </h3>
+                    <p className={`text-sm transition-colors duration-200 ${
+                      darkMode ? 'text-gray-400' : 'text-slate-600'
+                    }`}>
+                      {metric.title}
+                    </p>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Recent Activity */}
+            <div className="lg:col-span-2">
+              <div className={`rounded-2xl overflow-hidden transition-colors duration-200 ${
+                darkMode 
+                  ? 'bg-gray-800/60 border border-gray-700/50' 
+                  : 'bg-white/80 border border-slate-200/50'
+              }`}>
+                <div className="p-6 border-b border-current border-opacity-10">
+                  <h2 className={`text-xl font-bold transition-colors duration-200 ${
+                    darkMode ? 'text-white' : 'text-slate-900'
+                  }`}>
+                    Recent Activity
+                  </h2>
+                </div>
+                
+                <div className="p-6">
+                  <div className="space-y-4">
+                    {recentActivities.map((activity) => (
+                      <div
+                        key={activity.id}
+                        className={`flex items-start space-x-4 p-4 rounded-xl transition-colors duration-200 ${
+                          darkMode ? 'bg-gray-700/30' : 'bg-slate-50'
+                        }`}
+                      >
+                        <div className="flex-shrink-0 mt-1">
+                          {getStatusIcon(activity.status)}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between">
+                            <p className={`text-sm font-medium transition-colors duration-200 ${
+                              darkMode ? 'text-white' : 'text-slate-900'
+                            }`}>
+                              {activity.type}
+                            </p>
+                            <span className={`text-xs transition-colors duration-200 ${
+                              darkMode ? 'text-gray-400' : 'text-slate-500'
+                            }`}>
+                              {activity.timestamp}
+                            </span>
+                          </div>
+                          <p className={`text-sm mt-1 transition-colors duration-200 ${
+                            darkMode ? 'text-gray-400' : 'text-slate-600'
+                          }`}>
+                            {activity.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="space-y-6">
+              <div className={`rounded-2xl overflow-hidden transition-colors duration-200 ${
+                darkMode 
+                  ? 'bg-gray-800/60 border border-gray-700/50' 
+                  : 'bg-white/80 border border-slate-200/50'
+              }`}>
+                <div className="p-6 border-b border-current border-opacity-10">
+                  <h2 className={`text-xl font-bold transition-colors duration-200 ${
+                    darkMode ? 'text-white' : 'text-slate-900'
+                  }`}>
+                    Quick Actions
+                  </h2>
+                </div>
+                
+                <div className="p-6 space-y-3">
+                  {[
+                    { label: 'New Comparison', href: '/chat', icon: GitCompare },
+                    { label: 'Analyze Dataset', href: '/dataset-analysis', icon: Database },
+                    { label: 'View Charts', href: '/visualization', icon: BarChart3 },
+                    { label: 'Tune Parameters', href: '/hyperparameter-tuning', icon: TrendingUp }
+                  ].map((action, index) => {
+                    const Icon = action.icon
+                    return (
+                      <a
+                        key={index}
+                        href={action.href}
+                        className={`flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 group ${
+                          darkMode 
+                            ? 'hover:bg-gray-700/50 text-gray-300 hover:text-white' 
+                            : 'hover:bg-slate-100 text-slate-700 hover:text-slate-900'
+                        }`}
+                      >
+                        <Icon className="w-5 h-5" />
+                        <span className="text-sm font-medium">{action.label}</span>
+                        <ArrowUpRight className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                      </a>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Usage Overview */}
+              <div className={`rounded-2xl overflow-hidden transition-colors duration-200 ${
+                darkMode 
+                  ? 'bg-gray-800/60 border border-gray-700/50' 
+                  : 'bg-white/80 border border-slate-200/50'
+              }`}>
+                <div className="p-6 border-b border-current border-opacity-10">
+                  <h2 className={`text-xl font-bold transition-colors duration-200 ${
+                    darkMode ? 'text-white' : 'text-slate-900'
+                  }`}>
+                    Usage This Month
+                  </h2>
+                </div>
+                
+                <div className="p-6 space-y-4">
+                  <div className="space-y-3">
+                    <div className="flex justify-between text-sm">
+                      <span className={darkMode ? 'text-gray-300' : 'text-slate-600'}>
+                        API Calls
+                      </span>
+                      <span className={darkMode ? 'text-white' : 'text-slate-900'}>
+                        1,247 / 2,000
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                      <div className="bg-blue-600 h-2 rounded-full" style={{width: '62%'}}></div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="flex justify-between text-sm">
+                      <span className={darkMode ? 'text-gray-300' : 'text-slate-600'}>
+                        Storage
+                      </span>
+                      <span className={darkMode ? 'text-white' : 'text-slate-900'}>
+                        2.3 GB / 5 GB
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+                      <div className="bg-purple-600 h-2 rounded-full" style={{width: '46%'}}></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
