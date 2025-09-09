@@ -159,7 +159,7 @@ class DatabaseService {
         message: data.message,
         createdAt: data.created_at,
         updatedAt: data.updated_at,
-        responses: data.ai_responses.map(resp => ({
+        responses: data.ai_responses.map((resp: { id: string; conversation_id: string; model_name: string; response: string; is_best_response: boolean; created_at: string }) => ({
           id: resp.id,
           conversationId: resp.conversation_id,
           modelName: resp.model_name,

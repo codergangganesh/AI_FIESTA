@@ -43,7 +43,7 @@ export default function LandingPage() {
       gradient: 'from-pink-500 to-rose-500',
       stats: 'Unlimited Storage'
     },
-    {
+    {      
       icon: Users,
       title: 'Premium Models',
       description: 'Access to cutting-edge AI models including GPT-5, Claude 4, Gemini 2.5, and emerging models.',
@@ -667,9 +667,11 @@ export default function LandingPage() {
                     'Gemini 2.5',
                     'DeepSeek'
                   ].map((model, index) => (
-                    <li key={index} className="text-slate-400 text-sm flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                      <span>{model}</span>
+                    <li key={index}>
+                      <Link href="/chat" className="text-slate-400 hover:text-white transition-colors duration-200 text-sm flex items-center space-x-2 group">
+                        <div className="w-2 h-2 bg-blue-400 rounded-full group-hover:bg-blue-300 transition-colors duration-200"></div>
+                        <span className="hover:underline">{model}</span>
+                      </Link>
                     </li>
                   ))}
                 </ul>

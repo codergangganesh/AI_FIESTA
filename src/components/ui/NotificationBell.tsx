@@ -4,6 +4,8 @@ import { useState, useRef, useEffect } from 'react'
 import { useNotifications } from '@/contexts/NotificationContext'
 import { useDarkMode } from '@/contexts/DarkModeContext'
 import { Bell, CheckCircle, XCircle, AlertTriangle, Info, Trash2 } from 'lucide-react'
+import NotificationDetailsModal from './NotificationDetailsModal'
+import { Notification } from '@/contexts/NotificationContext'
 
 const getIcon = (type: string) => {
   switch (type) {
@@ -42,6 +44,8 @@ export default function NotificationBell() {
     clearAll 
   } = useNotifications()
   const [isOpen, setIsOpen] = useState(false)
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null)
+  const [showDetailsModal, setShowDetailsModal] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -55,8 +59,11 @@ export default function NotificationBell() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const handleNotificationClick = (notificationId: string) => {
-    markAsRead(notificationId)
+  const handleNotificationClick = (notification: Notification) => {
+    markAsRead(notification.id)
+    setSelectedNotification(notification)
+    setShowDetailsModal(true)
+    setIsOpen(false)
   }
 
   const recentNotifications = notifications.slice(0, 10)
@@ -151,7 +158,7 @@ export default function NotificationBell() {
                 {recentNotifications.map((notification) => (
                   <div
                     key={notification.id}
-                    onClick={() => handleNotificationClick(notification.id)}
+                    onClick={() => handleNotificationClick(notification)}
                     className={`relative p-3 rounded-xl mb-2 cursor-pointer transition-all duration-200 ${
                       !notification.read 
                         ? darkMode 
@@ -224,6 +231,16 @@ export default function NotificationBell() {
           )}
         </div>
       )}
+      
+      {/* Notification Details Modal */}
+      <NotificationDetailsModal
+        notification={selectedNotification}
+        isOpen={showDetailsModal}
+        onClose={() => {
+          setShowDetailsModal(false)
+          setSelectedNotification(null)
+        }}
+      />
     </div>
   )
 }

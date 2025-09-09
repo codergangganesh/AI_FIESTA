@@ -1,10 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowLeft, User, Lock, Mail, Trash2, Moon, Sun, Bell } from 'lucide-react'
+import { ArrowLeft, User, Lock, Mail, Trash2, Moon, Sun, Bell, Shield, CreditCard, Database, Settings as SettingsIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { useDarkMode } from '@/contexts/DarkModeContext'
+import AdvancedSidebar from '@/components/layout/AdvancedSidebar'
 import Link from 'next/link'
 
 export default function AccountSettingsPage() {
@@ -35,7 +36,6 @@ export default function AccountSettingsPage() {
   const handleSaveProfile = async () => {
     setIsLoading(true)
     try {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000))
       setMessage('Profile updated successfully!')
       setTimeout(() => setMessage(''), 3000)
@@ -54,7 +54,6 @@ export default function AccountSettingsPage() {
     
     setIsLoading(true)
     try {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000))
       setMessage('Password changed successfully!')
       setFormData(prev => ({ ...prev, currentPassword: '', newPassword: '', confirmPassword: '' }))
@@ -69,9 +68,8 @@ export default function AccountSettingsPage() {
   const handleSavePreferences = async () => {
     setIsLoading(true)
     try {
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000))
-      setMessage('Email preferences updated successfully!')
+      setMessage('Preferences updated successfully!')
       setTimeout(() => setMessage(''), 3000)
     } catch (error) {
       setMessage('Failed to update preferences. Please try again.')
@@ -81,123 +79,170 @@ export default function AccountSettingsPage() {
   }
 
   const tabs = [
-    { id: 'profile', label: 'Profile Information', icon: User },
-    { id: 'password', label: 'Password Management', icon: Lock },
-    { id: 'email', label: 'Email Preferences', icon: Mail },
-    { id: 'delete', label: 'Delete Account', icon: Trash2 }
+    { 
+      id: 'profile', 
+      label: 'Profile Information', 
+      icon: User,
+      description: 'Update your personal details and preferences'
+    },
+    { 
+      id: 'security', 
+      label: 'Security & Privacy', 
+      icon: Shield,
+      description: 'Manage passwords and security settings'
+    },
+    { 
+      id: 'notifications', 
+      label: 'Notifications', 
+      icon: Bell,
+      description: 'Configure notification preferences'
+    },
+    { 
+      id: 'billing', 
+      label: 'Billing & Subscription', 
+      icon: CreditCard,
+      description: 'Manage your subscription and billing'
+    },
+    { 
+      id: 'data', 
+      label: 'Data & Privacy', 
+      icon: Database,
+      description: 'Export data and privacy controls'
+    },
+    { 
+      id: 'delete', 
+      label: 'Delete Account', 
+      icon: Trash2,
+      description: 'Permanently delete your account'
+    }
   ]
 
   return (
-    <div className={`min-h-screen transition-colors duration-200 ${
+    <div className={`flex h-screen transition-colors duration-200 ${
       darkMode 
         ? 'bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900' 
         : 'bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50'
     }`}>
-      {/* Header */}
-      <div className={`backdrop-blur-sm border-b transition-colors duration-200 ${
-        darkMode 
-          ? 'bg-gray-800/60 border-gray-700/30' 
-          : 'bg-white/60 border-slate-200/30'
-      }`}>
-        <div className="max-w-4xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+      {/* Advanced Sidebar */}
+      <AdvancedSidebar />
+      
+      {/* Main Content Area */}
+      <div className="flex-1 ml-16 lg:ml-72 transition-all duration-300 overflow-hidden">
+        {/* Header */}
+        <div className={`backdrop-blur-sm border-b transition-colors duration-200 ${
+          darkMode 
+            ? 'bg-gray-800/60 border-gray-700/30' 
+            : 'bg-white/60 border-slate-200/30'
+        }`}>
+          <div className="max-w-6xl mx-auto px-6 py-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <Link
+                  href="/dashboard"
+                  className={`p-2 rounded-xl transition-all duration-200 ${
+                    darkMode 
+                      ? 'hover:bg-gray-700/50 text-gray-300 hover:text-white' 
+                      : 'hover:bg-slate-100 text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </Link>
+                <div>
+                  <h1 className={`text-3xl font-bold transition-colors duration-200 ${
+                    darkMode ? 'text-white' : 'text-slate-900'
+                  }`}>
+                    Account Settings
+                  </h1>
+                  <p className={`transition-colors duration-200 ${
+                    darkMode ? 'text-gray-300' : 'text-slate-600'
+                  }`}>
+                    Manage your account preferences and security
+                  </p>
+                </div>
+              </div>
+              
+              {/* Dark Mode Toggle */}
               <button
-                onClick={() => router.back()}
-                className={`p-2 rounded-xl transition-all duration-200 ${
+                onClick={toggleDarkMode}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 ${
                   darkMode 
-                    ? 'hover:bg-gray-700/50 text-gray-300 hover:text-white' 
-                    : 'hover:bg-slate-100 text-slate-600 hover:text-slate-900'
+                    ? 'bg-gray-700/50 hover:bg-gray-600/50 text-gray-300' 
+                    : 'bg-white/80 hover:bg-white border border-slate-200 text-slate-700'
                 }`}
               >
-                <ArrowLeft className="w-5 h-5" />
+                {darkMode ? (
+                  <>
+                    <Sun className="w-4 h-4" />
+                    <span className="hidden sm:inline">Light Mode</span>
+                  </>
+                ) : (
+                  <>
+                    <Moon className="w-4 h-4" />
+                    <span className="hidden sm:inline">Dark Mode</span>
+                  </>
+                )}
               </button>
-              <div>
-                <h1 className={`text-2xl font-bold transition-colors duration-200 ${
-                  darkMode ? 'text-white' : 'text-slate-900'
-                }`}>
-                  Account Settings
-                </h1>
-                <p className={`transition-colors duration-200 ${
-                  darkMode ? 'text-gray-300' : 'text-slate-600'
-                }`}>
-                  Manage your account preferences and security
-                </p>
-              </div>
             </div>
-            
-            {/* Dark Mode Toggle */}
-            <button
-              onClick={toggleDarkMode}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 ${
-                darkMode 
-                  ? 'bg-gray-700/50 hover:bg-gray-600/50 text-gray-300' 
-                  : 'bg-white/80 hover:bg-white border border-slate-200 text-slate-700'
-              }`}
-            >
-              {darkMode ? (
-                <>
-                  <Sun className="w-4 h-4" />
-                  <span className="hidden sm:inline">Light Mode</span>
-                </>
-              ) : (
-                <>
-                  <Moon className="w-4 h-4" />
-                  <span className="hidden sm:inline">Dark Mode</span>
-                </>
-              )}
-            </button>
           </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* Sidebar Navigation */}
-          <div className="lg:col-span-1">
-            <div className={`rounded-2xl overflow-hidden transition-colors duration-200 ${
-              darkMode 
-                ? 'bg-gray-800/60 border border-gray-700/50' 
-                : 'bg-white/80 border border-slate-200/50'
-            }`}>
-              <div className="p-2">
-                {tabs.map((tab) => {
-                  const Icon = tab.icon
-                  return (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                        activeTab === tab.id
-                          ? darkMode
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-blue-600 text-white'
-                          : darkMode
-                            ? 'hover:bg-gray-700/50 text-gray-300 hover:text-white'
-                            : 'hover:bg-slate-100 text-slate-700 hover:text-slate-900'
-                      }`}
-                    >
-                      <Icon className="w-5 h-5" />
-                      <span className="font-medium text-sm">{tab.label}</span>
-                    </button>
-                  )
-                })}
+        {/* Main Content - Flexbox Layout */}
+        <div className="flex-1 overflow-hidden">
+          <div className="h-full flex">
+            {/* Settings Sidebar */}
+            <div className={`w-80 border-r transition-colors duration-200 ${
+              darkMode ? 'border-gray-700/50 bg-gray-800/40' : 'border-slate-200/50 bg-white/40'
+            } backdrop-blur-sm`}>
+              <div className="p-6">
+                <h2 className={`text-lg font-bold mb-6 transition-colors duration-200 ${
+                  darkMode ? 'text-white' : 'text-slate-900'
+                }`}>
+                  Settings
+                </h2>
+                
+                <div className="space-y-2">
+                  {tabs.map((tab) => {
+                    const Icon = tab.icon
+                    return (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`w-full group flex items-start space-x-3 p-4 rounded-xl transition-all duration-200 text-left ${
+                          activeTab === tab.id
+                            ? darkMode
+                              ? 'bg-blue-600/20 border border-blue-500/30 text-blue-400'
+                              : 'bg-blue-50 border border-blue-200 text-blue-700'
+                            : darkMode
+                              ? 'hover:bg-gray-700/30 text-gray-300 hover:text-white'
+                              : 'hover:bg-slate-100/50 text-slate-700 hover:text-slate-900'
+                        }`}
+                      >
+                        <div className="flex-shrink-0">
+                          <Icon className={`w-5 h-5 transition-colors duration-200 ${
+                            activeTab === tab.id ? 'text-current' : 'text-current opacity-60'
+                          }`} />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-sm mb-1">{tab.label}</div>
+                          <div className={`text-xs leading-relaxed transition-colors duration-200 ${
+                            darkMode ? 'text-gray-400' : 'text-slate-500'
+                          }`}>
+                            {tab.description}
+                          </div>
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Content Area */}
-          <div className="lg:col-span-3">
-            <div className={`rounded-2xl overflow-hidden transition-colors duration-200 ${
-              darkMode 
-                ? 'bg-gray-800/60 border border-gray-700/50' 
-                : 'bg-white/80 border border-slate-200/50'
-            }`}>
-              <div className="p-6">
+            {/* Content Area */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="p-8 max-w-4xl mx-auto">
                 {/* Success/Error Message */}
                 {message && (
-                  <div className={`mb-6 p-4 rounded-xl ${
+                  <div className={`mb-6 p-4 rounded-xl transition-colors duration-200 ${
                     message.includes('successfully')
                       ? darkMode
                         ? 'bg-green-900/30 border border-green-700/50 text-green-400'
@@ -212,12 +257,19 @@ export default function AccountSettingsPage() {
 
                 {/* Profile Information Tab */}
                 {activeTab === 'profile' && (
-                  <div className="space-y-6">
-                    <h2 className={`text-xl font-bold transition-colors duration-200 ${
-                      darkMode ? 'text-white' : 'text-slate-900'
-                    }`}>
-                      Profile Information
-                    </h2>
+                  <div className="space-y-8">
+                    <div className="border-b border-current border-opacity-10 pb-6">
+                      <h2 className={`text-2xl font-bold transition-colors duration-200 ${
+                        darkMode ? 'text-white' : 'text-slate-900'
+                      }`}>
+                        Profile Information
+                      </h2>
+                      <p className={`mt-2 transition-colors duration-200 ${
+                        darkMode ? 'text-gray-400' : 'text-slate-600'
+                      }`}>
+                        Update your personal details and account information
+                      </p>
+                    </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
@@ -288,14 +340,21 @@ export default function AccountSettingsPage() {
                   </div>
                 )}
 
-                {/* Password Management Tab */}
-                {activeTab === 'password' && (
-                  <div className="space-y-6">
-                    <h2 className={`text-xl font-bold transition-colors duration-200 ${
-                      darkMode ? 'text-white' : 'text-slate-900'
-                    }`}>
-                      Password Management
-                    </h2>
+                {/* Security & Privacy Tab */}
+                {activeTab === 'security' && (
+                  <div className="space-y-8">
+                    <div className="border-b border-current border-opacity-10 pb-6">
+                      <h2 className={`text-2xl font-bold transition-colors duration-200 ${
+                        darkMode ? 'text-white' : 'text-slate-900'
+                      }`}>
+                        Security & Privacy
+                      </h2>
+                      <p className={`mt-2 transition-colors duration-200 ${
+                        darkMode ? 'text-gray-400' : 'text-slate-600'
+                      }`}>
+                        Manage your account security and privacy settings
+                      </p>
+                    </div>
                     
                     <div>
                       <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${
@@ -366,14 +425,21 @@ export default function AccountSettingsPage() {
                   </div>
                 )}
 
-                {/* Email Preferences Tab */}
-                {activeTab === 'email' && (
-                  <div className="space-y-6">
-                    <h2 className={`text-xl font-bold transition-colors duration-200 ${
-                      darkMode ? 'text-white' : 'text-slate-900'
-                    }`}>
-                      Email Preferences
-                    </h2>
+                {/* Notifications Tab */}
+                {activeTab === 'notifications' && (
+                  <div className="space-y-8">
+                    <div className="border-b border-current border-opacity-10 pb-6">
+                      <h2 className={`text-2xl font-bold transition-colors duration-200 ${
+                        darkMode ? 'text-white' : 'text-slate-900'
+                      }`}>
+                        Notification Preferences
+                      </h2>
+                      <p className={`mt-2 transition-colors duration-200 ${
+                        darkMode ? 'text-gray-400' : 'text-slate-600'
+                      }`}>
+                        Control how and when you receive notifications
+                      </p>
+                    </div>
                     
                     <div className="space-y-4">
                       {[
@@ -419,14 +485,104 @@ export default function AccountSettingsPage() {
                   </div>
                 )}
 
+                {/* Billing Tab */}
+                {activeTab === 'billing' && (
+                  <div className="space-y-8">
+                    <div className="border-b border-current border-opacity-10 pb-6">
+                      <h2 className={`text-2xl font-bold transition-colors duration-200 ${
+                        darkMode ? 'text-white' : 'text-slate-900'
+                      }`}>
+                        Billing & Subscription
+                      </h2>
+                      <p className={`mt-2 transition-colors duration-200 ${
+                        darkMode ? 'text-gray-400' : 'text-slate-600'
+                      }`}>
+                        Manage your subscription and billing information
+                      </p>
+                    </div>
+                    
+                    <div className={`p-6 rounded-xl border transition-colors duration-200 ${
+                      darkMode 
+                        ? 'bg-blue-900/20 border-blue-700/50' 
+                        : 'bg-blue-50 border-blue-200'
+                    }`}>
+                      <h3 className={`font-semibold mb-2 transition-colors duration-200 ${
+                        darkMode ? 'text-blue-400' : 'text-blue-700'
+                      }`}>
+                        Current Plan: Free
+                      </h3>
+                      <p className={`mb-4 transition-colors duration-200 ${
+                        darkMode ? 'text-blue-300' : 'text-blue-600'
+                      }`}>
+                        Upgrade to Pro for unlimited access to all AI models and advanced features.
+                      </p>
+                      
+                      <Link
+                        href="/pricing"
+                        className="inline-flex items-center space-x-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg"
+                      >
+                        <CreditCard className="w-4 h-4" />
+                        <span>Upgrade Plan</span>
+                      </Link>
+                    </div>
+                  </div>
+                )}
+
+                {/* Data & Privacy Tab */}
+                {activeTab === 'data' && (
+                  <div className="space-y-8">
+                    <div className="border-b border-current border-opacity-10 pb-6">
+                      <h2 className={`text-2xl font-bold transition-colors duration-200 ${
+                        darkMode ? 'text-white' : 'text-slate-900'
+                      }`}>
+                        Data & Privacy
+                      </h2>
+                      <p className={`mt-2 transition-colors duration-200 ${
+                        darkMode ? 'text-gray-400' : 'text-slate-600'
+                      }`}>
+                        Export your data and manage privacy settings
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className={`p-4 rounded-xl border transition-colors duration-200 ${
+                        darkMode 
+                          ? 'bg-gray-700/30 border-gray-600' 
+                          : 'bg-slate-50 border-slate-200'
+                      }`}>
+                        <h3 className={`font-medium mb-2 transition-colors duration-200 ${
+                          darkMode ? 'text-white' : 'text-slate-900'
+                        }`}>
+                          Export Data
+                        </h3>
+                        <p className={`text-sm mb-3 transition-colors duration-200 ${
+                          darkMode ? 'text-gray-400' : 'text-slate-600'
+                        }`}>
+                          Download all your conversations and account data
+                        </p>
+                        <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all duration-200">
+                          Export Data
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Delete Account Tab */}
                 {activeTab === 'delete' && (
-                  <div className="space-y-6">
-                    <h2 className={`text-xl font-bold transition-colors duration-200 ${
-                      darkMode ? 'text-white' : 'text-slate-900'
-                    }`}>
-                      Delete Account
-                    </h2>
+                  <div className="space-y-8">
+                    <div className="border-b border-current border-opacity-10 pb-6">
+                      <h2 className={`text-2xl font-bold transition-colors duration-200 ${
+                        darkMode ? 'text-white' : 'text-slate-900'
+                      }`}>
+                        Delete Account
+                      </h2>
+                      <p className={`mt-2 transition-colors duration-200 ${
+                        darkMode ? 'text-gray-400' : 'text-slate-600'
+                      }`}>
+                        Permanently delete your account and all associated data
+                      </p>
+                    </div>
                     
                     <div className={`p-6 rounded-xl border transition-colors duration-200 ${
                       darkMode 

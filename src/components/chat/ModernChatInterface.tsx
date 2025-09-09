@@ -295,25 +295,45 @@ export default function ModernChatInterface() {
       {/* Main Chat Area */}
       <div className="flex-1 flex flex-col">
         {/* Top Bar with Model Selection */}
-        <div className="bg-white/60 backdrop-blur-sm border-b border-slate-200/30 p-4">
+        <div className={`backdrop-blur-sm border-b p-4 transition-colors duration-200 ${
+          darkMode 
+            ? 'bg-gray-800/60 border-gray-700/30' 
+            : 'bg-white/60 border-slate-200/30'
+        }`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="px-4 py-2 bg-gradient-to-r from-blue-100 to-purple-100 text-blue-700 rounded-full text-sm font-medium">
+              <div className={`px-4 py-2 bg-gradient-to-r rounded-full text-sm font-medium transition-colors duration-200 ${
+                darkMode 
+                  ? 'from-blue-900/50 to-purple-900/50 text-blue-300 border border-blue-700/30' 
+                  : 'from-blue-100 to-purple-100 text-blue-700'
+              }`}>
                 {selectedModels.length} models selected
               </div>
               <button
                 onClick={() => setShowModelSelector(!showModelSelector)}
-                className="flex items-center space-x-2 px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-all duration-200 hover:shadow-md"
+                className={`flex items-center space-x-2 px-4 py-2 border rounded-xl transition-all duration-200 hover:shadow-md ${
+                  darkMode 
+                    ? 'bg-gray-700/50 hover:bg-gray-600/50 border-gray-600 text-gray-300 hover:text-white' 
+                    : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700'
+                }`}
               >
-                <Settings className="w-4 h-4 text-slate-600" />
-                <span className="text-slate-700 font-medium">Configure Models</span>
+                <Settings className={`w-4 h-4 transition-colors duration-200 ${
+                  darkMode ? 'text-gray-400' : 'text-slate-600'
+                }`} />
+                <span className={`font-medium transition-colors duration-200 ${
+                  darkMode ? 'text-gray-300' : 'text-slate-700'
+                }`}>Configure Models</span>
               </button>
             </div>
           </div>
 
           {/* Model Selector Dropdown */}
           {showModelSelector && (
-            <div className="mt-4 p-4 bg-white rounded-2xl border border-slate-200/50 shadow-lg">
+            <div className={`mt-4 p-4 rounded-2xl border shadow-lg transition-colors duration-200 ${
+              darkMode 
+                ? 'bg-gray-800/95 border-gray-700/50 backdrop-blur-xl' 
+                : 'bg-white border-slate-200/50'
+            }`}>
               <ModelSelector 
                 selectedModels={selectedModels}
                 onModelToggle={handleModelToggle}
@@ -327,15 +347,27 @@ export default function ModernChatInterface() {
           {currentSession ? (
             <div className="h-full flex flex-col">
               {/* User Message */}
-              <div className="border-b border-slate-200/30 bg-white/30 p-6">
+              <div className={`border-b p-6 transition-colors duration-200 ${
+                darkMode 
+                  ? 'border-gray-700/30 bg-gray-800/30' 
+                  : 'border-slate-200/30 bg-white/30'
+              }`}>
                 <div className="max-w-4xl mx-auto">
                   <div className="flex items-start space-x-4">
-                    <div className="w-8 h-8 bg-gradient-to-br from-slate-600 to-slate-700 rounded-lg flex items-center justify-center">
+                    <div className={`w-8 h-8 bg-gradient-to-br rounded-lg flex items-center justify-center transition-colors duration-200 ${
+                      darkMode 
+                        ? 'from-blue-600 to-purple-600' 
+                        : 'from-slate-600 to-slate-700'
+                    }`}>
                       <span className="text-white text-sm font-bold">You</span>
                     </div>
                     <div className="flex-1">
-                      <p className="text-slate-900 font-medium">{currentSession.message}</p>
-                      <p className="text-xs text-slate-500 mt-1">
+                      <p className={`font-medium transition-colors duration-200 ${
+                        darkMode ? 'text-white' : 'text-slate-900'
+                      }`}>{currentSession.message}</p>
+                      <p className={`text-xs mt-1 transition-colors duration-200 ${
+                        darkMode ? 'text-gray-400' : 'text-slate-500'
+                      }`}>
                         {currentSession.timestamp.toLocaleString()}
                       </p>
                     </div>
@@ -379,13 +411,19 @@ export default function ModernChatInterface() {
             // Welcome State
             <div className="h-full flex items-center justify-center p-8">
               <div className="text-center max-w-2xl">
-                <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-6">
+                <div className={`w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl transition-transform duration-300 hover:scale-105 ${
+                  darkMode ? 'shadow-blue-500/20' : 'shadow-blue-500/30'
+                }`}>
                   <Sparkles className="w-10 h-10 text-white" />
                 </div>
-                <h2 className="text-3xl font-bold text-slate-900 mb-4">
+                <h2 className={`text-3xl font-bold mb-4 transition-colors duration-200 ${
+                  darkMode ? 'text-white' : 'text-slate-900'
+                }`}>
                   Start Your AI Comparison
                 </h2>
-                <p className="text-lg text-slate-600 mb-8 leading-relaxed">
+                <p className={`text-lg mb-8 leading-relaxed transition-colors duration-200 ${
+                  darkMode ? 'text-gray-300' : 'text-slate-600'
+                }`}>
                   Send one message to multiple AI models and compare their responses side by side. 
                   Click "New Comparison" to begin or try one of the suggested prompts below.
                 </p>
@@ -396,13 +434,23 @@ export default function ModernChatInterface() {
                     <button
                       key={index}
                       onClick={() => setMessage(prompt)}
-                      className="p-4 text-left bg-white/60 hover:bg-white/80 border border-slate-200/50 rounded-xl transition-all duration-200 hover:shadow-md hover:scale-105 group"
+                      className={`p-4 text-left rounded-xl transition-all duration-200 hover:shadow-md hover:scale-105 group ${
+                        darkMode 
+                          ? 'bg-gray-800/60 hover:bg-gray-700/80 border border-gray-700/50 hover:border-gray-600' 
+                          : 'bg-white/60 hover:bg-white/80 border border-slate-200/50'
+                      }`}
                     >
                       <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center group-hover:from-blue-200 group-hover:to-purple-200 transition-all duration-200">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center group-hover:from-blue-200 group-hover:to-purple-200 transition-all duration-200 ${
+                          darkMode 
+                            ? 'bg-gradient-to-br from-blue-900/50 to-purple-900/50 group-hover:from-blue-800/60 group-hover:to-purple-800/60' 
+                            : 'bg-gradient-to-br from-blue-100 to-purple-100'
+                        }`}>
                           <Sparkles className="w-4 h-4 text-blue-600" />
                         </div>
-                        <span className="text-slate-700 text-sm font-medium">{prompt}</span>
+                        <span className={`text-sm font-medium transition-colors duration-200 ${
+                          darkMode ? 'text-gray-300 group-hover:text-white' : 'text-slate-700'
+                        }`}>{prompt}</span>
                       </div>
                     </button>
                   ))}
@@ -413,7 +461,11 @@ export default function ModernChatInterface() {
         </div>
 
         {/* Message Input */}
-        <div className="border-t border-slate-200/30 bg-white/60 backdrop-blur-sm p-6">
+        <div className={`border-t backdrop-blur-sm p-6 transition-colors duration-200 ${
+          darkMode 
+            ? 'border-gray-700/30 bg-gray-800/60' 
+            : 'border-slate-200/30 bg-white/60'
+        }`}>
           <div className="max-w-4xl mx-auto">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="relative">
@@ -423,7 +475,11 @@ export default function ModernChatInterface() {
                   onChange={(e) => setMessage(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Ask anything to compare AI models... (Enter to send, Shift+Enter for new line)"
-                  className="w-full px-6 py-4 bg-white border border-slate-200/50 rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all duration-200 text-slate-900 placeholder:text-slate-500"
+                  className={`w-full px-6 py-4 border rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all duration-200 text-sm placeholder:text-slate-500 ${
+                    darkMode 
+                      ? 'bg-gray-700/50 border-gray-600/50 text-white placeholder:text-gray-400 hover:bg-gray-700/70' 
+                      : 'bg-white border-slate-200/50 text-slate-900 hover:border-slate-300/50'
+                  }`}
                   rows={1}
                   style={{ minHeight: '56px', maxHeight: '120px' }}
                 />
@@ -431,15 +487,23 @@ export default function ModernChatInterface() {
               
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <div className="text-sm text-slate-600">
+                  <div className={`text-sm transition-colors duration-200 ${
+                    darkMode ? 'text-gray-300' : 'text-slate-600'
+                  }`}>
                     {selectedModels.length === 0 
                       ? 'Select models to start comparing' 
                       : `${selectedModels.length} model${selectedModels.length === 1 ? '' : 's'} ready`
                     }
                   </div>
                   {loading.length > 0 && (
-                    <div className="flex items-center space-x-2 text-sm text-blue-600">
-                      <div className="w-4 h-4 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin"></div>
+                    <div className={`flex items-center space-x-2 text-sm transition-colors duration-200 ${
+                      darkMode ? 'text-blue-400' : 'text-blue-600'
+                    }`}>
+                      <div className={`w-4 h-4 border-2 rounded-full animate-spin transition-colors duration-200 ${
+                        darkMode 
+                          ? 'border-blue-800 border-t-blue-400' 
+                          : 'border-blue-200 border-t-blue-600'
+                      }`}></div>
                       <span>Processing...</span>
                     </div>
                   )}

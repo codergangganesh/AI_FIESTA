@@ -73,6 +73,7 @@ export default function PricingPage() {
           planType,
           amount,
           currency: 'INR',
+          billingCycle,
           userEmail: user.email || '',
           userName: user.user_metadata?.full_name || user.email?.split('@')[0] || ''
         },

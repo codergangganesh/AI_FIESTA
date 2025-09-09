@@ -6,6 +6,7 @@ import { AIModel } from '@/types/app'
 import { useDarkMode } from '@/contexts/DarkModeContext'
 import ResponseSummary from './ResponseSummary'
 import TextToSpeech from './TextToSpeech'
+import Link from 'next/link'
 
 interface AIResponseCardProps {
   model: AIModel
@@ -122,8 +123,12 @@ export default function AIResponseCard({
   return (
     <div className={`group relative overflow-hidden rounded-2xl transition-all duration-300 hover:scale-102 ${
       isBestResponse 
-        ? 'bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-300 shadow-lg shadow-amber-200/50' 
-        : 'bg-white/80 backdrop-blur-sm border border-slate-200/50 hover:shadow-lg hover:border-slate-300/50'
+        ? darkMode
+          ? 'bg-gradient-to-br from-amber-900/30 to-yellow-900/30 border-2 border-amber-600/50 shadow-lg shadow-amber-500/20' 
+          : 'bg-gradient-to-br from-amber-50 to-yellow-50 border-2 border-amber-300 shadow-lg shadow-amber-200/50'
+        : darkMode
+          ? 'bg-gray-800/60 backdrop-blur-sm border border-gray-700/50 hover:shadow-lg hover:border-gray-600/50'
+          : 'bg-white/80 backdrop-blur-sm border border-slate-200/50 hover:shadow-lg hover:border-slate-300/50'
     }`}>
       {/* Best Response Indicator */}
       {isBestResponse && (
@@ -143,17 +148,27 @@ export default function AIResponseCard({
               {model.displayName.charAt(0)}
             </div>
             <div>
-              <h3 className="font-bold text-slate-900 text-lg">{model.displayName}</h3>
+              <Link href="/chat" className="hover:text-blue-600 transition-colors duration-200">
+                <h3 className={`font-bold text-lg hover:text-blue-600 cursor-pointer transition-colors duration-200 ${
+                  darkMode ? 'text-white' : 'text-slate-900'
+                }`}>{model.displayName}</h3>
+              </Link>
               <div className="flex items-center space-x-2">
                 <span className={`text-xs font-medium px-2 py-1 rounded-full ${
                   isBestResponse 
-                    ? 'bg-amber-100 text-amber-700' 
-                    : 'bg-slate-100 text-slate-600'
+                    ? darkMode
+                      ? 'bg-amber-900/40 text-amber-300' 
+                      : 'bg-amber-100 text-amber-700'
+                    : darkMode
+                      ? 'bg-gray-700 text-gray-300'
+                      : 'bg-slate-100 text-slate-600'
                 }`}>
                   {model.provider}
                 </span>
                 {isBestResponse && (
-                  <div className="flex items-center space-x-1 text-amber-600">
+                  <div className={`flex items-center space-x-1 ${
+                    darkMode ? 'text-amber-400' : 'text-amber-600'
+                  }`}>
                     <Sparkles className="w-3 h-3" />
                     <span className="text-xs font-semibold">Best</span>
                   </div>
@@ -170,8 +185,12 @@ export default function AIResponseCard({
                   onClick={onMarkBest}
                   className={`p-2 rounded-xl transition-all duration-200 ${
                     isBestResponse 
-                      ? 'bg-amber-100 text-amber-600 shadow-md' 
-                      : 'bg-slate-100 text-slate-400 hover:text-amber-500 hover:bg-amber-50 hover:scale-110'
+                      ? darkMode
+                        ? 'bg-amber-900/40 text-amber-400 shadow-md' 
+                        : 'bg-amber-100 text-amber-600 shadow-md'
+                      : darkMode
+                        ? 'bg-gray-700 text-gray-400 hover:text-amber-400 hover:bg-amber-900/20 hover:scale-110'
+                        : 'bg-slate-100 text-slate-400 hover:text-amber-500 hover:bg-amber-50 hover:scale-110'
                   }`}
                   title={isBestResponse ? 'Best response' : 'Mark as best'}
                 >
@@ -180,7 +199,11 @@ export default function AIResponseCard({
                 
                 <button
                   onClick={handleCopy}
-                  className="p-2 bg-slate-100 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-xl transition-all duration-200 hover:scale-110"
+                  className={`p-2 rounded-xl transition-all duration-200 hover:scale-110 ${
+                    darkMode 
+                      ? 'bg-gray-700 text-gray-400 hover:text-gray-200 hover:bg-gray-600' 
+                      : 'bg-slate-100 text-slate-400 hover:text-slate-600 hover:bg-slate-200'
+                  }`}
                   title="Copy response"
                 >
                   {copied ? (
