@@ -1,12 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useDarkMode } from '@/contexts/DarkModeContext'
 import { usePlan } from '@/contexts/PlanContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { useToast } from '@/contexts/NotificationContext'
 import AdvancedSidebar from '@/components/layout/AdvancedSidebar'
-import { processPayment, formatPrice, calculateDiscount, PLAN_PRICES } from '@/lib/razorpay'
+import { createStripeCheckout, getFormattedPricing, redirectToCheckout } from '@/lib/stripe'
 import { Star, Crown, Zap, ArrowRight, Shield, Headphones, Globe, Users, BarChart3, Database, GitCompare, Loader2, Check } from 'lucide-react'
 
 interface PricingPlan {
@@ -31,6 +31,12 @@ export default function PricingPage() {
   const { success, error } = useToast()
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual')
   const [isProcessing, setIsProcessing] = useState<string | null>(null)
+  const [pricing, setPricing] = useState<any>(null)
+
+  useEffect(() => {
+    const formattedPricing = getFormattedPricing()
+    setPricing(formattedPricing)
+  }, [])
 
   const handlePlanUpgrade = async (planType: 'pro' | 'pro_plus') => {
     if (!user) {
@@ -43,44 +49,29 @@ export default function PricingPage() {
       return
     }
 
+    if (!pricing) {
+      error('Pricing Error', 'Pricing information is not loaded yet. Please try again.')
+      return
+    }
+
     setIsProcessing(planType)
 
-    const amount = billingCycle === 'annual' 
-      ? PLAN_PRICES[planType].yearly 
-      : PLAN_PRICES[planType].monthly
-
     try {
-      await processPayment(
-        {
-          planType,
-          amount,
-          currency: 'INR',
-          userEmail: user.email || '',
-          userName: user.user_metadata?.full_name || user.email?.split('@')[0] || '',
-          billingCycle: billingCycle === 'annual' ? 'yearly' : 'monthly'
-        },
-        async (response) => {
-          const upgradeSuccess = await upgradePlan(planType, response.razorpay_payment_id)
-          if (upgradeSuccess) {
-            success(
-              'Payment Successful!', 
-              `Welcome to ${planType.toUpperCase()}! Your plan has been upgraded.`
-            )
-          } else {
-            error('Upgrade Failed', 'Payment was successful but plan upgrade failed. Please contact support.')
-          }
-          setIsProcessing(null)
-        },
-        (err) => {
-          error(
-            'Payment Failed', 
-            err.message || 'Payment could not be processed. Please try again.'
-          )
-          setIsProcessing(null)
-        }
-      )
-    } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred'
+      const checkoutData = await createStripeCheckout({
+        planType,
+        billingCycle: billingCycle === 'annual' ? 'yearly' : 'monthly',
+        amount: pricing[planType][billingCycle === 'annual' ? 'yearly' : 'monthly'].amount,
+        currency: 'INR',
+        userEmail: user.email || '',
+        userName: user.user_metadata?.full_name || user.email?.split('@')[0] || '',
+        trialDays: 7
+      })
+
+      // Redirect to Stripe checkout
+      await redirectToCheckout(checkoutData.sessionId)
+    } catch (err) {
+      console.error('Payment error:', err)
+      const errorMessage = err instanceof Error ? err.message : 'Payment failed. Please try again.'
       error('Payment Error', errorMessage)
       setIsProcessing(null)
     }
@@ -98,6 +89,22 @@ export default function PricingPage() {
       case 'pro_plus': return 'Pro Plus Plan'
       default: return null
     }
+  }
+
+  // Wait for pricing data to load
+  if (!pricing) {
+    return (
+      <div className={`min-h-screen transition-colors duration-200 ${
+        darkMode 
+          ? 'bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900' 
+          : 'bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50'
+      }`}>
+        <AdvancedSidebar />
+        <div className="ml-16 lg:ml-72 transition-all duration-300 flex items-center justify-center h-screen">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+        </div>
+      </div>
+    )
   }
 
   const plans: PricingPlan[] = [
@@ -128,10 +135,10 @@ export default function PricingPage() {
       id: 'pro',
       name: 'Pro Plan',
       price: billingCycle === 'monthly' 
-        ? formatPrice(PLAN_PRICES.pro.monthly)
-        : formatPrice(PLAN_PRICES.pro.yearly),
+        ? pricing.pro.monthly.price
+        : pricing.pro.yearly.price,
       originalPrice: billingCycle === 'annual' 
-        ? formatPrice(PLAN_PRICES.pro.monthly * 12) 
+        ? pricing.pro.monthly.price.replace('₹', '₹') 
         : undefined,
       period: billingCycle === 'monthly' ? 'per month' : 'per year',
       description: 'Advanced features for serious AI researchers and developers',
@@ -155,10 +162,10 @@ export default function PricingPage() {
       id: 'pro-plus',
       name: 'Pro Plus Plan',
       price: billingCycle === 'monthly' 
-        ? formatPrice(PLAN_PRICES.pro_plus.monthly)
-        : formatPrice(PLAN_PRICES.pro_plus.yearly),
+        ? pricing.pro_plus.monthly.price
+        : pricing.pro_plus.yearly.price,
       originalPrice: billingCycle === 'annual' 
-        ? formatPrice(PLAN_PRICES.pro_plus.monthly * 12) 
+        ? pricing.pro_plus.monthly.price.replace('₹', '₹') 
         : undefined,
       period: billingCycle === 'monthly' ? 'per month' : 'per year',
       description: 'Complete AI platform with enterprise-grade features',
@@ -295,7 +302,7 @@ export default function PricingPage() {
                   >
                     Annual
                     <span className="ml-2 text-xs bg-green-500 text-white px-2 py-1 rounded-full">
-                      Save {calculateDiscount(PLAN_PRICES.pro.monthly, PLAN_PRICES.pro.yearly)}%
+                      Save {pricing.pro.yearly.discount}%
                     </span>
                   </button>
                 </div>
@@ -523,11 +530,11 @@ export default function PricingPage() {
                 },
                 {
                   question: "What payment methods do you accept?",
-                  answer: "We accept all major credit cards, UPI, net banking, and digital wallets popular in India through Razorpay."
+                  answer: "We accept all major credit cards, UPI, net banking, and digital wallets popular in India through Stripe."
                 },
                 {
                   question: "Is there a free trial for paid plans?",
-                  answer: "Yes, we offer a 14-day free trial for both Pro and Pro Plus plans. No credit card required to start."
+                  answer: "Yes, we offer a 7-day free trial for both Pro and Pro Plus plans. No credit card required to start."
                 },
                 {
                   question: "What happens if I exceed my API limits?",

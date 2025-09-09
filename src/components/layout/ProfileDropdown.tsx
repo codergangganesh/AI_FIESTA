@@ -82,7 +82,7 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
 
   const handlePricing = () => {
     setIsOpen(false)
-    router.push('/pricing')
+    router.push('/payment')
   }
 
   const handleUsage = () => {
