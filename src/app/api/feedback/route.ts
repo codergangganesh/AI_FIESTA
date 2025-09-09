@@ -1,10 +1,12 @@
 import { NextRequest } from 'next/server';
-import { createClient } from '@/utils/supabase/client';
+import { createServerSupabaseClient } from '@/utils/supabase/server';
 
 export async function POST(request: NextRequest) {
   try {
     const { name, email, message, rating } = await request.json();
-    const supabase = createClient();
+
+    // Create a Supabase client with the user's cookies
+    const supabase = createServerSupabaseClient();
 
     // Get user session
     const { data: { user } } = await supabase.auth.getUser();

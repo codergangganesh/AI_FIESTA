@@ -32,13 +32,13 @@ async function getPlanFromSupabase(userId: string, supabase: any): Promise<PlanT
     const { data, error } = await supabase.from('information_schema.tables').select('table_name').eq('table_schema', 'public')
     
     if (error) {
-      console.error('Error checking tables:', error)
+      console.error('Error checking tables:', error.message || error)
       return 'free'
     }
 
     // Add null check for data
     if (!data || !Array.isArray(data) || !data.some((table: any) => table.table_name === 'profiles')) {
-      console.error('Profiles table does not exist in Supabase')
+      console.warn('Profiles table does not exist in Supabase')
       return 'free'
     }
 
@@ -49,14 +49,16 @@ async function getPlanFromSupabase(userId: string, supabase: any): Promise<PlanT
       .eq('id', userId)
       .single()
 
+    // If there's an error fetching the plan (e.g., column doesn't exist), default to free
     if (profileError) {
-      console.error('Error fetching plan:', profileError)
+      console.warn('Plan column may not exist in profiles table, defaulting to free plan:', profileError.message || 'Unknown error')
       return 'free'
     }
 
+    // If plan column exists but is null, default to free
     return (profileData?.plan as PlanType) || 'free'
-  } catch (error) {
-    console.error('Unexpected error fetching plan:', error)
+  } catch (error: any) {
+    console.error('Unexpected error fetching plan:', error.message || error)
     return 'free'
   }
 }
@@ -78,8 +80,8 @@ export function PlanProvider({ children }: { children: React.ReactNode }) {
       try {
         const currentPlan = await getPlanFromSupabase(user.id, supabase)
         setPlan(currentPlan)
-      } catch (error) {
-        console.error('Error in fetchPlan:', error)
+      } catch (error: any) {
+        console.error('Error in fetchPlan:', error.message || error)
         setPlan('free')
       } finally {
         setLoading(authLoading)
@@ -101,7 +103,7 @@ export function PlanProvider({ children }: { children: React.ReactNode }) {
           },
           (payload: any) => {
             if (payload.new?.plan && payload.new.plan !== plan) {
-              setPlan(payload.new.plan)
+              setPlan(payload.new.plan as PlanType)
             }
           }
         )
@@ -120,8 +122,12 @@ export function PlanProvider({ children }: { children: React.ReactNode }) {
     isProPlus: plan === 'pro_plus',
     refreshPlan: async () => {
       if (!user?.id) return
-      const newPlan = await getPlanFromSupabase(user.id, supabase)
-      setPlan(newPlan)
+      try {
+        const newPlan = await getPlanFromSupabase(user.id, supabase)
+        setPlan(newPlan)
+      } catch (error: any) {
+        console.error('Error in refreshPlan:', error.message || error)
+      }
     },
   }
 

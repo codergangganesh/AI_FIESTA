@@ -2,6 +2,7 @@
 create table public.profiles (
   id uuid references auth.users on delete cascade not null primary key,
   email text unique not null,
+  plan text default 'free' check (plan in ('free', 'pro', 'pro_plus')),
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -81,8 +82,8 @@ create policy "Users can update responses for own conversations" on public.ai_re
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.profiles (id, email)
-  values (new.id, new.email);
+  insert into public.profiles (id, email, plan)
+  values (new.id, new.email, 'free');
   return new;
 end;
 $$ language plpgsql security definer;

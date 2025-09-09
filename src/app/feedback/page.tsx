@@ -2,14 +2,16 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
+import { useDarkMode } from '@/contexts/DarkModeContext'
 import { useRouter } from 'next/navigation'
 import AdvancedSidebar from '@/components/layout/AdvancedSidebar'
 import { Star, Send } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
-import Navigation from '@/components/Navigation'
+import SimplifiedNavigation from '@/components/SimplifiedNavigation'
 
 export default function FeedbackPage() {
   const { user, loading } = useAuth()
+  const { darkMode } = useDarkMode()
   const router = useRouter()
   const [formData, setFormData] = useState({
     name: user?.user_metadata?.full_name || '',
@@ -80,7 +82,7 @@ export default function FeedbackPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     );
@@ -145,7 +147,14 @@ export default function FeedbackPage() {
       // The real-time subscription will handle adding the new feedback to the list
       // Show success modal
       setShowModal(true);
-    } catch (error: Error) {
+      // Reset form after successful submission
+      setFormData({
+        name: user?.user_metadata?.full_name || '',
+        email: user?.email || '',
+        message: '',
+        rating: 0
+      });
+    } catch (error: any) {
       console.error('Error submitting feedback:', error);
       setSubmitError(error.message || 'An unexpected error occurred');
     } finally {
@@ -177,8 +186,8 @@ export default function FeedbackPage() {
         onMouseLeave={() => setHoverRating(0)}
         className={`p-1 focus:outline-none transition-all duration-200 transform hover:scale-110 ${
           star <= (hoverRating || formData.rating)
-            ? 'text-yellow-400'
-            : 'text-gray-300'
+            ? darkMode ? 'text-yellow-400' : 'text-yellow-500'
+            : darkMode ? 'text-gray-600' : 'text-gray-300'
         }`}
       >
         <Star
@@ -193,23 +202,37 @@ export default function FeedbackPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className={`min-h-screen transition-colors duration-200 ${
+      darkMode 
+        ? 'bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900' 
+        : 'bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50'
+    }`}>
       <AdvancedSidebar />
       <div className="ml-16 lg:ml-72">
-        <Navigation />
+        <SimplifiedNavigation />
         
         <main className="max-w-6xl mx-auto px-6 py-8">
           {/* Header */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-slate-900 mb-4">Your Feedback Matters</h1>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+            <h1 className={`text-4xl font-bold mb-4 transition-colors duration-200 ${
+              darkMode ? 'text-white' : 'text-slate-900'
+            }`}>
+              Your Feedback Matters
+            </h1>
+            <p className={`text-xl max-w-2xl mx-auto transition-colors duration-200 ${
+              darkMode ? 'text-gray-300' : 'text-slate-600'
+            }`}>
               Help us improve AI Fiesta by sharing your experience and suggestions.
             </p>
           </div>
 
           {/* Error Message */}
           {submitError && (
-            <div className="max-w-6xl mx-auto mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-xl">
+            <div className={`max-w-6xl mx-auto mb-6 p-4 rounded-xl border-l-4 transition-colors duration-200 ${
+              darkMode 
+                ? 'bg-red-900/30 border-red-700/50 text-red-400' 
+                : 'bg-red-50 border-red-500 text-red-700'
+            }`}>
               <p className="font-medium">{submitError}</p>
             </div>
           )}
@@ -217,13 +240,23 @@ export default function FeedbackPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Feedback Form */}
             <div className="lg:col-span-2">
-              <div className="bg-white/80 backdrop-blur-sm border border-slate-200/50 rounded-2xl p-8">
-                <h3 className="text-2xl font-bold text-slate-900 mb-6">Share Your Thoughts</h3>
+              <div className={`rounded-2xl p-8 transition-colors duration-200 backdrop-blur-sm ${
+                darkMode 
+                  ? 'bg-gray-800/60 border border-gray-700/50' 
+                  : 'bg-white/80 border border-slate-200/50'
+              }`}>
+                <h3 className={`text-2xl font-bold mb-6 transition-colors duration-200 ${
+                  darkMode ? 'text-white' : 'text-slate-900'
+                }`}>
+                  Share Your Thoughts
+                </h3>
                 
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Name */}
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    <label className={`block text-sm font-semibold mb-2 transition-colors duration-200 ${
+                      darkMode ? 'text-gray-300' : 'text-slate-700'
+                    }`}>
                       Name
                     </label>
                     <input
@@ -232,10 +265,14 @@ export default function FeedbackPage() {
                       value={formData.name}
                       onChange={handleInputChange}
                       placeholder="Enter your name"
-                      className={`w-full px-4 py-3 bg-white border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all duration-200 ${
+                      className={`w-full px-4 py-3 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2 ${
                         errors.name 
-                          ? 'border-red-500 focus:border-red-500' 
-                          : 'border-slate-200 focus:border-purple-400 focus:shadow-[0_0_15px_rgba(168,85,247,0.5)]'
+                          ? darkMode 
+                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-gray-700/50' 
+                            : 'border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-white'
+                          : darkMode 
+                            ? 'border-gray-600 focus:border-purple-500 focus:ring-purple-500/20 bg-gray-700/50 text-white placeholder-gray-400' 
+                            : 'border-slate-200 focus:border-purple-500 focus:ring-purple-500/20 bg-white text-slate-900 placeholder-slate-500'
                       }`}
                     />
                     {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
@@ -243,7 +280,9 @@ export default function FeedbackPage() {
 
                   {/* Email */}
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    <label className={`block text-sm font-semibold mb-2 transition-colors duration-200 ${
+                      darkMode ? 'text-gray-300' : 'text-slate-700'
+                    }`}>
                       Email
                     </label>
                     <input
@@ -252,10 +291,14 @@ export default function FeedbackPage() {
                       value={formData.email}
                       onChange={handleInputChange}
                       placeholder="Enter your email"
-                      className={`w-full px-4 py-3 bg-white border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all duration-200 ${
+                      className={`w-full px-4 py-3 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2 ${
                         errors.email 
-                          ? 'border-red-500 focus:border-red-500' 
-                          : 'border-slate-200 focus:border-purple-400 focus:shadow-[0_0_15px_rgba(168,85,247,0.5)]'
+                          ? darkMode 
+                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-gray-700/50' 
+                            : 'border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-white'
+                          : darkMode 
+                            ? 'border-gray-600 focus:border-purple-500 focus:ring-purple-500/20 bg-gray-700/50 text-white placeholder-gray-400' 
+                            : 'border-slate-200 focus:border-purple-500 focus:ring-purple-500/20 bg-white text-slate-900 placeholder-slate-500'
                       }`}
                     />
                     {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
@@ -263,7 +306,9 @@ export default function FeedbackPage() {
 
                   {/* Rating */}
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    <label className={`block text-sm font-semibold mb-2 transition-colors duration-200 ${
+                      darkMode ? 'text-gray-300' : 'text-slate-700'
+                    }`}>
                       Rating
                     </label>
                     <div className="flex space-x-1">
@@ -274,7 +319,9 @@ export default function FeedbackPage() {
 
                   {/* Message */}
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    <label className={`block text-sm font-semibold mb-2 transition-colors duration-200 ${
+                      darkMode ? 'text-gray-300' : 'text-slate-700'
+                    }`}>
                       Your Feedback
                     </label>
                     <textarea
@@ -283,10 +330,14 @@ export default function FeedbackPage() {
                       onChange={handleInputChange}
                       placeholder="Share your thoughts, suggestions, or report issues..."
                       rows={6}
-                      className={`w-full px-4 py-3 bg-white border rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500/20 transition-all duration-200 resize-none ${
+                      className={`w-full px-4 py-3 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2 resize-none ${
                         errors.message 
-                          ? 'border-red-500 focus:border-red-500' 
-                          : 'border-slate-200 focus:border-purple-400 focus:shadow-[0_0_15px_rgba(168,85,247,0.5)]'
+                          ? darkMode 
+                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-gray-700/50' 
+                            : 'border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-white'
+                          : darkMode 
+                            ? 'border-gray-600 focus:border-purple-500 focus:ring-purple-500/20 bg-gray-700/50 text-white placeholder-gray-400' 
+                            : 'border-slate-200 focus:border-purple-500 focus:ring-purple-500/20 bg-white text-slate-900 placeholder-slate-500'
                       }`}
                     />
                     {errors.message && <p className="mt-1 text-sm text-red-500">{errors.message}</p>}
@@ -296,7 +347,15 @@ export default function FeedbackPage() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className={`w-full flex items-center justify-center space-x-3 px-6 py-4 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-xl font-semibold hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 border-2 border-purple-400 hover:border-purple-300 shadow-[0_0_15px_rgba(168,85,247,0.5)] ${isSubmitting ? 'animate-pulse' : ''}`}
+                    className={`w-full flex items-center justify-center space-x-3 px-6 py-4 rounded-xl font-semibold transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed ${
+                      isSubmitting 
+                        ? 'animate-pulse' 
+                        : ''
+                    } ${
+                      darkMode 
+                        ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700' 
+                        : 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:from-purple-600 hover:to-indigo-600'
+                    }`}
                   >
                     {isSubmitting ? (
                       <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
@@ -311,63 +370,123 @@ export default function FeedbackPage() {
 
             {/* Feedback Stats */}
             <div className="space-y-6">
-              <div className="bg-white/80 backdrop-blur-sm border border-slate-200/50 rounded-2xl p-6">
-                <h3 className="text-xl font-bold text-slate-900 mb-4">Feedback Overview</h3>
+              <div className={`rounded-2xl p-6 transition-colors duration-200 backdrop-blur-sm ${
+                darkMode 
+                  ? 'bg-gray-800/60 border border-gray-700/50' 
+                  : 'bg-white/80 border border-slate-200/50'
+              }`}>
+                <h3 className={`text-xl font-bold mb-4 transition-colors duration-200 ${
+                  darkMode ? 'text-white' : 'text-slate-900'
+                }`}>
+                  Feedback Overview
+                </h3>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-600">Average Rating</span>
+                    <span className={`transition-colors duration-200 ${
+                      darkMode ? 'text-gray-300' : 'text-slate-600'
+                    }`}>
+                      Average Rating
+                    </span>
                     <div className="flex items-center space-x-1">
                       <Star className="w-5 h-5 text-yellow-400 fill-current" />
-                      <span className="font-bold text-slate-900">4.8</span>
+                      <span className={`font-bold transition-colors duration-200 ${
+                        darkMode ? 'text-white' : 'text-slate-900'
+                      }`}>
+                        4.8
+                      </span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-600">Total Feedback</span>
-                    <span className="font-bold text-slate-900">{feedbackList.length + 127}</span>
+                    <span className={`transition-colors duration-200 ${
+                      darkMode ? 'text-gray-300' : 'text-slate-600'
+                    }`}>
+                      Total Feedback
+                    </span>
+                    <span className={`font-bold transition-colors duration-200 ${
+                      darkMode ? 'text-white' : 'text-slate-900'
+                    }`}>
+                      {feedbackList.length + 127}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-600">Positive Feedback</span>
-                    <span className="font-bold text-slate-900">92%</span>
+                    <span className={`transition-colors duration-200 ${
+                      darkMode ? 'text-gray-300' : 'text-slate-600'
+                    }`}>
+                      Positive Feedback
+                    </span>
+                    <span className={`font-bold transition-colors duration-200 ${
+                      darkMode ? 'text-white' : 'text-slate-900'
+                    }`}>
+                      92%
+                    </span>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white/80 backdrop-blur-sm border border-slate-200/50 rounded-2xl p-6">
-                <h3 className="text-xl font-bold text-slate-900 mb-4">Recent Feedback</h3>
+              <div className={`rounded-2xl p-6 transition-colors duration-200 backdrop-blur-sm ${
+                darkMode 
+                  ? 'bg-gray-800/60 border border-gray-700/50' 
+                  : 'bg-white/80 border border-slate-200/50'
+              }`}>
+                <h3 className={`text-xl font-bold mb-4 transition-colors duration-200 ${
+                  darkMode ? 'text-white' : 'text-slate-900'
+                }`}>
+                  Recent Feedback
+                </h3>
                 <div className="space-y-4">
-                  <div className="p-4 bg-slate-50 rounded-xl">
+                  <div className={`p-4 rounded-xl transition-colors duration-200 ${
+                    darkMode ? 'bg-gray-700/30' : 'bg-slate-50'
+                  }`}>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-slate-900">Alex Johnson</span>
+                      <span className={`font-medium transition-colors duration-200 ${
+                        darkMode ? 'text-white' : 'text-slate-900'
+                      }`}>
+                        Alex Johnson
+                      </span>
                       <div className="flex">
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
                             className={`w-4 h-4 ${
-                              i < 5 ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                              i < 5 
+                                ? darkMode ? 'text-yellow-400 fill-current' : 'text-yellow-500 fill-current'
+                                : darkMode ? 'text-gray-600' : 'text-gray-300'
                             }`}
                           />
                         ))}
                       </div>
                     </div>
-                    <p className="text-sm text-slate-600">
+                    <p className={`text-sm transition-colors duration-200 ${
+                      darkMode ? 'text-gray-300' : 'text-slate-600'
+                    }`}>
                       "The AI comparison feature is amazing! Saved me hours of testing different models."
                     </p>
                   </div>
-                  <div className="p-4 bg-slate-50 rounded-xl">
+                  <div className={`p-4 rounded-xl transition-colors duration-200 ${
+                    darkMode ? 'bg-gray-700/30' : 'bg-slate-50'
+                  }`}>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium text-slate-900">Sarah Williams</span>
+                      <span className={`font-medium transition-colors duration-200 ${
+                        darkMode ? 'text-white' : 'text-slate-900'
+                      }`}>
+                        Sarah Williams
+                      </span>
                       <div className="flex">
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
                             className={`w-4 h-4 ${
-                              i < 4 ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                              i < 4 
+                                ? darkMode ? 'text-yellow-400 fill-current' : 'text-yellow-500 fill-current'
+                                : darkMode ? 'text-gray-600' : 'text-gray-300'
                             }`}
                           />
                         ))}
                       </div>
                     </div>
-                    <p className="text-sm text-slate-600">
+                    <p className={`text-sm transition-colors duration-200 ${
+                      darkMode ? 'text-gray-300' : 'text-slate-600'
+                    }`}>
                       "Great interface and responsive support team. Would recommend to anyone!"
                     </p>
                   </div>
@@ -379,28 +498,52 @@ export default function FeedbackPage() {
           {/* Submitted Feedback */}
           {feedbackList.length > 0 && (
             <div className="mt-12">
-              <h3 className="text-2xl font-bold text-slate-900 mb-6">Recent Feedback</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <h3 className={`text-2xl font-bold mb-6 transition-colors duration-200 ${
+                darkMode ? 'text-white' : 'text-slate-900'
+              }`}>
+                Community Feedback
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {feedbackList.map((feedback) => (
                   <div 
                     key={feedback.id}
-                    className="bg-white/80 backdrop-blur-sm border border-slate-200/50 rounded-2xl p-6 hover:shadow-lg transition-all duration-300 hover:scale-[1.02]"
+                    className={`rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 backdrop-blur-sm ${
+                      darkMode 
+                        ? 'bg-gray-800/60 border border-gray-700/50 hover:shadow-lg' 
+                        : 'bg-white/80 border border-slate-200/50 hover:shadow-lg'
+                    }`}
                   >
                     <div className="flex items-center justify-between mb-4">
                       <div>
-                        <h4 className="font-bold text-slate-900">{feedback.name}</h4>
-                        <p className="text-sm text-slate-500">{new Date(feedback.created_at).toLocaleDateString()}</p>
+                        <h4 className={`font-bold transition-colors duration-200 ${
+                          darkMode ? 'text-white' : 'text-slate-900'
+                        }`}>
+                          {feedback.name}
+                        </h4>
+                        <p className={`text-sm transition-colors duration-200 ${
+                          darkMode ? 'text-gray-400' : 'text-slate-500'
+                        }`}>
+                          {new Date(feedback.created_at).toLocaleDateString()}
+                        </p>
                       </div>
                       <div className="flex">
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
-                            className={`w-5 h-5 ${i < feedback.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+                            className={`w-5 h-5 ${
+                              i < feedback.rating 
+                                ? darkMode ? 'text-yellow-400 fill-current' : 'text-yellow-500 fill-current'
+                                : darkMode ? 'text-gray-600' : 'text-gray-300'
+                            }`}
                           />
                         ))}
                       </div>
                     </div>
-                    <p className="text-slate-700">{feedback.message}</p>
+                    <p className={`transition-colors duration-200 ${
+                      darkMode ? 'text-gray-300' : 'text-slate-700'
+                    }`}>
+                      {feedback.message}
+                    </p>
                   </div>
                 ))}
               </div>

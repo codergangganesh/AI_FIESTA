@@ -2,14 +2,16 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
+import { useDarkMode } from '@/contexts/DarkModeContext'
 import { useRouter } from 'next/navigation'
 import AdvancedSidebar from '@/components/layout/AdvancedSidebar'
-import { Mail, Send, Phone, MapPin, Clock, MessageSquare } from 'lucide-react'
+import { Mail, Send, Phone, MessageSquare, Clock } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
-import Navigation from '@/components/Navigation'
+import SimplifiedNavigation from '@/components/SimplifiedNavigation'
 
 export default function ContactPage() {
   const { user, loading } = useAuth()
+  const { darkMode } = useDarkMode()
   const router = useRouter()
   const [formData, setFormData] = useState({
     name: user?.user_metadata?.full_name || '',
@@ -57,7 +59,7 @@ export default function ContactPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-900 dark:via-blue-900 dark:to-indigo-900">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
       </div>
     )
@@ -176,23 +178,37 @@ export default function ContactPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className={`min-h-screen transition-colors duration-200 ${
+      darkMode 
+        ? 'bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900' 
+        : 'bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50'
+    }`}>
       <AdvancedSidebar />
       <div className="ml-16 lg:ml-72">
-        <Navigation />
+        <SimplifiedNavigation />
         
         <main className="max-w-6xl mx-auto px-6 py-8">
           {/* Header */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-slate-900 mb-4">Get in Touch</h1>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+            <h1 className={`text-4xl font-bold mb-4 transition-colors duration-200 ${
+              darkMode ? 'text-white' : 'text-slate-900'
+            }`}>
+              Get in Touch
+            </h1>
+            <p className={`text-xl max-w-2xl mx-auto transition-colors duration-200 ${
+              darkMode ? 'text-gray-300' : 'text-slate-600'
+            }`}>
               Have questions about AI Fiesta? We're here to help you get the most out of our AI comparison platform.
             </p>
           </div>
 
           {/* Error Message */}
           {submitError && (
-            <div className="max-w-6xl mx-auto mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-xl">
+            <div className={`max-w-6xl mx-auto mb-6 p-4 rounded-xl border-l-4 transition-colors duration-200 ${
+              darkMode 
+                ? 'bg-red-900/30 border-red-700/50 text-red-400' 
+                : 'bg-red-50 border-red-500 text-red-700'
+            }`}>
               <p className="font-medium">{submitError}</p>
             </div>
           )}
@@ -200,21 +216,43 @@ export default function ContactPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Contact Methods */}
             <div className="lg:col-span-1 space-y-6">
-              <div className="bg-white/80 backdrop-blur-sm border border-slate-200/50 rounded-2xl p-6">
-                <h3 className="text-xl font-bold text-slate-900 mb-6">Contact Methods</h3>
+              <div className={`rounded-2xl p-6 transition-colors duration-200 backdrop-blur-sm ${
+                darkMode 
+                  ? 'bg-gray-800/60 border border-gray-700/50' 
+                  : 'bg-white/80 border border-slate-200/50'
+              }`}>
+                <h3 className={`text-xl font-bold mb-6 transition-colors duration-200 ${
+                  darkMode ? 'text-white' : 'text-slate-900'
+                }`}>
+                  Contact Methods
+                </h3>
                 
                 <div className="space-y-4">
                   {contactMethods.map((method, index) => {
                     const Icon = method.icon
                     return (
-                      <div key={index} className="flex items-start space-x-4 p-4 rounded-xl hover:bg-slate-50/50 transition-colors duration-200">
+                      <div key={index} className={`flex items-start space-x-4 p-4 rounded-xl transition-colors duration-200 ${
+                        darkMode ? 'hover:bg-gray-700/30' : 'hover:bg-slate-50/50'
+                      }`}>
                         <div className={`w-12 h-12 bg-gradient-to-r ${method.color} rounded-xl flex items-center justify-center shadow-lg flex-shrink-0`}>
                           <Icon className="w-6 h-6 text-white" />
                         </div>
                         <div className="flex-1">
-                          <h4 className="font-semibold text-slate-900 mb-1">{method.title}</h4>
-                          <p className="text-sm text-slate-600 mb-1">{method.description}</p>
-                          <p className="text-sm font-medium text-blue-600">{method.value}</p>
+                          <h4 className={`font-semibold mb-1 transition-colors duration-200 ${
+                            darkMode ? 'text-white' : 'text-slate-900'
+                          }`}>
+                            {method.title}
+                          </h4>
+                          <p className={`text-sm mb-1 transition-colors duration-200 ${
+                            darkMode ? 'text-gray-400' : 'text-slate-600'
+                          }`}>
+                            {method.description}
+                          </p>
+                          <p className={`text-sm font-medium transition-colors duration-200 ${
+                            darkMode ? 'text-blue-400' : 'text-blue-600'
+                          }`}>
+                            {method.value}
+                          </p>
                         </div>
                       </div>
                     )
@@ -223,9 +261,19 @@ export default function ContactPage() {
               </div>
 
               {/* Quick Info */}
-              <div className="bg-white/80 backdrop-blur-sm border border-slate-200/50 rounded-2xl p-6">
-                <h3 className="text-lg font-bold text-slate-900 mb-4">Office Hours</h3>
-                <div className="flex items-center space-x-3 text-slate-600">
+              <div className={`rounded-2xl p-6 transition-colors duration-200 backdrop-blur-sm ${
+                darkMode 
+                  ? 'bg-gray-800/60 border border-gray-700/50' 
+                  : 'bg-white/80 border border-slate-200/50'
+              }`}>
+                <h3 className={`text-lg font-bold mb-4 transition-colors duration-200 ${
+                  darkMode ? 'text-white' : 'text-slate-900'
+                }`}>
+                  Office Hours
+                </h3>
+                <div className={`flex items-center space-x-3 transition-colors duration-200 ${
+                  darkMode ? 'text-gray-400' : 'text-slate-600'
+                }`}>
                   <Clock className="w-5 h-5" />
                   <div>
                     <p className="font-medium">Monday - Friday</p>
@@ -237,13 +285,23 @@ export default function ContactPage() {
 
             {/* Contact Form */}
             <div className="lg:col-span-2">
-              <div className="bg-white/80 backdrop-blur-sm border border-slate-200/50 rounded-2xl p-8">
-                <h3 className="text-2xl font-bold text-slate-900 mb-6">Send us a Message</h3>
+              <div className={`rounded-2xl p-8 transition-colors duration-200 backdrop-blur-sm ${
+                darkMode 
+                  ? 'bg-gray-800/60 border border-gray-700/50' 
+                  : 'bg-white/80 border border-slate-200/50'
+              }`}>
+                <h3 className={`text-2xl font-bold mb-6 transition-colors duration-200 ${
+                  darkMode ? 'text-white' : 'text-slate-900'
+                }`}>
+                  Send us a Message
+                </h3>
                 
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {/* Name */}
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    <label className={`block text-sm font-semibold mb-2 transition-colors duration-200 ${
+                      darkMode ? 'text-gray-300' : 'text-slate-700'
+                    }`}>
                       Name
                     </label>
                     <input
@@ -252,10 +310,14 @@ export default function ContactPage() {
                       value={formData.name}
                       onChange={handleInputChange}
                       placeholder="Enter your name"
-                      className={`w-full px-4 py-3 bg-white border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 ${
+                      className={`w-full px-4 py-3 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2 ${
                         errors.name 
-                          ? 'border-red-500 focus:border-red-500' 
-                          : 'border-slate-200 focus:border-blue-400 focus:shadow-[0_0_15px_rgba(59,130,246,0.5)]'
+                          ? darkMode 
+                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-gray-700/50' 
+                            : 'border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-white'
+                          : darkMode 
+                            ? 'border-gray-600 focus:border-blue-500 focus:ring-blue-500/20 bg-gray-700/50 text-white placeholder-gray-400' 
+                            : 'border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 bg-white text-slate-900 placeholder-slate-500'
                       }`}
                     />
                     {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
@@ -263,7 +325,9 @@ export default function ContactPage() {
 
                   {/* Email */}
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    <label className={`block text-sm font-semibold mb-2 transition-colors duration-200 ${
+                      darkMode ? 'text-gray-300' : 'text-slate-700'
+                    }`}>
                       Email
                     </label>
                     <input
@@ -272,10 +336,14 @@ export default function ContactPage() {
                       value={formData.email}
                       onChange={handleInputChange}
                       placeholder="Enter your email"
-                      className={`w-full px-4 py-3 bg-white border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 ${
+                      className={`w-full px-4 py-3 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2 ${
                         errors.email 
-                          ? 'border-red-500 focus:border-red-500' 
-                          : 'border-slate-200 focus:border-blue-400 focus:shadow-[0_0_15px_rgba(59,130,246,0.5)]'
+                          ? darkMode 
+                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-gray-700/50' 
+                            : 'border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-white'
+                          : darkMode 
+                            ? 'border-gray-600 focus:border-blue-500 focus:ring-blue-500/20 bg-gray-700/50 text-white placeholder-gray-400' 
+                            : 'border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 bg-white text-slate-900 placeholder-slate-500'
                       }`}
                     />
                     {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
@@ -283,7 +351,9 @@ export default function ContactPage() {
 
                   {/* Subject */}
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    <label className={`block text-sm font-semibold mb-2 transition-colors duration-200 ${
+                      darkMode ? 'text-gray-300' : 'text-slate-700'
+                    }`}>
                       Subject
                     </label>
                     <input
@@ -292,10 +362,14 @@ export default function ContactPage() {
                       value={formData.subject}
                       onChange={handleInputChange}
                       placeholder="How can we help you?"
-                      className={`w-full px-4 py-3 bg-white border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 ${
+                      className={`w-full px-4 py-3 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2 ${
                         errors.subject 
-                          ? 'border-red-500 focus:border-red-500' 
-                          : 'border-slate-200 focus:border-blue-400 focus:shadow-[0_0_15px_rgba(59,130,246,0.5)]'
+                          ? darkMode 
+                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-gray-700/50' 
+                            : 'border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-white'
+                          : darkMode 
+                            ? 'border-gray-600 focus:border-blue-500 focus:ring-blue-500/20 bg-gray-700/50 text-white placeholder-gray-400' 
+                            : 'border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 bg-white text-slate-900 placeholder-slate-500'
                       }`}
                     />
                     {errors.subject && <p className="mt-1 text-sm text-red-500">{errors.subject}</p>}
@@ -303,25 +377,33 @@ export default function ContactPage() {
 
                   {/* Priority */}
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    <label className={`block text-sm font-semibold mb-2 transition-colors duration-200 ${
+                      darkMode ? 'text-gray-300' : 'text-slate-700'
+                    }`}>
                       Priority
                     </label>
                     <select
                       name="priority"
                       value={formData.priority}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all duration-200"
+                      className={`w-full px-4 py-3 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2 ${
+                        darkMode 
+                          ? 'border-gray-600 focus:border-blue-500 focus:ring-blue-500/20 bg-gray-700/50 text-white' 
+                          : 'border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 bg-white text-slate-900'
+                      }`}
                     >
-                      <option value="low">Low Priority</option>
-                      <option value="medium">Medium Priority</option>
-                      <option value="high">High Priority</option>
-                      <option value="urgent">Urgent</option>
+                      <option value="low" className={darkMode ? 'bg-gray-700' : 'bg-white'}>Low Priority</option>
+                      <option value="medium" className={darkMode ? 'bg-gray-700' : 'bg-white'}>Medium Priority</option>
+                      <option value="high" className={darkMode ? 'bg-gray-700' : 'bg-white'}>High Priority</option>
+                      <option value="urgent" className={darkMode ? 'bg-gray-700' : 'bg-white'}>Urgent</option>
                     </select>
                   </div>
 
                   {/* Message */}
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    <label className={`block text-sm font-semibold mb-2 transition-colors duration-200 ${
+                      darkMode ? 'text-gray-300' : 'text-slate-700'
+                    }`}>
                       Message
                     </label>
                     <textarea
@@ -330,10 +412,14 @@ export default function ContactPage() {
                       onChange={handleInputChange}
                       placeholder="Tell us more about your question or issue..."
                       rows={6}
-                      className={`w-full px-4 py-3 bg-white border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 resize-none ${
+                      className={`w-full px-4 py-3 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2 resize-none ${
                         errors.message 
-                          ? 'border-red-500 focus:border-red-500' 
-                          : 'border-slate-200 focus:border-blue-400 focus:shadow-[0_0_15px_rgba(59,130,246,0.5)]'
+                          ? darkMode 
+                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-gray-700/50' 
+                            : 'border-red-500 focus:border-red-500 focus:ring-red-500/20 bg-white'
+                          : darkMode 
+                            ? 'border-gray-600 focus:border-blue-500 focus:ring-blue-500/20 bg-gray-700/50 text-white placeholder-gray-400' 
+                            : 'border-slate-200 focus:border-blue-500 focus:ring-blue-500/20 bg-white text-slate-900 placeholder-slate-500'
                       }`}
                     />
                     {errors.message && <p className="mt-1 text-sm text-red-500">{errors.message}</p>}
@@ -343,7 +429,15 @@ export default function ContactPage() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className={`w-full flex items-center justify-center space-x-3 px-6 py-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl font-semibold hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 ${isSubmitting ? 'animate-pulse' : ''}`}
+                    className={`w-full flex items-center justify-center space-x-3 px-6 py-4 rounded-xl font-semibold transition-all duration-200 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed ${
+                      isSubmitting 
+                        ? 'animate-pulse' 
+                        : ''
+                    } ${
+                      darkMode 
+                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700' 
+                        : 'bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600'
+                    }`}
                   >
                     {isSubmitting ? (
                       <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
@@ -361,18 +455,32 @@ export default function ContactPage() {
         {/* Success Modal */}
         {showModal && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl p-8 max-w-md w-full transform transition-all duration-300 scale-100">
+            <div className={`rounded-2xl p-8 max-w-md w-full transform transition-all duration-300 scale-100 shadow-2xl ${
+              darkMode ? 'bg-gray-800' : 'bg-white'
+            }`}>
               <div className="text-center">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl">✅</span>
+                <div className="w-16 h-16 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
                 </div>
-                <h3 className="text-2xl font-bold text-slate-900 mb-2">Thank You!</h3>
-                <p className="text-slate-600 mb-6">
-                  ✅ Thank you for contacting us! We will get back to you soon.
+                <h3 className={`text-2xl font-bold mb-2 transition-colors duration-200 ${
+                  darkMode ? 'text-white' : 'text-slate-900'
+                }`}>
+                  Message Sent Successfully!
+                </h3>
+                <p className={`mb-6 transition-colors duration-200 ${
+                  darkMode ? 'text-gray-300' : 'text-slate-600'
+                }`}>
+                  Thank you for contacting us. Our team will get back to you soon.
                 </p>
                 <button
                   onClick={() => setShowModal(false)}
-                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200"
+                  className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 hover:shadow-lg ${
+                    darkMode 
+                      ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700' 
+                      : 'bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:from-blue-600 hover:to-purple-600'
+                  }`}
                 >
                   Close
                 </button>
