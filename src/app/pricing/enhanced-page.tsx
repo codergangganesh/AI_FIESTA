@@ -357,10 +357,10 @@ export default function PricingPage() {
               <button 
                 onClick={() => handlePlanUpgrade('pro')}
                 disabled={isPlanActive('pro') || isProcessing === 'pro'}
-                className={`w-full py-3 px-6 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center ${
+                className={`w-full py-3 px-6 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center ${
                   isPlanActive('pro')
                     ? 'bg-green-500 text-white cursor-not-allowed'
-                    : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl'
+                    : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5'
                 }`}
               >
                 {isProcessing === 'pro' ? (

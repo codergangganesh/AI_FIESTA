@@ -106,24 +106,24 @@ export default function LandingPage() {
             <div className="flex items-center space-x-4">
               {user ? (
                 <>
-                  {/* Pricing link with modern black and gold design - smaller font */}
+                  {/* Pricing link with modern black and gold design - responsive and smaller font */}
                   <Link
                     href="/payment"
-                    className="relative flex items-center space-x-2 px-3 py-1.5 rounded-lg font-bold transition-all duration-300 group overflow-hidden"
+                    className="relative flex items-center space-x-2 px-3 py-1.5 rounded-lg font-bold transition-all duration-300 group overflow-hidden whitespace-nowrap"
                   >
-                    {/* Animated gold border */}
+                    {/* Animated gold border - always visible with hover effect */}
                     <div className="absolute inset-0 rounded-lg">
-                      <div className="absolute inset-0 rounded-lg border-2 border-transparent group-hover:border-yellow-400 transition-all duration-300"></div>
-                      <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-yellow-400/20 to-yellow-600/20 opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+                      <div className="absolute inset-0 rounded-lg border-2 border-yellow-400/50 group-hover:border-yellow-400 transition-all duration-300"></div>
+                      <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-yellow-400/10 to-yellow-600/10 opacity-100 group-hover:opacity-100 transition-all duration-300"></div>
                     </div>
                     
-                    {/* Gold shine effect */}
-                    <div className="absolute top-0 right-0 w-10 h-full bg-gradient-to-l from-yellow-400/30 to-transparent transform translate-x-full group-hover:-translate-x-full transition-transform duration-500 ease-in-out"></div>
+                    {/* Gold shine effect - always visible with enhanced hover effect */}
+                    <div className="absolute top-0 right-0 w-10 h-full bg-gradient-to-l from-yellow-400/20 to-transparent transform translate-x-0 group-hover:-translate-x-full transition-transform duration-500 ease-in-out"></div>
                     
-                    {/* Black background with gold text */}
+                    {/* Black background with gold text - always visible */}
                     <div className="relative flex items-center space-x-1.5 bg-black px-3 py-1.5 rounded-lg">
                       <span className="text-yellow-400 text-xs tracking-widest">PRICING</span>
-                      <svg className="w-3 h-3 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-3 h-3 text-yellow-400 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                     </div>

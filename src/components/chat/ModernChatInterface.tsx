@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Send, Settings, Plus, MessageSquare, History, Sparkles, Brain } from 'lucide-react'
 import { useDarkMode } from '@/contexts/DarkModeContext'
+import { useAuth } from '@/contexts/AuthContext'
 import { AI_MODELS } from '@/config/ai-models'
 import AIResponseCard from './AIResponseCard'
 import ModelSelector from './ModelSelector'
@@ -26,6 +27,7 @@ interface ChatSession {
 
 export default function ModernChatInterface() {
   const { darkMode, toggleDarkMode } = useDarkMode()
+  const { user } = useAuth()
   const [message, setMessage] = useState('')
   const [currentSession, setCurrentSession] = useState<ChatSession | null>(null)
   const [loading, setLoading] = useState<string[]>([])
@@ -359,11 +361,29 @@ export default function ModernChatInterface() {
                         ? 'from-blue-600 to-purple-600' 
                         : 'from-slate-600 to-slate-700'
                     }`}>
-                      <span className="text-white text-sm font-bold">You</span>
+                      <span className="text-white text-sm font-bold">
+                        {user?.user_metadata?.full_name 
+                          ? user.user_metadata.full_name.charAt(0).toUpperCase() 
+                          : user?.email?.charAt(0).toUpperCase() || 'U'}
+                      </span>
                     </div>
                     <div className="flex-1">
-                      <p className={`font-medium transition-colors duration-200 ${
-                        darkMode ? 'text-white' : 'text-slate-900'
+                      <div className="flex items-center space-x-2">
+                        <p className={`font-medium transition-colors duration-200 ${
+                          darkMode ? 'text-white' : 'text-slate-900'
+                        }`}>
+                          {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'}
+                        </p>
+                        <span className={`text-xs px-2 py-1 rounded-full transition-colors duration-200 ${
+                          darkMode 
+                            ? 'bg-blue-900/30 text-blue-400' 
+                            : 'bg-blue-100 text-blue-700'
+                        }`}>
+                          You
+                        </span>
+                      </div>
+                      <p className={`mt-2 transition-colors duration-200 ${
+                        darkMode ? 'text-gray-200' : 'text-slate-800'
                       }`}>{currentSession.message}</p>
                       <p className={`text-xs mt-1 transition-colors duration-200 ${
                         darkMode ? 'text-gray-400' : 'text-slate-500'

@@ -112,3 +112,45 @@ body {
   height: 2px;
   transition: width 0.2s ease;
 }
+
+/* Error message styles */
+.bg-red-50 {
+  background-color: #fef2f2;
+}
+.border-l-4 {
+  border-left-width: 4px;
+}
+.border-red-500 {
+  border-color: #ef4444;
+}
+.text-red-700 {
+  color: #b91c1c;
+}
+.font-medium {
+  font-weight: 500;
+}
+.rounded-xl {
+  border-radius: 1rem;
+}
+.p-4 {
+  padding: 1rem;
+}
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+.max-w-6xl {
+  max-width: 72rem;
+}
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Animation for loading states */
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}

@@ -18,7 +18,9 @@ import {
   ChevronRight,
   Brain,
   TrendingUp,
-  Zap
+  Zap,
+  Mail,
+  Star
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -84,6 +86,20 @@ export default function AdvancedSidebar({ className = '' }: AdvancedSidebarProps
       icon: Lightbulb,
       href: '/explainability',
       description: 'Model Interpretability'
+    },
+    {
+      id: 'contact',
+      label: 'Contact',
+      icon: Mail,
+      href: '/contact',
+      description: 'Get in Touch'
+    },
+    {
+      id: 'feedback',
+      label: 'Feedback',
+      icon: Star,
+      href: '/feedback',
+      description: 'Share Your Thoughts'
     },
     {
       id: 'pricing',
@@ -245,14 +261,14 @@ export default function AdvancedSidebar({ className = '' }: AdvancedSidebarProps
               <Link
                 key={item.id}
                 href={item.href}
-                className={`group relative flex items-center px-3 py-3 rounded-xl transition-all duration-200 ${
+                className={`group relative flex items-center px-3 py-3 rounded-xl transition-all duration-200 ease-in-out transform ${
                   isActive
                     ? darkMode
                       ? 'bg-blue-600 text-white shadow-lg'
                       : 'bg-blue-600 text-white shadow-lg'
                     : darkMode
-                    ? 'hover:bg-gray-700/50 text-gray-300 hover:text-white'
-                    : 'hover:bg-slate-100 text-slate-600 hover:text-slate-900'
+                    ? 'hover:bg-gray-700/50 text-gray-300 hover:text-white hover:scale-[1.02] hover:shadow-md'
+                    : 'hover:bg-slate-100 text-slate-600 hover:text-slate-900 hover:scale-[1.02] hover:shadow-md'
                 }`}
                 onMouseEnter={() => setHoveredItem(item.id)}
                 onMouseLeave={() => setHoveredItem(null)}
@@ -260,15 +276,15 @@ export default function AdvancedSidebar({ className = '' }: AdvancedSidebarProps
                 {/* Icon */}
                 <div className="flex-shrink-0">
                   <Icon
-                    className={`w-5 h-5 transition-transform duration-200 ${
-                      hoveredItem === item.id ? 'scale-110' : ''
-                    }`}
+                    className={`w-5 h-5 transition-all duration-300 ease-in-out ${
+                      hoveredItem === item.id ? 'scale-125 text-blue-400' : ''
+                    } ${isActive ? 'text-white' : ''}`}
                   />
                 </div>
 
                 {/* Label and Description */}
                 <div
-                  className={`ml-3 overflow-hidden transition-all duration-300 ${
+                  className={`ml-3 overflow-hidden transition-all duration-300 ease-in-out ${
                     isExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0'
                   }`}
                 >
@@ -291,10 +307,10 @@ export default function AdvancedSidebar({ className = '' }: AdvancedSidebarProps
                 {/* Tooltip for collapsed mode */}
                 {!isExpanded && (
                   <div
-                    className={`absolute left-full ml-2 px-3 py-2 rounded-lg shadow-lg border pointer-events-none transition-all duration-200 z-50 ${
+                    className={`absolute left-full ml-2 px-3 py-2 rounded-lg shadow-lg border pointer-events-none transition-all duration-200 z-50 transform ${
                       hoveredItem === item.id
-                        ? 'opacity-100 translate-x-0'
-                        : 'opacity-0 -translate-x-2'
+                        ? 'opacity-100 translate-x-0 scale-100'
+                        : 'opacity-0 -translate-x-2 scale-95'
                     } ${
                       darkMode
                         ? 'bg-gray-800 border-gray-700 text-white'
@@ -324,7 +340,7 @@ export default function AdvancedSidebar({ className = '' }: AdvancedSidebarProps
         </nav>
 
         {/* Bottom Section */}
-        <div className="p-4 border-t border-current border-opacity-10">
+        {/* <div className="p-4 border-t border-current border-opacity-10">
           <div
             className={`rounded-xl p-3 transition-colors duration-200 ${
               darkMode
@@ -364,7 +380,7 @@ export default function AdvancedSidebar({ className = '' }: AdvancedSidebarProps
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
       </div>
 
       </div>

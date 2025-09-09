@@ -1,10 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
-import Navigation from '@/components/Navigation'
+import AdvancedSidebar from '@/components/layout/AdvancedSidebar'
 import { Mail, Send, Phone, MapPin, Clock, MessageSquare } from 'lucide-react'
+import { createClient } from '@/utils/supabase/client'
+import Navigation from '@/components/Navigation'
 
 export default function ContactPage() {
   const { user, loading } = useAuth()
@@ -19,6 +21,39 @@ export default function ContactPage() {
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showModal, setShowModal] = useState(false)
+  const [submitError, setSubmitError] = useState('')
+
+  const supabase = createClient()
+
+  // Subscribe to contact messages in real-time for the current user
+  useEffect(() => {
+    if (!user?.id) return
+
+    const channel = supabase
+      .channel('contact-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'contact_messages',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload: any) => {
+          // If the updated message is ours and status changed to resolved/closed
+          if (payload.new.user_id === user?.id && 
+              ['resolved', 'closed'].includes(payload.new.status)) {
+            // Show a notification or update UI
+            console.log('Message status updated:', payload.new.status)
+          }
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [user?.id])
 
   if (loading) {
     return (
@@ -68,20 +103,38 @@ export default function ContactPage() {
     }
     
     setIsSubmitting(true)
+    setSubmitError('')
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    // Show success modal
-    setShowModal(true)
-    setFormData({ 
-      name: user?.user_metadata?.full_name || '',
-      email: user?.email || '',
-      subject: '', 
-      message: '', 
-      priority: 'medium' 
-    })
-    setIsSubmitting(false)
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to send message')
+      }
+      
+      // Show success modal
+      setShowModal(true)
+      // Reset form
+      setFormData({ 
+        name: user?.user_metadata?.full_name || '',
+        email: user?.email || '',
+        subject: '', 
+        message: '', 
+        priority: 'medium' 
+      })
+    } catch (error: any) {
+      console.error('Error sending message:', error)
+      setSubmitError(error.message || 'An unexpected error occurred')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -124,200 +177,210 @@ export default function ContactPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
-      <Navigation />
-      
-      <main className="max-w-6xl mx-auto px-6 py-8">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-slate-900 mb-4">Get in Touch</h1>
-          <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-            Have questions about AI Fiesta? We're here to help you get the most out of our AI comparison platform.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Contact Methods */}
-          <div className="lg:col-span-1 space-y-6">
-            <div className="bg-white/80 backdrop-blur-sm border border-slate-200/50 rounded-2xl p-6">
-              <h3 className="text-xl font-bold text-slate-900 mb-6">Contact Methods</h3>
-              
-              <div className="space-y-4">
-                {contactMethods.map((method, index) => {
-                  const Icon = method.icon
-                  return (
-                    <div key={index} className="flex items-start space-x-4 p-4 rounded-xl hover:bg-slate-50/50 transition-colors duration-200">
-                      <div className={`w-12 h-12 bg-gradient-to-r ${method.color} rounded-xl flex items-center justify-center shadow-lg flex-shrink-0`}>
-                        <Icon className="w-6 h-6 text-white" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-slate-900 mb-1">{method.title}</h4>
-                        <p className="text-sm text-slate-600 mb-1">{method.description}</p>
-                        <p className="text-sm font-medium text-blue-600">{method.value}</p>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Quick Info */}
-            <div className="bg-white/80 backdrop-blur-sm border border-slate-200/50 rounded-2xl p-6">
-              <h3 className="text-lg font-bold text-slate-900 mb-4">Office Hours</h3>
-              <div className="flex items-center space-x-3 text-slate-600">
-                <Clock className="w-5 h-5" />
-                <div>
-                  <p className="font-medium">Monday - Friday</p>
-                  <p className="text-sm">9:00 AM - 6:00 PM PST</p>
-                </div>
-              </div>
-            </div>
+      <AdvancedSidebar />
+      <div className="ml-16 lg:ml-72">
+        <Navigation />
+        
+        <main className="max-w-6xl mx-auto px-6 py-8">
+          {/* Header */}
+          <div className="text-center mb-12">
+            <h1 className="text-4xl font-bold text-slate-900 mb-4">Get in Touch</h1>
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+              Have questions about AI Fiesta? We're here to help you get the most out of our AI comparison platform.
+            </p>
           </div>
 
-          {/* Contact Form */}
-          <div className="lg:col-span-2">
-            <div className="bg-white/80 backdrop-blur-sm border border-slate-200/50 rounded-2xl p-8">
-              <h3 className="text-2xl font-bold text-slate-900 mb-6">Send us a Message</h3>
-              
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Name */}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    placeholder="Enter your name"
-                    className={`w-full px-4 py-3 bg-white border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 ${
-                      errors.name 
-                        ? 'border-red-500 focus:border-red-500' 
-                        : 'border-slate-200 focus:border-blue-400'
-                    }`}
-                  />
-                  {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
-                </div>
+          {/* Error Message */}
+          {submitError && (
+            <div className="max-w-6xl mx-auto mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-xl">
+              <p className="font-medium">{submitError}</p>
+            </div>
+          )}
 
-                {/* Email */}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    placeholder="Enter your email"
-                    className={`w-full px-4 py-3 bg-white border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 ${
-                      errors.email 
-                        ? 'border-red-500 focus:border-red-500' 
-                        : 'border-slate-200 focus:border-blue-400'
-                    }`}
-                  />
-                  {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Contact Methods */}
+            <div className="lg:col-span-1 space-y-6">
+              <div className="bg-white/80 backdrop-blur-sm border border-slate-200/50 rounded-2xl p-6">
+                <h3 className="text-xl font-bold text-slate-900 mb-6">Contact Methods</h3>
+                
+                <div className="space-y-4">
+                  {contactMethods.map((method, index) => {
+                    const Icon = method.icon
+                    return (
+                      <div key={index} className="flex items-start space-x-4 p-4 rounded-xl hover:bg-slate-50/50 transition-colors duration-200">
+                        <div className={`w-12 h-12 bg-gradient-to-r ${method.color} rounded-xl flex items-center justify-center shadow-lg flex-shrink-0`}>
+                          <Icon className="w-6 h-6 text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-slate-900 mb-1">{method.title}</h4>
+                          <p className="text-sm text-slate-600 mb-1">{method.description}</p>
+                          <p className="text-sm font-medium text-blue-600">{method.value}</p>
+                        </div>
+                      </div>
+                    )
+                  })}
                 </div>
+              </div>
 
-                {/* Subject */}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Subject
-                  </label>
-                  <input
-                    type="text"
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleInputChange}
-                    placeholder="How can we help you?"
-                    className={`w-full px-4 py-3 bg-white border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 ${
-                      errors.subject 
-                        ? 'border-red-500 focus:border-red-500' 
-                        : 'border-slate-200 focus:border-blue-400'
-                    }`}
-                  />
-                  {errors.subject && <p className="mt-1 text-sm text-red-500">{errors.subject}</p>}
+              {/* Quick Info */}
+              <div className="bg-white/80 backdrop-blur-sm border border-slate-200/50 rounded-2xl p-6">
+                <h3 className="text-lg font-bold text-slate-900 mb-4">Office Hours</h3>
+                <div className="flex items-center space-x-3 text-slate-600">
+                  <Clock className="w-5 h-5" />
+                  <div>
+                    <p className="font-medium">Monday - Friday</p>
+                    <p className="text-sm">9:00 AM - 6:00 PM PST</p>
+                  </div>
                 </div>
+              </div>
+            </div>
 
-                {/* Priority */}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Priority
-                  </label>
-                  <select
-                    name="priority"
-                    value={formData.priority}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all duration-200"
+            {/* Contact Form */}
+            <div className="lg:col-span-2">
+              <div className="bg-white/80 backdrop-blur-sm border border-slate-200/50 rounded-2xl p-8">
+                <h3 className="text-2xl font-bold text-slate-900 mb-6">Send us a Message</h3>
+                
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* Name */}
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      Name
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      placeholder="Enter your name"
+                      className={`w-full px-4 py-3 bg-white border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 ${
+                        errors.name 
+                          ? 'border-red-500 focus:border-red-500' 
+                          : 'border-slate-200 focus:border-blue-400 focus:shadow-[0_0_15px_rgba(59,130,246,0.5)]'
+                      }`}
+                    />
+                    {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
+                  </div>
+
+                  {/* Email */}
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder="Enter your email"
+                      className={`w-full px-4 py-3 bg-white border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 ${
+                        errors.email 
+                          ? 'border-red-500 focus:border-red-500' 
+                          : 'border-slate-200 focus:border-blue-400 focus:shadow-[0_0_15px_rgba(59,130,246,0.5)]'
+                      }`}
+                    />
+                    {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
+                  </div>
+
+                  {/* Subject */}
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      Subject
+                    </label>
+                    <input
+                      type="text"
+                      name="subject"
+                      value={formData.subject}
+                      onChange={handleInputChange}
+                      placeholder="How can we help you?"
+                      className={`w-full px-4 py-3 bg-white border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 ${
+                        errors.subject 
+                          ? 'border-red-500 focus:border-red-500' 
+                          : 'border-slate-200 focus:border-blue-400 focus:shadow-[0_0_15px_rgba(59,130,246,0.5)]'
+                      }`}
+                    />
+                    {errors.subject && <p className="mt-1 text-sm text-red-500">{errors.subject}</p>}
+                  </div>
+
+                  {/* Priority */}
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      Priority
+                    </label>
+                    <select
+                      name="priority"
+                      value={formData.priority}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all duration-200"
+                    >
+                      <option value="low">Low Priority</option>
+                      <option value="medium">Medium Priority</option>
+                      <option value="high">High Priority</option>
+                      <option value="urgent">Urgent</option>
+                    </select>
+                  </div>
+
+                  {/* Message */}
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-700 mb-2">
+                      Message
+                    </label>
+                    <textarea
+                      name="message"
+                      value={formData.message}
+                      onChange={handleInputChange}
+                      placeholder="Tell us more about your question or issue..."
+                      rows={6}
+                      className={`w-full px-4 py-3 bg-white border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 resize-none ${
+                        errors.message 
+                          ? 'border-red-500 focus:border-red-500' 
+                          : 'border-slate-200 focus:border-blue-400 focus:shadow-[0_0_15px_rgba(59,130,246,0.5)]'
+                      }`}
+                    />
+                    {errors.message && <p className="mt-1 text-sm text-red-500">{errors.message}</p>}
+                  </div>
+
+                  {/* Submit Button */}
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className={`w-full flex items-center justify-center space-x-3 px-6 py-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl font-semibold hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105 ${isSubmitting ? 'animate-pulse' : ''}`}
                   >
-                    <option value="low">Low Priority</option>
-                    <option value="medium">Medium Priority</option>
-                    <option value="high">High Priority</option>
-                    <option value="urgent">Urgent</option>
-                  </select>
-                </div>
-
-                {/* Message */}
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Message
-                  </label>
-                  <textarea
-                    name="message"
-                    value={formData.message}
-                    onChange={handleInputChange}
-                    placeholder="Tell us more about your question or issue..."
-                    rows={6}
-                    className={`w-full px-4 py-3 bg-white border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 resize-none ${
-                      errors.message 
-                        ? 'border-red-500 focus:border-red-500' 
-                        : 'border-slate-200 focus:border-blue-400'
-                    }`}
-                  />
-                  {errors.message && <p className="mt-1 text-sm text-red-500">{errors.message}</p>}
-                </div>
-
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full flex items-center justify-center space-x-3 px-6 py-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl font-semibold hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105"
-                >
-                  {isSubmitting ? (
-                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
-                  ) : (
-                    <Send className="w-5 h-5" />
-                  )}
-                  <span>{isSubmitting ? 'Sending...' : 'Send Message'}</span>
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </main>
-
-      {/* Success Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl p-8 max-w-md w-full transform transition-all duration-300 scale-100">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">✅</span>
+                    {isSubmitting ? (
+                      <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+                    ) : (
+                      <Send className="w-5 h-5" />
+                    )}
+                    <span>{isSubmitting ? 'Sending...' : 'Send Message'}</span>
+                  </button>
+                </form>
               </div>
-              <h3 className="text-2xl font-bold text-slate-900 mb-2">Thank You!</h3>
-              <p className="text-slate-600 mb-6">
-                Thank you for contacting us! We will get back to you soon.
-              </p>
-              <button
-                onClick={() => setShowModal(false)}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200"
-              >
-                Close
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        </main>
+
+        {/* Success Modal */}
+        {showModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl p-8 max-w-md w-full transform transition-all duration-300 scale-100">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">✅</span>
+                </div>
+                <h3 className="text-2xl font-bold text-slate-900 mb-2">Thank You!</h3>
+                <p className="text-slate-600 mb-6">
+                  ✅ Thank you for contacting us! We will get back to you soon.
+                </p>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
