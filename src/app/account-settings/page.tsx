@@ -98,6 +98,12 @@ export default function AccountSettingsPage() {
       description: 'Configure notification preferences'
     },
     { 
+      id: 'contact', 
+      label: 'Contact & Feedback', 
+      icon: Mail,
+      description: 'Get in touch with support and provide feedback'
+    },
+    { 
       id: 'billing', 
       label: 'Billing & Subscription', 
       icon: CreditCard,
@@ -482,6 +488,160 @@ export default function AccountSettingsPage() {
                     >
                       {isLoading ? 'Saving...' : 'Save Preferences'}
                     </button>
+                  </div>
+                )}
+
+                {/* Contact & Feedback Tab */}
+                {activeTab === 'contact' && (
+                  <div className="space-y-8">
+                    <div className="border-b border-current border-opacity-10 pb-6">
+                      <h2 className={`text-2xl font-bold transition-colors duration-200 ${
+                        darkMode ? 'text-white' : 'text-slate-900'
+                      }`}>
+                        Contact & Feedback
+                      </h2>
+                      <p className={`mt-2 transition-colors duration-200 ${
+                        darkMode ? 'text-gray-400' : 'text-slate-600'
+                      }`}>
+                        Get in touch with our support team or share your feedback
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                      {/* Contact Section */}
+                      <div className={`rounded-2xl p-6 transition-colors duration-200 ${
+                        darkMode 
+                          ? 'bg-gray-800/60 backdrop-blur-sm border border-gray-700/50' 
+                          : 'bg-white/80 backdrop-blur-sm border border-slate-200/50'
+                      }`}>
+                        <div className="flex items-center space-x-3 mb-6">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                            darkMode 
+                              ? 'bg-blue-900/50 text-blue-400' 
+                              : 'bg-blue-100 text-blue-600'
+                          }`}>
+                            <Mail className="w-5 h-5" />
+                          </div>
+                          <h3 className={`text-xl font-bold transition-colors duration-200 ${
+                            darkMode ? 'text-white' : 'text-slate-900'
+                          }`}>
+                            Contact Support
+                          </h3>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div className={`p-4 rounded-xl transition-colors duration-200 ${
+                            darkMode ? 'bg-gray-700/50' : 'bg-slate-50'
+                          }`}>
+                            <h4 className={`font-semibold mb-1 transition-colors duration-200 ${
+                              darkMode ? 'text-blue-400' : 'text-blue-600'
+                            }`}>
+                              Email
+                            </h4>
+                            <p className={`transition-colors duration-200 ${
+                              darkMode ? 'text-gray-300' : 'text-slate-700'
+                            }`}>
+                              support@aifiesta.com
+                            </p>
+                          </div>
+
+                          <div className={`p-4 rounded-xl transition-colors duration-200 ${
+                            darkMode ? 'bg-gray-700/50' : 'bg-slate-50'
+                          }`}>
+                            <h4 className={`font-semibold mb-1 transition-colors duration-200 ${
+                              darkMode ? 'text-blue-400' : 'text-blue-600'
+                            }`}>
+                              Phone
+                            </h4>
+                            <p className={`transition-colors duration-200 ${
+                              darkMode ? 'text-gray-300' : 'text-slate-700'
+                            }`}>
+                              +1 (555) 123-4567
+                            </p>
+                          </div>
+
+                          <div className={`p-4 rounded-xl transition-colors duration-200 ${
+                            darkMode ? 'bg-gray-700/50' : 'bg-slate-50'
+                          }`}>
+                            <h4 className={`font-semibold mb-1 transition-colors duration-200 ${
+                              darkMode ? 'text-blue-400' : 'text-blue-600'
+                            }`}>
+                              Response Time
+                            </h4>
+                            <p className={`transition-colors duration-200 ${
+                              darkMode ? 'text-gray-300' : 'text-slate-700'
+                            }`}>
+                              Within 24 hours
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Feedback Section */}
+                      <div className={`rounded-2xl p-6 transition-colors duration-200 ${
+                        darkMode 
+                          ? 'bg-gray-800/60 backdrop-blur-sm border border-gray-700/50' 
+                          : 'bg-white/80 backdrop-blur-sm border border-slate-200/50'
+                      }`}>
+                        <div className="flex items-center space-x-3 mb-6">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                            darkMode 
+                              ? 'bg-purple-900/50 text-purple-400' 
+                              : 'bg-purple-100 text-purple-600'
+                          }`}>
+                            <SettingsIcon className="w-5 h-5" />
+                          </div>
+                          <h3 className={`text-xl font-bold transition-colors duration-200 ${
+                            darkMode ? 'text-white' : 'text-slate-900'
+                          }`}>
+                            Send Feedback
+                          </h3>
+                        </div>
+
+                        <form className="space-y-4">
+                          <div>
+                            <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${
+                              darkMode ? 'text-gray-300' : 'text-slate-700'
+                            }`}>
+                              Subject
+                            </label>
+                            <input
+                              type="text"
+                              placeholder="What's your feedback about?"
+                              className={`w-full px-4 py-3 rounded-xl border transition-all duration-200 ${
+                                darkMode
+                                  ? 'bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500'
+                                  : 'bg-white border-slate-200 text-slate-900 placeholder-slate-500 focus:border-purple-500'
+                              } focus:outline-none focus:ring-2 focus:ring-purple-500/20`}
+                            />
+                          </div>
+
+                          <div>
+                            <label className={`block text-sm font-medium mb-2 transition-colors duration-200 ${
+                              darkMode ? 'text-gray-300' : 'text-slate-700'
+                            }`}>
+                              Your Feedback
+                            </label>
+                            <textarea
+                              rows={4}
+                              placeholder="Share your thoughts, suggestions, or report issues..."
+                              className={`w-full px-4 py-3 rounded-xl border transition-all duration-200 resize-none ${
+                                darkMode
+                                  ? 'bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-purple-500'
+                                  : 'bg-white border-slate-200 text-slate-900 placeholder-slate-500 focus:border-purple-500'
+                              } focus:outline-none focus:ring-2 focus:ring-purple-500/20`}
+                            ></textarea>
+                          </div>
+
+                          <button
+                            type="submit"
+                            className="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg"
+                          >
+                            Send Feedback
+                          </button>
+                        </form>
+                      </div>
+                    </div>
                   </div>
                 )}
 

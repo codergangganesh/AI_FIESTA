@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
-import { ArrowRight, MessageSquare, Zap, BarChart3, Shield, Clock, Users, Brain, Sparkles, Star, ChevronRight, Play, Globe, TrendingUp, Award, Infinity, Cpu, Layers, GitBranch } from 'lucide-react'
+import { ArrowRight, MessageSquare, Zap, BarChart3, Shield, Clock, Users, Brain, Sparkles, Star, ChevronRight, Play, Globe, TrendingUp, Award, Infinity, Cpu, Layers, GitBranch, Settings as SettingsIcon, LogOut } from 'lucide-react'
 
 export default function LandingPage() {
   const { user } = useAuth()
@@ -102,28 +102,51 @@ export default function LandingPage() {
             
             <div className="flex items-center space-x-4">
               {user ? (
-                <>
-                  <Link
-                    href="/chat"
-                    className="flex items-center space-x-2 text-slate-700 hover:text-slate-900 px-4 py-2 rounded-xl hover:bg-slate-100 transition-all duration-200 font-medium"
-                  >
-                    <MessageSquare className="w-4 h-4" />
-                    <span>Chat</span>
-                  </Link>
-                  <Link
-                    href="/history"
-                    className="flex items-center space-x-2 text-slate-700 hover:text-slate-900 px-4 py-2 rounded-xl hover:bg-slate-100 transition-all duration-200 font-medium"
-                  >
-                    <Clock className="w-4 h-4" />
-                    <span>History</span>
-                  </Link>
-                </>
+                // Profile icon for logged-in users
+                <div className="relative group">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold cursor-pointer">
+                    {user.email?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                  {/* Dropdown menu */}
+                  <div className="absolute right-0 mt-2 w-48 rounded-xl bg-white/90 backdrop-blur-xl border border-slate-200/50 shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                    <Link
+                      href="/chat"
+                      className="flex items-center space-x-2 px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                    >
+                      <MessageSquare className="w-4 h-4" />
+                      <span>Chat</span>
+                    </Link>
+                    <Link
+                      href="/history"
+                      className="flex items-center space-x-2 px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                    >
+                      <Clock className="w-4 h-4" />
+                      <span>History</span>
+                    </Link>
+                    <Link
+                      href="/account-settings"
+                      className="flex items-center space-x-2 px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                    >
+                      <SettingsIcon className="w-4 h-4" />
+                      <span>Account Settings</span>
+                    </Link>
+                    <div className="border-t border-slate-200/50 my-2"></div>
+                    <Link
+                      href="/"
+                      className="flex items-center space-x-2 px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Logout</span>
+                    </Link>
+                  </div>
+                </div>
               ) : (
+                // Sign in button for non-logged-in users
                 <Link
                   href="/auth"
                   className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-xl text-sm font-semibold hover:shadow-lg transition-all duration-200 hover:scale-105"
                 >
-                  Get Started
+                  Sign In
                 </Link>
               )}
             </div>

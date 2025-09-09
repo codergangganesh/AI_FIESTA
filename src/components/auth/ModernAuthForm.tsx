@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Github } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 export default function ModernAuthForm() {
   const [isLogin, setIsLogin] = useState(true)
@@ -18,6 +19,27 @@ export default function ModernAuthForm() {
 
   const { signIn, signUp } = useAuth()
   const router = useRouter()
+  const supabase = createClient()
+
+  const checkEmailExists = async (email: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', email)
+        .maybeSingle()
+      
+      if (error) {
+        console.error('Error checking email:', error)
+        return false
+      }
+      
+      return !!data
+    } catch (err) {
+      console.error('Error checking email existence:', err)
+      return false
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,6 +55,14 @@ export default function ModernAuthForm() {
           router.push('/chat')
         }
       } else {
+        // Check if email already exists
+        const emailExists = await checkEmailExists(formData.email)
+        if (emailExists) {
+          setError('Email already exists.')
+          setLoading(false)
+          return
+        }
+
         if (formData.password !== formData.confirmPassword) {
           setError('Passwords do not match')
           return

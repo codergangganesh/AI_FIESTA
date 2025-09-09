@@ -239,7 +239,7 @@ export default function AIResponseCard({
                   <AlertCircle className="w-6 h-6 text-red-500" />
                 </div>
                 <p className="text-red-600 text-sm font-medium mb-2">Something went wrong</p>
-                <p className="text-red-500 text-xs bg-red-50 px-3 py-2 rounded-lg">{error}</p>
+                <p className={`text-xs ${darkMode ? 'bg-red-900/30 text-red-300' : 'bg-red-50 text-red-500'} px-3 py-2 rounded-lg`}>{error}</p>
               </div>
             </div>
           ) : content ? (
@@ -280,13 +280,15 @@ export default function AIResponseCard({
                 <div className="mb-3">
                   <div className="w-full bg-slate-200 rounded-full h-1.5">
                     <div 
-                      className="reading-indicator rounded-full h-1.5 transition-all duration-200"
+                      className={`reading-indicator rounded-full h-1.5 transition-all duration-200 ${
+                        darkMode ? 'bg-blue-400' : 'bg-blue-500'
+                      }`}
                       style={{ width: `${readingProgress}%` }}
                     ></div>
                   </div>
                   <div className="flex justify-between items-center mt-1">
-                    <span className="text-xs text-slate-500">Reading progress</span>
-                    <span className="text-xs text-slate-600 font-medium">{Math.round(readingProgress)}%</span>
+                    <span className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>Reading progress</span>
+                    <span className={`text-xs ${darkMode ? 'text-slate-300' : 'text-slate-600'} font-medium`}>{Math.round(readingProgress)}%</span>
                   </div>
                 </div>
               )}
@@ -295,21 +297,29 @@ export default function AIResponseCard({
               <div className="relative">
                 <div 
                   ref={scrollRef}
-                  className={`overflow-y-auto response-scroll bg-slate-50/30 rounded-xl p-4 border border-slate-200/30 transition-all duration-300 hover:border-slate-300/50 ${
+                  className={`overflow-y-auto response-scroll ${
+                    darkMode ? 'bg-gray-700/30' : 'bg-slate-50/30'
+                  } rounded-xl p-4 border ${
+                    darkMode ? 'border-gray-600/30' : 'border-slate-200/30'
+                  } transition-all duration-300 hover:${
+                    darkMode ? 'border-gray-500/50' : 'border-slate-300/50'
+                  } ${
                     isExpanded ? 'max-h-96' : isLongContent ? 'max-h-48' : 'max-h-80'
                   }`}
                 >
-                  <div className={`prose prose-slate max-w-none text-slate-700 leading-relaxed ${
-                    isBestResponse ? 'prose-amber' : ''
-                  }`}>
-                    <div className="whitespace-pre-wrap text-sm">{displayContent}</div>
+                  <div className={`prose max-w-none leading-relaxed ${
+                    darkMode ? 'prose-invert text-slate-100' : 'prose-slate text-slate-700'
+                  } ${isBestResponse ? 'prose-amber' : ''}`}>
+                    <div className={`whitespace-pre-wrap text-sm ${darkMode ? 'text-slate-100' : 'text-slate-700'}`}>{displayContent}</div>
                     
                     {/* Show More Button for Preview Mode */}
                     {shouldShowPreview && (
-                      <div className="mt-4 pt-4 border-t border-slate-200/50">
+                      <div className={`mt-4 pt-4 border-t ${darkMode ? 'border-gray-600/50' : 'border-slate-200/50'}`}>
                         <button
                           onClick={() => setShowPreview(false)}
-                          className="flex items-center space-x-2 text-blue-600 hover:text-blue-800 text-sm font-medium transition-colors"
+                          className={`flex items-center space-x-2 text-sm font-medium transition-colors ${
+                            darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-800'
+                          }`}
                         >
                           <ChevronDown className="w-4 h-4" />
                           <span>Show full response</span>
@@ -321,8 +331,12 @@ export default function AIResponseCard({
                 
                 {/* Enhanced Scroll Indicator */}
                 {showScrollIndicator && !shouldShowPreview && (
-                  <div className="absolute bottom-0 left-0 right-0 h-8 scroll-indicator rounded-b-xl flex items-end justify-center pb-2">
-                    <div className="flex items-center space-x-1 text-xs text-slate-500 bg-white/80 px-2 py-1 rounded-full shadow-sm">
+                  <div className={`absolute bottom-0 left-0 right-0 h-8 scroll-indicator rounded-b-xl flex items-end justify-center pb-2 ${
+                    darkMode ? 'bg-gradient-to-t from-gray-700/80 to-transparent' : 'bg-gradient-to-t from-white/80 to-transparent'
+                  }`}>
+                    <div className={`flex items-center space-x-1 text-xs ${
+                      darkMode ? 'text-slate-400 bg-gray-800/80' : 'text-slate-500 bg-white/80'
+                    } px-2 py-1 rounded-full shadow-sm`}>
                       <ChevronDown className="w-3 h-3" />
                       <span>Scroll for more</span>
                     </div>
@@ -346,7 +360,9 @@ export default function AIResponseCard({
                   <TextToSpeech text={content} />
                 )}
                 
-                <div className="flex items-center justify-between text-xs text-slate-500 px-2">
+                <div className={`flex items-center justify-between text-xs px-2 ${
+                  darkMode ? 'text-slate-400' : 'text-slate-500'
+                }`}>
                 <div className="flex items-center space-x-3">
                   <span>{content.split(' ').length} words</span>
                   <span>•</span>
@@ -354,7 +370,7 @@ export default function AIResponseCard({
                   {isLongContent && (
                     <>
                       <span>•</span>
-                      <span className="text-blue-600 font-medium">{getReadingTime(content)}</span>
+                      <span className={`${darkMode ? 'text-blue-400' : 'text-blue-600'} font-medium`}>{getReadingTime(content)}</span>
                     </>
                   )}
                 </div>
@@ -377,14 +393,16 @@ export default function AIResponseCard({
                 <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-3 ${
                   isBestResponse 
                     ? 'bg-gradient-to-br from-amber-100 to-yellow-100' 
-                    : 'bg-gradient-to-br from-slate-100 to-slate-200'
+                    : darkMode
+                      ? 'bg-gray-700' 
+                      : 'bg-gradient-to-br from-slate-100 to-slate-200'
                 }`}>
                   <Sparkles className={`w-8 h-8 ${
-                    isBestResponse ? 'text-amber-500' : 'text-slate-400'
+                    isBestResponse ? 'text-amber-500' : darkMode ? 'text-slate-400' : 'text-slate-400'
                   }`} />
                 </div>
-                <p className="text-slate-500 text-sm font-medium">Ready to respond</p>
-                <p className="text-slate-400 text-xs mt-1">Send a message to get started</p>
+                <p className={`text-sm font-medium ${darkMode ? 'text-slate-300' : 'text-slate-500'}`}>Ready to respond</p>
+                <p className={`text-xs mt-1 ${darkMode ? 'text-slate-400' : 'text-slate-400'}`}>Send a message to get started</p>
               </div>
             </div>
           )}

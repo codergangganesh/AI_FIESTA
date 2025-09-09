@@ -513,16 +513,21 @@ export default function PricingPage() {
 
         {/* FAQ Section */}
         <div className="px-6 py-12 border-t border-current border-opacity-10">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-6xl mx-auto">
             <div className="text-center mb-12">
               <h2 className={`text-3xl font-bold mb-4 transition-colors duration-200 ${
                 darkMode ? 'text-white' : 'text-slate-900'
               }`}>
                 Frequently Asked Questions
               </h2>
+              <p className={`text-lg transition-colors duration-200 ${
+                darkMode ? 'text-gray-300' : 'text-slate-600'
+              }`}>
+                Everything you need to know about AI Fiesta
+              </p>
             </div>
 
-            <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
               {[
                 {
                   question: "Can I switch between plans?",
@@ -539,14 +544,46 @@ export default function PricingPage() {
                 {
                   question: "What happens if I exceed my API limits?",
                   answer: "Your service won't be interrupted. We'll notify you and you can upgrade your plan or purchase additional API calls."
+                },
+                {
+                  question: "How secure is my data?",
+                  answer: "We use industry-standard encryption and security practices to protect your data. All communications are encrypted in transit and at rest."
+                },
+                {
+                  question: "Can I cancel my subscription anytime?",
+                  answer: "Yes, you can cancel your subscription at any time. You'll continue to have access until the end of your billing period."
+                },
+                {
+                  question: "Do you offer refunds?",
+                  answer: "Yes, we offer a 30-day money-back guarantee if you're not satisfied with our service. Contact our support team for assistance."
+                },
+                {
+                  question: "How many AI models can I compare at once?",
+                  answer: "The Free plan allows you to compare up to 2 models, Pro allows 4 models, and Pro Plus gives you access to all 9+ models simultaneously."
+                },
+                {
+                  question: "Is there a mobile app?",
+                  answer: "AI Fiesta is a web-based platform that works perfectly on mobile browsers. We're also working on dedicated mobile apps for iOS and Android."
+                },
+                {
+                  question: "How often are new models added?",
+                  answer: "We add new AI models regularly as they become available. Our team actively monitors the AI landscape for the latest advancements."
+                },
+                {
+                  question: "Can I export my comparison results?",
+                  answer: "Yes, all plans include export functionality. You can export your results in various formats including PDF, CSV, and JSON."
+                },
+                {
+                  question: "Do you offer enterprise plans?",
+                  answer: "Yes, we offer custom enterprise plans with additional features like team collaboration, custom integrations, and dedicated support. Contact our sales team for more information."
                 }
               ].map((faq, index) => (
                 <div
                   key={index}
-                  className={`p-6 rounded-2xl transition-colors duration-200 ${
+                  className={`p-6 rounded-2xl transition-all duration-300 hover:scale-[1.02] ${
                     darkMode 
-                      ? 'bg-gray-800/60 border border-gray-700/50' 
-                      : 'bg-white/80 border border-slate-200/50'
+                      ? 'bg-gray-800/60 border border-gray-700/50 hover:border-blue-500/30 hover:shadow-xl' 
+                      : 'bg-white/80 border border-slate-200/50 hover:border-blue-300/50 hover:shadow-xl'
                   }`}
                 >
                   <h3 className={`text-lg font-semibold mb-3 transition-colors duration-200 ${
@@ -561,6 +598,38 @@ export default function PricingPage() {
                   </p>
                 </div>
               ))}
+            </div>
+
+            {/* Ask Your Own Question */}
+            <div className={`p-8 rounded-2xl text-center ${
+              darkMode 
+                ? 'bg-gradient-to-br from-blue-900/30 to-purple-900/30 border border-blue-700/30' 
+                : 'bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200'
+            }`}>
+              <h3 className={`text-2xl font-bold mb-4 transition-colors duration-200 ${
+                darkMode ? 'text-white' : 'text-slate-900'
+              }`}>
+                Have More Questions?
+              </h3>
+              <p className={`text-lg mb-6 transition-colors duration-200 ${
+                darkMode ? 'text-gray-300' : 'text-slate-600'
+              }`}>
+                Can't find what you're looking for? Ask us anything!
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <input
+                  type="text"
+                  placeholder="Type your question here..."
+                  className={`px-6 py-3 rounded-xl border focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 w-full sm:w-96 max-w-full ${
+                    darkMode
+                      ? 'bg-gray-700/50 border-gray-600 text-white placeholder-gray-400'
+                      : 'bg-white border-slate-200 text-slate-900 placeholder-slate-500'
+                  }`}
+                />
+                <button className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg">
+                  Ask Question
+                </button>
+              </div>
             </div>
           </div>
         </div>

@@ -40,7 +40,7 @@ export default function Navigation() {
   const menuItems = [
     { icon: BarChart3, label: 'Chart', href: '/analytics', description: 'View analytics and insights' },
     { icon: History, label: 'History', href: '/history', description: 'Browse conversation history' },
-    { icon: Mail, label: 'Email', href: '/contact', description: 'Contact support' },
+    { icon: Mail, label: 'Contact', href: '/contact', description: 'Contact support' },
     { icon: DollarSign, label: 'Pricing', href: '/payment', description: 'View pricing and upgrade plans' },
   ]
 
@@ -73,7 +73,7 @@ export default function Navigation() {
             </div>
           </div>
 
-          {/* Center Navigation */}
+          {/* Center Navigation - Simplified for logged-in users */}
           <div className="hidden md:flex items-center space-x-1">
             <Link
               href="/chat"
