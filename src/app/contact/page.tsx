@@ -10,11 +10,15 @@ export default function ContactPage() {
   const { user, loading } = useAuth()
   const router = useRouter()
   const [formData, setFormData] = useState({
+    name: user?.user_metadata?.full_name || '',
+    email: user?.email || '',
     subject: '',
     message: '',
     priority: 'medium'
   })
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [showModal, setShowModal] = useState(false)
 
   if (loading) {
     return (
@@ -29,16 +33,69 @@ export default function ContactPage() {
     return null
   }
 
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {}
+    
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required'
+    }
+    
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required'
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Invalid email format'
+    }
+    
+    if (!formData.subject.trim()) {
+      newErrors.subject = 'Subject is required'
+    }
+    
+    if (!formData.message.trim()) {
+      newErrors.message = 'Message is required'
+    } else if (formData.message.length < 10) {
+      newErrors.message = 'Message should be at least 10 characters'
+    }
+    
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if (!validateForm()) {
+      return
+    }
+    
     setIsSubmitting(true)
     
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 2000))
     
-    alert('Message sent successfully! We\'ll get back to you within 24 hours.')
-    setFormData({ subject: '', message: '', priority: 'medium' })
+    // Show success modal
+    setShowModal(true)
+    setFormData({ 
+      name: user?.user_metadata?.full_name || '',
+      email: user?.email || '',
+      subject: '', 
+      message: '', 
+      priority: 'medium' 
+    })
     setIsSubmitting(false)
+  }
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+    
+    // Clear error when user starts typing
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors[name]
+        return newErrors
+      })
+    }
   }
 
   const contactMethods = [
@@ -122,35 +179,44 @@ export default function ContactPage() {
               <h3 className="text-2xl font-bold text-slate-900 mb-6">Send us a Message</h3>
               
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* User Info (pre-filled) */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Your Email
-                    </label>
-                    <input
-                      type="email"
-                      value={user.email || ''}
-                      disabled
-                      className="w-full px-4 py-3 bg-slate-100/50 border border-slate-200 rounded-xl text-slate-600 cursor-not-allowed"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-2">
-                      Priority
-                    </label>
-                    <select
-                      value={formData.priority}
-                      onChange={(e) => setFormData({...formData, priority: e.target.value})}
-                      className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all duration-200"
-                    >
-                      <option value="low">Low Priority</option>
-                      <option value="medium">Medium Priority</option>
-                      <option value="high">High Priority</option>
-                      <option value="urgent">Urgent</option>
-                    </select>
-                  </div>
+                {/* Name */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    placeholder="Enter your name"
+                    className={`w-full px-4 py-3 bg-white border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 ${
+                      errors.name 
+                        ? 'border-red-500 focus:border-red-500' 
+                        : 'border-slate-200 focus:border-blue-400'
+                    }`}
+                  />
+                  {errors.name && <p className="mt-1 text-sm text-red-500">{errors.name}</p>}
+                </div>
+
+                {/* Email */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    placeholder="Enter your email"
+                    className={`w-full px-4 py-3 bg-white border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 ${
+                      errors.email 
+                        ? 'border-red-500 focus:border-red-500' 
+                        : 'border-slate-200 focus:border-blue-400'
+                    }`}
+                  />
+                  {errors.email && <p className="mt-1 text-sm text-red-500">{errors.email}</p>}
                 </div>
 
                 {/* Subject */}
@@ -160,12 +226,35 @@ export default function ContactPage() {
                   </label>
                   <input
                     type="text"
+                    name="subject"
                     value={formData.subject}
-                    onChange={(e) => setFormData({...formData, subject: e.target.value})}
+                    onChange={handleInputChange}
                     placeholder="How can we help you?"
-                    required
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all duration-200"
+                    className={`w-full px-4 py-3 bg-white border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 ${
+                      errors.subject 
+                        ? 'border-red-500 focus:border-red-500' 
+                        : 'border-slate-200 focus:border-blue-400'
+                    }`}
                   />
+                  {errors.subject && <p className="mt-1 text-sm text-red-500">{errors.subject}</p>}
+                </div>
+
+                {/* Priority */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Priority
+                  </label>
+                  <select
+                    name="priority"
+                    value={formData.priority}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all duration-200"
+                  >
+                    <option value="low">Low Priority</option>
+                    <option value="medium">Medium Priority</option>
+                    <option value="high">High Priority</option>
+                    <option value="urgent">Urgent</option>
+                  </select>
                 </div>
 
                 {/* Message */}
@@ -174,20 +263,25 @@ export default function ContactPage() {
                     Message
                   </label>
                   <textarea
+                    name="message"
                     value={formData.message}
-                    onChange={(e) => setFormData({...formData, message: e.target.value})}
+                    onChange={handleInputChange}
                     placeholder="Tell us more about your question or issue..."
-                    required
                     rows={6}
-                    className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all duration-200 resize-none"
+                    className={`w-full px-4 py-3 bg-white border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 resize-none ${
+                      errors.message 
+                        ? 'border-red-500 focus:border-red-500' 
+                        : 'border-slate-200 focus:border-blue-400'
+                    }`}
                   />
+                  {errors.message && <p className="mt-1 text-sm text-red-500">{errors.message}</p>}
                 </div>
 
                 {/* Submit Button */}
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full flex items-center justify-center space-x-3 px-6 py-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl font-semibold hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                  className="w-full flex items-center justify-center space-x-3 px-6 py-4 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl font-semibold hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-105"
                 >
                   {isSubmitting ? (
                     <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
@@ -201,6 +295,29 @@ export default function ContactPage() {
           </div>
         </div>
       </main>
+
+      {/* Success Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full transform transition-all duration-300 scale-100">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">✅</span>
+              </div>
+              <h3 className="text-2xl font-bold text-slate-900 mb-2">Thank You!</h3>
+              <p className="text-slate-600 mb-6">
+                Thank you for contacting us! We will get back to you soon.
+              </p>
+              <button
+                onClick={() => setShowModal(false)}
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

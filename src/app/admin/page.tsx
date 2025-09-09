@@ -4,11 +4,21 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import Navigation from '@/components/Navigation'
-import { BarChart3, TrendingUp, Users, MessageSquare, Clock, Star, BarChart } from 'lucide-react'
+import { 
+  Users, 
+  BarChart3, 
+  MessageSquare, 
+  Star, 
+  TrendingUp, 
+  Eye, 
+  Clock,
+  BarChart
+} from 'lucide-react'
 
-export default function AnalyticsPage() {
+export default function AdminDashboard() {
   const { user, loading } = useAuth()
   const router = useRouter()
+  const [isAdmin, setIsAdmin] = useState(false)
   const [activeUsers, setActiveUsers] = useState(42)
   const [pageVisits, setPageVisits] = useState(1247)
   const [avgRating, setAvgRating] = useState(4.8)
@@ -20,11 +30,14 @@ export default function AnalyticsPage() {
     { page: '/contact', visits: 98 }
   ])
 
+  // Check if user is admin (in a real app, this would come from the backend)
   useEffect(() => {
-    if (!loading && !user) {
-      router.push('/auth')
+    if (user) {
+      // For demo purposes, we'll assume the admin has a specific email
+      // In a real app, this would be checked against user roles/permissions
+      setIsAdmin(user.email === 'admin@aifiesta.com' || user.email?.includes('admin'))
     }
-  }, [user, loading, router])
+  }, [user])
 
   // Simulate real-time updates
   useEffect(() => {
@@ -40,6 +53,19 @@ export default function AnalyticsPage() {
     return () => clearInterval(interval)
   }, [])
 
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/auth')
+    }
+  }, [user, loading, router])
+
+  // Redirect non-admin users
+  useEffect(() => {
+    if (user && !isAdmin) {
+      router.push('/dashboard')
+    }
+  }, [user, isAdmin, router])
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -48,16 +74,9 @@ export default function AnalyticsPage() {
     )
   }
 
-  if (!user) {
+  if (!user || !isAdmin) {
     return null
   }
-
-  const stats = [
-    { label: 'Active Users', value: activeUsers, icon: Users, color: 'from-blue-500 to-blue-600' },
-    { label: 'Page Visits', value: pageVisits, icon: MessageSquare, color: 'from-purple-500 to-purple-600' },
-    { label: 'Avg. Rating', value: avgRating.toFixed(1), icon: Star, color: 'from-yellow-500 to-yellow-600' },
-    { label: 'Best Responses', value: '89%', icon: BarChart3, color: 'from-green-500 to-green-600' },
-  ]
 
   // Model performance data
   const modelPerformance = [
@@ -68,6 +87,13 @@ export default function AnalyticsPage() {
     { model: 'SVM', accuracy: 85, engagement: 75 }
   ]
 
+  const stats = [
+    { label: 'Current Active Users', value: activeUsers, icon: Users, color: 'from-blue-500 to-blue-600' },
+    { label: 'Page Visit Count', value: pageVisits, icon: Eye, color: 'from-purple-500 to-purple-600' },
+    { label: 'Average Feedback Rating', value: avgRating.toFixed(1), icon: Star, color: 'from-yellow-500 to-yellow-600' },
+    { label: 'Total Conversations', value: '1,247', icon: MessageSquare, color: 'from-green-500 to-green-600' },
+  ]
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       <Navigation />
@@ -75,8 +101,8 @@ export default function AnalyticsPage() {
       <main className="max-w-7xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-2">Analytics Dashboard</h1>
-          <p className="text-slate-600">Track your AI conversation insights and performance metrics</p>
+          <h1 className="text-3xl font-bold text-slate-900 mb-2">Admin Dashboard</h1>
+          <p className="text-slate-600">Real-time analytics and model performance insights</p>
         </div>
 
         {/* Stats Grid */}

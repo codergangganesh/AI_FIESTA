@@ -91,55 +91,83 @@ export default function LandingPage() {
       <header className="relative z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
+            {/* Logo that redirects to Chat section */}
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <Brain className="w-6 h-6 text-white" />
-              </div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
-                AI Fiesta
-              </h1>
+              <Link href={user ? "/chat" : "/"} className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                  <Brain className="w-6 h-6 text-white" />
+                </div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
+                  AI Fiesta
+                </h1>
+              </Link>
             </div>
             
             <div className="flex items-center space-x-4">
               {user ? (
-                // Profile icon for logged-in users
-                <div className="relative group">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold cursor-pointer">
-                    {user.email?.charAt(0).toUpperCase() || 'U'}
+                <>
+                  {/* Pricing link with modern black and gold design - smaller font */}
+                  <Link
+                    href="/payment"
+                    className="relative flex items-center space-x-2 px-3 py-1.5 rounded-lg font-bold transition-all duration-300 group overflow-hidden"
+                  >
+                    {/* Animated gold border */}
+                    <div className="absolute inset-0 rounded-lg">
+                      <div className="absolute inset-0 rounded-lg border-2 border-transparent group-hover:border-yellow-400 transition-all duration-300"></div>
+                      <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-yellow-400/20 to-yellow-600/20 opacity-0 group-hover:opacity-100 transition-all duration-300"></div>
+                    </div>
+                    
+                    {/* Gold shine effect */}
+                    <div className="absolute top-0 right-0 w-10 h-full bg-gradient-to-l from-yellow-400/30 to-transparent transform translate-x-full group-hover:-translate-x-full transition-transform duration-500 ease-in-out"></div>
+                    
+                    {/* Black background with gold text */}
+                    <div className="relative flex items-center space-x-1.5 bg-black px-3 py-1.5 rounded-lg">
+                      <span className="text-yellow-400 text-xs tracking-widest">PRICING</span>
+                      <svg className="w-3 h-3 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                  </Link>
+                  
+                  {/* Profile icon for logged-in users */}
+                  <div className="relative group">
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold cursor-pointer">
+                      {user.email?.charAt(0).toUpperCase() || 'U'}
+                    </div>
+                    {/* Dropdown menu */}
+                    <div className="absolute right-0 mt-2 w-48 rounded-xl bg-white/90 backdrop-blur-xl border border-slate-200/50 shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                      <Link
+                        href="/chat"
+                        className="flex items-center space-x-2 px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                      >
+                        <MessageSquare className="w-4 h-4" />
+                        <span>Chat</span>
+                      </Link>
+                      <Link
+                        href="/history"
+                        className="flex items-center space-x-2 px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                      >
+                        <Clock className="w-4 h-4" />
+                        <span>History</span>
+                      </Link>
+                      <Link
+                        href="/account-settings"
+                        className="flex items-center space-x-2 px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                      >
+                        <SettingsIcon className="w-4 h-4" />
+                        <span>Account Settings</span>
+                      </Link>
+                      <div className="border-t border-slate-200/50 my-2"></div>
+                      <Link
+                        href="/"
+                        className="flex items-center space-x-2 px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span>Logout</span>
+                      </Link>
+                    </div>
                   </div>
-                  {/* Dropdown menu */}
-                  <div className="absolute right-0 mt-2 w-48 rounded-xl bg-white/90 backdrop-blur-xl border border-slate-200/50 shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                    <Link
-                      href="/chat"
-                      className="flex items-center space-x-2 px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-                    >
-                      <MessageSquare className="w-4 h-4" />
-                      <span>Chat</span>
-                    </Link>
-                    <Link
-                      href="/history"
-                      className="flex items-center space-x-2 px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-                    >
-                      <Clock className="w-4 h-4" />
-                      <span>History</span>
-                    </Link>
-                    <Link
-                      href="/account-settings"
-                      className="flex items-center space-x-2 px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-                    >
-                      <SettingsIcon className="w-4 h-4" />
-                      <span>Account Settings</span>
-                    </Link>
-                    <div className="border-t border-slate-200/50 my-2"></div>
-                    <Link
-                      href="/"
-                      className="flex items-center space-x-2 px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      <span>Logout</span>
-                    </Link>
-                  </div>
-                </div>
+                </>
               ) : (
                 // Sign in button for non-logged-in users
                 <Link
@@ -192,7 +220,7 @@ export default function LandingPage() {
             
             <p className="text-xl sm:text-2xl text-slate-600 mb-12 max-w-4xl mx-auto leading-relaxed">
               Send one message to multiple AI models and compare their responses instantly. 
-              <span className="text-blue-600 font-semibold">Find the perfect AI</span> for every task.
+              <span className="text-blue-600 font-semibold"> Find the perfect AI</span> for every task.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
