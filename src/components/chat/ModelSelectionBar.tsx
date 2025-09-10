@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { AI_MODELS } from '@/config/ai-models'
-import { Search, Filter, ChevronLeft, ChevronRight, Plus, Check, X, Info } from 'lucide-react'
+import { Search, Filter, ChevronLeft, ChevronRight, Plus, Check, X, Info, Star, Code, Image, FileText, DollarSign, Clock } from 'lucide-react'
 
 interface ModelSelectionBarProps {
   selectedModels: string[]
@@ -39,6 +39,39 @@ export default function ModelSelectionBar({ selectedModels, onModelToggle, darkM
       'Shisa': 'from-pink-500 to-purple-500'
     }
     return colors[provider as keyof typeof colors] || 'from-slate-500 to-slate-700'
+  }
+
+  const getCapabilityIcon = (capability: string) => {
+    switch (capability) {
+      case 'text': return <FileText className="w-3 h-3" />
+      case 'image': return <Image className="w-3 h-3" />
+      case 'code': return <Code className="w-3 h-3" />
+      case 'audio': return <Zap className="w-3 h-3" />
+      case 'video': return <Zap className="w-3 h-3" />
+      case 'document': return <FileText className="w-3 h-3" />
+      case 'math': return <Star className="w-3 h-3" />
+      default: return <Brain className="w-3 h-3" />
+    }
+  }
+
+  const getSpeedColor = (speed: string) => {
+    switch (speed) {
+      case 'very-fast': return 'text-green-500'
+      case 'fast': return 'text-green-400'
+      case 'medium': return 'text-yellow-500'
+      case 'slow': return 'text-red-500'
+      default: return 'text-gray-500'
+    }
+  }
+
+  const getCostColor = (cost: string) => {
+    switch (cost) {
+      case 'very-low': return 'text-green-500'
+      case 'low': return 'text-green-400'
+      case 'medium': return 'text-yellow-500'
+      case 'high': return 'text-red-500'
+      default: return 'text-gray-500'
+    }
   }
 
   const scroll = (direction: 'left' | 'right') => {
@@ -212,7 +245,7 @@ export default function ModelSelectionBar({ selectedModels, onModelToggle, darkM
               return (
                 <div key={model.id} className="relative flex-shrink-0">
                   <div
-                    className={`relative flex items-center space-x-3 px-4 py-3 rounded-xl border-2 transition-all duration-200 min-w-[200px] cursor-pointer ${
+                    className={`relative flex items-center space-x-3 px-4 py-3 rounded-xl border-2 transition-all duration-200 min-w-[220px] cursor-pointer ${
                       isSelected
                         ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
                         : darkMode 
@@ -240,6 +273,21 @@ export default function ModelSelectionBar({ selectedModels, onModelToggle, darkM
                       }`}>
                         {model.provider}
                       </p>
+                      {/* Enhanced Model Details */}
+                      <div className="flex items-center space-x-2 mt-1">
+                        <div className="flex items-center space-x-1">
+                          <Clock className={`w-3 h-3 ${getSpeedColor(model.speed || 'medium')}`} />
+                          <span className={`text-xs font-medium ${getSpeedColor(model.speed || 'medium')}`}>
+                            {model.speed || 'Medium'}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <DollarSign className={`w-3 h-3 ${getCostColor(model.cost || 'medium')}`} />
+                          <span className={`text-xs font-medium ${getCostColor(model.cost || 'medium')}`}>
+                            {model.cost || 'Medium'}
+                          </span>
+                        </div>
+                      </div>
                     </div>
 
                     {/* Selection Indicator */}
@@ -271,30 +319,60 @@ export default function ModelSelectionBar({ selectedModels, onModelToggle, darkM
 
                   {/* Model Info Tooltip */}
                   {showModelInfo === model.id && (
-                    <div className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-2 p-3 rounded-lg shadow-xl border z-50 w-64 ${
+                    <div className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-2 p-4 rounded-lg shadow-xl border z-50 w-72 ${
                       darkMode 
                         ? 'bg-gray-800 border-gray-700 text-white' 
                         : 'bg-white border-gray-200 text-gray-900'
                     }`}>
-                      <div className="space-y-2">
-                        <h4 className="font-semibold">{model.displayName}</h4>
-                        <div className="space-y-1 text-xs">
+                      <div className="space-y-3">
+                        <div>
+                          <h4 className="font-semibold">{model.displayName}</h4>
+                          <p className={`text-xs mt-1 ${
+                            darkMode ? 'text-gray-300' : 'text-gray-600'
+                          }`}>
+                            {model.description || 'No description available'}
+                          </p>
+                        </div>
+                        
+                        <div className="space-y-2 text-xs">
                           <div className="flex justify-between">
                             <span className={darkMode ? 'text-gray-400' : 'text-gray-500'}>Provider:</span>
                             <span>{model.provider}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className={darkMode ? 'text-gray-400' : 'text-gray-500'}>Speed:</span>
-                            <span>Fast</span>
+                            <span className={getSpeedColor(model.speed || 'medium')}>
+                              {model.speed || 'Medium'}
+                            </span>
                           </div>
                           <div className="flex justify-between">
                             <span className={darkMode ? 'text-gray-400' : 'text-gray-500'}>Cost:</span>
-                            <span>$0.01/1K tokens</span>
+                            <span className={getCostColor(model.cost || 'medium')}>
+                              {model.cost || 'Medium'}
+                            </span>
                           </div>
                           <div className="flex justify-between">
                             <span className={darkMode ? 'text-gray-400' : 'text-gray-500'}>Context:</span>
-                            <span>32K tokens</span>
+                            <span>{model.contextWindow || '32K tokens'}</span>
                           </div>
+                          
+                          {/* Capabilities */}
+                          {model.capabilities && model.capabilities.length > 0 && (
+                            <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                              <span className={darkMode ? 'text-gray-400' : 'text-gray-500'}>Capabilities:</span>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {model.capabilities.map((cap, idx) => (
+                                  <span 
+                                    key={idx} 
+                                    className="flex items-center space-x-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-full text-xs"
+                                  >
+                                    {getCapabilityIcon(cap)}
+                                    <span>{cap}</span>
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>

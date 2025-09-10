@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { AIModel } from '@/types/app'
 import { AI_MODELS } from '@/config/ai-models'
-import { Settings, Check, Brain, Zap, X } from 'lucide-react'
+import { Settings, Check, Brain, Zap, X, Star, Code, Image, FileText, DollarSign, Clock } from 'lucide-react'
 
 interface ModelSelectorProps {
   selectedModels: string[]
@@ -39,6 +39,39 @@ export default function ModelSelector({ selectedModels, onModelToggle }: ModelSe
       'Shisa': 'bg-pink-100 text-pink-700'
     }
     return colors[provider as keyof typeof colors] || 'bg-slate-100 text-slate-700'
+  }
+
+  const getCapabilityIcon = (capability: string) => {
+    switch (capability) {
+      case 'text': return <FileText className="w-3 h-3" />
+      case 'image': return <Image className="w-3 h-3" />
+      case 'code': return <Code className="w-3 h-3" />
+      case 'audio': return <Zap className="w-3 h-3" />
+      case 'video': return <Zap className="w-3 h-3" />
+      case 'document': return <FileText className="w-3 h-3" />
+      case 'math': return <Star className="w-3 h-3" />
+      default: return <Brain className="w-3 h-3" />
+    }
+  }
+
+  const getSpeedColor = (speed: string) => {
+    switch (speed) {
+      case 'very-fast': return 'text-green-500'
+      case 'fast': return 'text-green-400'
+      case 'medium': return 'text-yellow-500'
+      case 'slow': return 'text-red-500'
+      default: return 'text-gray-500'
+    }
+  }
+
+  const getCostColor = (cost: string) => {
+    switch (cost) {
+      case 'very-low': return 'text-green-500'
+      case 'low': return 'text-green-400'
+      case 'medium': return 'text-yellow-500'
+      case 'high': return 'text-red-500'
+      default: return 'text-gray-500'
+    }
   }
 
   return (
@@ -135,6 +168,43 @@ export default function ModelSelector({ selectedModels, onModelToggle }: ModelSe
                       <span className="text-xs font-semibold">Active</span>
                     </div>
                   )}
+                </div>
+                
+                {/* Enhanced Model Details */}
+                {model.description && (
+                  <p className="text-xs text-slate-600 line-clamp-2 mt-2">
+                    {model.description}
+                  </p>
+                )}
+                
+                {/* Model Stats */}
+                <div className="flex items-center justify-between mt-2">
+                  <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-1">
+                      <Clock className={`w-3 h-3 ${getSpeedColor(model.speed || 'medium')}`} />
+                      <span className={`text-xs font-medium ${getSpeedColor(model.speed || 'medium')}`}>
+                        {model.speed || 'Medium'}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <DollarSign className={`w-3 h-3 ${getCostColor(model.cost || 'medium')}`} />
+                      <span className={`text-xs font-medium ${getCostColor(model.cost || 'medium')}`}>
+                        {model.cost || 'Medium'}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  {/* Capabilities */}
+                  <div className="flex space-x-1">
+                    {model.capabilities?.slice(0, 3).map((cap, idx) => (
+                      <div key={idx} className="text-slate-500" title={cap}>
+                        {getCapabilityIcon(cap)}
+                      </div>
+                    ))}
+                    {model.capabilities && model.capabilities.length > 3 && (
+                      <div className="text-xs text-slate-500">+{model.capabilities.length - 3}</div>
+                    )}
+                  </div>
                 </div>
               </div>
 

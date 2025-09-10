@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
 import { ArrowRight, MessageSquare, Zap, BarChart3, Shield, Clock, Users, Brain, Sparkles, Star, ChevronRight, Play, Globe, TrendingUp, Award, Infinity, Cpu, Layers, GitBranch, Settings as SettingsIcon, LogOut } from 'lucide-react'
+import ModernModelShowcase from './ModernModelShowcase'
 
 export default function LandingPage() {
   const { user } = useAuth()
@@ -50,18 +51,6 @@ export default function LandingPage() {
       gradient: 'from-indigo-500 to-blue-500',
       stats: '9+ AI Providers'
     }
-  ]
-
-  const models = [
-    { name: 'GPT-5', provider: 'OpenAI', color: 'from-green-500 to-blue-500' },
-    { name: 'Claude 4 Sonnet', provider: 'Anthropic', color: 'from-orange-500 to-red-500' },
-    { name: 'Gemini 2.5', provider: 'Google', color: 'from-blue-500 to-green-500' },
-    { name: 'DeepSeek', provider: 'DeepSeek', color: 'from-purple-500 to-pink-500' },
-    { name: 'Qwen 2.5', provider: 'Alibaba', color: 'from-red-500 to-orange-500' },
-    { name: 'Grok', provider: 'xAI', color: 'from-gray-700 to-gray-900' },
-    { name: 'LLaMA 3.3', provider: 'Meta', color: 'from-blue-600 to-purple-600' },
-    { name: 'Kimi 2', provider: 'Moonshot', color: 'from-cyan-500 to-blue-500' },
-    { name: 'Shisa AI', provider: 'Shisa', color: 'from-pink-500 to-purple-500' }
   ]
 
   const steps = [
@@ -236,7 +225,7 @@ export default function LandingPage() {
               <div className="flex items-center space-x-4 text-slate-600">
                 <div className="flex -space-x-2">
                   {[1,2,3,4].map((i) => (
-                    <div key={i} className={`w-8 h-8 rounded-full bg-gradient-to-br ${models[i]?.color || 'from-slate-400 to-slate-600'} border-2 border-white`}></div>
+                    <div key={i} className={`w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 border-2 border-white`}></div>
                   ))}
                 </div>
                 <span className="text-sm font-medium">9+ AI Models Available</span>
@@ -326,56 +315,8 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* AI Models Section */}
-      <section className="py-24 bg-white/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-20">
-            <div className="inline-flex items-center space-x-2 bg-blue-50 border border-blue-200/50 rounded-full px-4 py-2 mb-6">
-              <Globe className="w-4 h-4 text-blue-500" />
-              <span className="text-sm font-medium text-blue-700">Premium AI Models</span>
-            </div>
-            <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent mb-6">
-              World-Class AI Models
-            </h2>
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-              Access the latest and most powerful AI models from leading companies
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {models.map((model, index) => (
-              <div 
-                key={index} 
-                className="group bg-white/80 backdrop-blur-sm border border-slate-200/50 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 hover:scale-105 relative overflow-hidden"
-              >
-                {/* Animated background gradient on hover */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${model.color} opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-2xl`}></div>
-                
-                <div className="relative flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className={`w-12 h-12 bg-gradient-to-br ${model.color} rounded-xl flex items-center justify-center text-white font-bold shadow-lg group-hover:scale-110 transition-transform`}>
-                      {model.name.charAt(0)}
-                    </div>
-                    <div>
-                      <div className="font-bold text-slate-900">{model.name}</div>
-                      <div className="text-sm text-slate-600">{model.provider}</div>
-                    </div>
-                  </div>
-                  
-                  {/* Status indicator */}
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                    <span className="text-xs text-green-600 font-medium">Active</span>
-                  </div>
-                </div>
-                
-                {/* Hover effect overlay */}
-                <div className="absolute inset-0 border-2 border-transparent group-hover:border-white/20 rounded-2xl transition-all duration-300"></div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Modern AI Models Section */}
+      <ModernModelShowcase />
 
       {/* Testimonials Section */}
       <section className="py-24 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 relative">

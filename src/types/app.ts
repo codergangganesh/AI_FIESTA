@@ -4,6 +4,11 @@ export interface AIModel {
   displayName: string
   provider: string
   enabled: boolean
+  capabilities?: string[]
+  speed?: 'very-fast' | 'fast' | 'medium' | 'slow'
+  cost?: 'very-low' | 'low' | 'medium' | 'high'
+  contextWindow?: string
+  description?: string
 }
 
 export interface ChatMessage {
