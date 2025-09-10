@@ -28,30 +28,16 @@ export function usePlan() {
 
 async function getPlanFromSupabase(userId: string, supabase: any): Promise<PlanType> {
   try {
-    // First check if profiles table exists
-    const { data, error } = await supabase.from('information_schema.tables').select('table_name').eq('table_schema', 'public')
-    
-    if (error) {
-      console.error('Error checking tables:', error.message || error)
-      return 'free'
-    }
-
-    // Add null check for data
-    if (!data || !Array.isArray(data) || !data.some((table: any) => table.table_name === 'profiles')) {
-      console.warn('Profiles table does not exist in Supabase')
-      return 'free'
-    }
-
-    // Check if the user exists in profiles table
+    // Directly check if the user exists in profiles table
     const { data: profileData, error: profileError } = await supabase
       .from('profiles')
       .select('plan')
       .eq('id', userId)
       .single()
 
-    // If there's an error fetching the plan (e.g., column doesn't exist), default to free
+    // If there's an error fetching the plan, default to free
     if (profileError) {
-      console.warn('Plan column may not exist in profiles table, defaulting to free plan:', profileError.message || 'Unknown error')
+      console.warn('Error fetching user plan, defaulting to free plan:', profileError.message || 'Unknown error')
       return 'free'
     }
 

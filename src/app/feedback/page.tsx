@@ -61,16 +61,6 @@ export default function FeedbackPage() {
         },
         (payload: any) => {
           setFeedbackList(prev => [payload.new as any, ...prev]);
-          if (payload.new.user_id === user?.id) {
-            setShowModal(true);
-            // Reset form after successful submission
-            setFormData({
-              name: user?.user_metadata?.full_name || '',
-              email: user?.email || '',
-              message: '',
-              rating: 0
-            });
-          }
         }
       )
       .subscribe();
@@ -78,7 +68,7 @@ export default function FeedbackPage() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user?.id]);
+  }, []);
 
   if (loading) {
     return (
@@ -144,7 +134,11 @@ export default function FeedbackPage() {
         throw new Error(errorData.error || 'Failed to submit feedback');
       }
       
-      // The real-time subscription will handle adding the new feedback to the list
+      const result = await response.json();
+      
+      // Add the newly submitted feedback to the list immediately
+      setFeedbackList(prev => [result.data, ...prev]);
+      
       // Show success modal
       setShowModal(true);
       // Reset form after successful submission
@@ -201,6 +195,33 @@ export default function FeedbackPage() {
     ))
   }
 
+  // Calculate feedback statistics dynamically
+  const calculateFeedbackStats = () => {
+    if (feedbackList.length === 0) {
+      return {
+        averageRating: 0,
+        totalFeedback: 0,
+        positiveFeedback: 0
+      };
+    }
+
+    // Calculate average rating
+    const totalRating = feedbackList.reduce((sum, feedback) => sum + (feedback.rating || 0), 0);
+    const averageRating = totalRating / feedbackList.length;
+
+    // Calculate positive feedback (ratings 4 or higher)
+    const positiveCount = feedbackList.filter(feedback => (feedback.rating || 0) >= 4).length;
+    const positivePercentage = (positiveCount / feedbackList.length) * 100;
+
+    return {
+      averageRating: parseFloat(averageRating.toFixed(1)),
+      totalFeedback: feedbackList.length,
+      positiveFeedback: Math.round(positivePercentage)
+    };
+  };
+
+  const feedbackStats = calculateFeedbackStats();
+
   return (
     <div className={`min-h-screen transition-colors duration-200 ${
       darkMode 
@@ -225,6 +246,45 @@ export default function FeedbackPage() {
               Help us improve AI Fiesta by sharing your experience and suggestions.
             </p>
           </div>
+
+          {/* Success Modal */}
+          {showModal && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+              <div className={`rounded-2xl p-8 max-w-md w-full transform transition-all duration-300 scale-100 ${
+                darkMode 
+                  ? 'bg-gray-800 border border-gray-700' 
+                  : 'bg-white border border-slate-200'
+              }`}>
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                  </div>
+                  <h3 className={`text-2xl font-bold mb-2 transition-colors duration-200 ${
+                    darkMode ? 'text-white' : 'text-slate-900'
+                  }`}>
+                    Feedback Submitted!
+                  </h3>
+                  <p className={`mb-6 transition-colors duration-200 ${
+                    darkMode ? 'text-gray-300' : 'text-slate-600'
+                  }`}>
+                    Thank you for your valuable feedback. We appreciate your input.
+                  </p>
+                  <button
+                    onClick={() => setShowModal(false)}
+                    className={`px-6 py-3 rounded-xl font-semibold transition-all duration-200 ${
+                      darkMode 
+                        ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700' 
+                        : 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:from-purple-600 hover:to-indigo-600'
+                    }`}
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Error Message */}
           {submitError && (
@@ -392,7 +452,7 @@ export default function FeedbackPage() {
                       <span className={`font-bold transition-colors duration-200 ${
                         darkMode ? 'text-white' : 'text-slate-900'
                       }`}>
-                        4.8
+                        {feedbackStats.averageRating}
                       </span>
                     </div>
                   </div>
@@ -405,7 +465,7 @@ export default function FeedbackPage() {
                     <span className={`font-bold transition-colors duration-200 ${
                       darkMode ? 'text-white' : 'text-slate-900'
                     }`}>
-                      {feedbackList.length + 127}
+                      {feedbackStats.totalFeedback}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
@@ -417,78 +477,8 @@ export default function FeedbackPage() {
                     <span className={`font-bold transition-colors duration-200 ${
                       darkMode ? 'text-white' : 'text-slate-900'
                     }`}>
-                      92%
+                      {feedbackStats.positiveFeedback}%
                     </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className={`rounded-2xl p-6 transition-colors duration-200 backdrop-blur-sm ${
-                darkMode 
-                  ? 'bg-gray-800/60 border border-gray-700/50' 
-                  : 'bg-white/80 border border-slate-200/50'
-              }`}>
-                <h3 className={`text-xl font-bold mb-4 transition-colors duration-200 ${
-                  darkMode ? 'text-white' : 'text-slate-900'
-                }`}>
-                  Recent Feedback
-                </h3>
-                <div className="space-y-4">
-                  <div className={`p-4 rounded-xl transition-colors duration-200 ${
-                    darkMode ? 'bg-gray-700/30' : 'bg-slate-50'
-                  }`}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className={`font-medium transition-colors duration-200 ${
-                        darkMode ? 'text-white' : 'text-slate-900'
-                      }`}>
-                        Alex Johnson
-                      </span>
-                      <div className="flex">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-4 h-4 ${
-                              i < 5 
-                                ? darkMode ? 'text-yellow-400 fill-current' : 'text-yellow-500 fill-current'
-                                : darkMode ? 'text-gray-600' : 'text-gray-300'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    <p className={`text-sm transition-colors duration-200 ${
-                      darkMode ? 'text-gray-300' : 'text-slate-600'
-                    }`}>
-                      "The AI comparison feature is amazing! Saved me hours of testing different models."
-                    </p>
-                  </div>
-                  <div className={`p-4 rounded-xl transition-colors duration-200 ${
-                    darkMode ? 'bg-gray-700/30' : 'bg-slate-50'
-                  }`}>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className={`font-medium transition-colors duration-200 ${
-                        darkMode ? 'text-white' : 'text-slate-900'
-                      }`}>
-                        Sarah Williams
-                      </span>
-                      <div className="flex">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-4 h-4 ${
-                              i < 4 
-                                ? darkMode ? 'text-yellow-400 fill-current' : 'text-yellow-500 fill-current'
-                                : darkMode ? 'text-gray-600' : 'text-gray-300'
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    <p className={`text-sm transition-colors duration-200 ${
-                      darkMode ? 'text-gray-300' : 'text-slate-600'
-                    }`}>
-                      "Great interface and responsive support team. Would recommend to anyone!"
-                    </p>
                   </div>
                 </div>
               </div>
@@ -501,7 +491,7 @@ export default function FeedbackPage() {
               <h3 className={`text-2xl font-bold mb-6 transition-colors duration-200 ${
                 darkMode ? 'text-white' : 'text-slate-900'
               }`}>
-                Community Feedback
+                Your Feedback
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {feedbackList.map((feedback) => (
