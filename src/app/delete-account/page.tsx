@@ -5,11 +5,13 @@ import { ArrowLeft, AlertTriangle, Trash2, Shield, Lock } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { useDarkMode } from '@/contexts/DarkModeContext'
+import { createClient } from '@/utils/supabase/client'
 
 export default function DeleteAccountPage() {
   const router = useRouter()
   const { user, signOut } = useAuth()
   const { darkMode } = useDarkMode()
+  const supabase = createClient()
   
   const [step, setStep] = useState(1)
   const [confirmText, setConfirmText] = useState('')
@@ -34,14 +36,52 @@ export default function DeleteAccountPage() {
     setError('')
     
     try {
-      // Simulate account deletion API call
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // First, verify the password by attempting to sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user?.email || '',
+        password,
+      })
       
-      // Sign out user and redirect
+      if (signInError) {
+        setError('Incorrect password. Please try again.')
+        setIsLoading(false)
+        return
+      }
+      
+      // Password is correct, now delete the account
+      const response = await fetch('/api/delete-account', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      
+      if (!response.ok) {
+        const errorText = await response.text()
+        let errorMessage = `API error! status: ${response.status}`
+        try {
+          const errorData = JSON.parse(errorText)
+          errorMessage += `, message: ${errorData.error || errorText}`
+        } catch (parseError) {
+          errorMessage += `, message: ${errorText}`
+        }
+        throw new Error(errorMessage)
+      }
+      
+      const result = await response.json()
+      
+      if (!result.success) {
+        throw new Error(result.error || 'Failed to delete account')
+      }
+      
+      // Sign out the user
       await signOut()
-      router.push('/?deleted=true')
-    } catch (error) {
-      setError('Failed to delete account. Please try again.')
+      
+      // Account deleted successfully, redirect to home page with success message
+      router.push('/?deleted=true&message=Your%20account%20has%20been%20successfully%20deleted.')
+    } catch (error: any) {
+      console.error('Error deleting account:', error)
+      setError(error.message || 'Failed to delete account. Please try again.')
       setIsLoading(false)
     }
   }

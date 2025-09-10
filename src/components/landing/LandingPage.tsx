@@ -2,11 +2,15 @@
 
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
+import { useSearchParams } from 'next/navigation'
 import { ArrowRight, MessageSquare, Zap, BarChart3, Shield, Clock, Users, Brain, Sparkles, Star, ChevronRight, Play, Globe, TrendingUp, Award, Infinity, Cpu, Layers, GitBranch, Settings as SettingsIcon, LogOut } from 'lucide-react'
 import ModernModelShowcase from './ModernModelShowcase'
 
 export default function LandingPage() {
   const { user } = useAuth()
+  const searchParams = useSearchParams()
+  const deleted = searchParams.get('deleted')
+  const message = searchParams.get('message')
 
   const features = [
     {
@@ -47,7 +51,7 @@ export default function LandingPage() {
     {      
       icon: Users,
       title: 'Premium Models',
-      description: 'Access to cutting-edge AI models including GPT-5, Claude 4, Gemini 2.5, and emerging models.',
+      description: 'Access to cutting-edge AI models including GPT-5, Claude 4, and emerging models.',
       gradient: 'from-indigo-500 to-blue-500',
       stats: '9+ AI Providers'
     }
@@ -76,6 +80,23 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      {/* Success Message Popup */}
+      {deleted && message && (
+        <div className="fixed top-4 right-4 z-50">
+          <div className="bg-white border border-green-200 text-green-700 px-6 py-4 rounded-xl shadow-lg flex items-center space-x-3 animate-fade-in">
+            <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
+              <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <div>
+              <div className="font-semibold">Success!</div>
+              <div className="text-sm">{decodeURIComponent(message)}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header className="relative z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

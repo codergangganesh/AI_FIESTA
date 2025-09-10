@@ -17,7 +17,7 @@ export default function ModernAuthForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  const { signIn, signUp } = useAuth()
+  const { signIn, signUp, signInWithGoogle, signInWithGithub } = useAuth()
   const router = useRouter()
   const supabase = createClient()
 
@@ -65,18 +65,46 @@ export default function ModernAuthForm() {
 
         if (formData.password !== formData.confirmPassword) {
           setError('Passwords do not match')
+          setLoading(false)
           return
         }
+        
         const { error } = await signUp(formData.email, formData.password)
         if (error) {
-          setError(error.message)
+          // Check if it's an email already exists error
+          if (error.message.includes('already registered')) {
+            setError('Email already exists.')
+          } else {
+            setError(error.message)
+          }
         } else {
-          router.push('/chat')
+          // After successful signup, redirect to login page
+          router.push('/auth?message=Account%20created%20successfully.%20Please%20sign%20in.')
         }
       }
     } catch (err) {
       setError('An unexpected error occurred')
     } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setLoading(true)
+      await signInWithGoogle()
+    } catch (err) {
+      setError('Failed to sign in with Google. Please try again.')
+      setLoading(false)
+    }
+  }
+
+  const handleGithubSignIn = async () => {
+    try {
+      setLoading(true)
+      await signInWithGithub()
+    } catch (err) {
+      setError('Failed to sign in with GitHub. Please try again.')
       setLoading(false)
     }
   }
@@ -226,7 +254,9 @@ export default function ModernAuthForm() {
         <div className="grid grid-cols-2 gap-4">
           <button
             type="button"
-            className="flex items-center justify-center space-x-2 px-4 py-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all duration-200 hover:shadow-md"
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+            className="flex items-center justify-center space-x-2 px-4 py-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -239,7 +269,9 @@ export default function ModernAuthForm() {
 
           <button
             type="button"
-            className="flex items-center justify-center space-x-2 px-4 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl transition-all duration-200 hover:shadow-md"
+            onClick={handleGithubSignIn}
+            disabled={loading}
+            className="flex items-center justify-center space-x-2 px-4 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Github className="w-5 h-5" />
             <span className="font-medium">GitHub</span>

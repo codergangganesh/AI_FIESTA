@@ -94,8 +94,8 @@ export default function ModelComparisonPage() {
         status: 'completed'
       },
       {
-        id: 'llama-2',
-        name: 'Llama 2 70B',
+        id: 'meta-llama/llama-3.3-70b-instruct',
+        name: 'LLaMA 3.3',
         provider: 'Meta',
         accuracy: 89.3,
         precision: 88.7,
@@ -105,10 +105,43 @@ export default function ModelComparisonPage() {
         responseTime: 1.8,
         costPer1k: 0.015,
         status: 'running'
+      },
+      {
+        id: 'qwen/qwen-2.5-72b-instruct',
+        name: 'Qwen 2.5',
+        provider: 'Alibaba',
+        accuracy: 87.5,
+        precision: 86.9,
+        recall: 88.1,
+        f1Score: 87.5,
+        rocAuc: 93.2,
+        responseTime: 2.1,
+        costPer1k: 0.012,
+        status: 'completed'
+      },
+      {
+        id: 'deepseek/deepseek-chat',
+        name: 'DeepSeek',
+        provider: 'DeepSeek',
+        accuracy: 85.2,
+        precision: 84.7,
+        recall: 85.7,
+        f1Score: 85.2,
+        rocAuc: 91.8,
+        responseTime: 1.5,
+        costPer1k: 0.008,
+        status: 'completed'
       }
     ]
     setModels(mockModels)
-    setConfig(prev => ({ ...prev, selectedModels: mockModels.slice(0, 3).map(m => m.id) }))
+    
+    // Set default models to LLaMA, Qwen, and DeepSeek for first-time users
+    const defaultModelIds = [
+      'meta-llama/llama-3.3-70b-instruct',
+      'qwen/qwen-2.5-72b-instruct', 
+      'deepseek/deepseek-chat'
+    ]
+    setConfig(prev => ({ ...prev, selectedModels: defaultModelIds }))
   }, [])
 
   const availableMetrics = [

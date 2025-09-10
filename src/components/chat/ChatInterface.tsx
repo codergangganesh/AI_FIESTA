@@ -13,6 +13,7 @@ interface ChatResponse {
   success: boolean
 }
 
+
 export default function ChatInterface() {
   const [message, setMessage] = useState('')
   const [responses, setResponses] = useState<ChatResponse[]>([])
