@@ -5,12 +5,33 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useSearchParams } from 'next/navigation'
 import { ArrowRight, MessageSquare, Zap, BarChart3, Shield, Clock, Users, Brain, Sparkles, Star, ChevronRight, Play, Globe, TrendingUp, Award, Infinity, Cpu, Layers, GitBranch, Settings as SettingsIcon, LogOut } from 'lucide-react'
 import ModernModelShowcase from './ModernModelShowcase'
+import { useEffect, useState } from 'react'
 
 export default function LandingPage() {
   const { user } = useAuth()
   const searchParams = useSearchParams()
-  const deleted = searchParams.get('deleted')
-  const message = searchParams.get('message')
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false)
+  const [popupMessage, setPopupMessage] = useState('')
+
+  // Check for success message in URL parameters
+  useEffect(() => {
+    const deleted = searchParams.get('deleted')
+    const message = searchParams.get('message')
+    
+    if (deleted && message) {
+      setPopupMessage(decodeURIComponent(message))
+      setShowSuccessPopup(true)
+      
+      // Auto-hide the popup after 5 seconds
+      const timer = setTimeout(() => {
+        setShowSuccessPopup(false)
+        // Remove the parameters from the URL
+        window.history.replaceState({}, document.title, '/')
+      }, 5000)
+      
+      return () => clearTimeout(timer)
+    }
+  }, [searchParams])
 
   const features = [
     {
@@ -81,18 +102,26 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       {/* Success Message Popup */}
-      {deleted && message && (
-        <div className="fixed top-4 right-4 z-50">
-          <div className="bg-white border border-green-200 text-green-700 px-6 py-4 rounded-xl shadow-lg flex items-center space-x-3 animate-fade-in">
-            <div className="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center">
-              <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      {showSuccessPopup && (
+        <div className="fixed top-4 right-4 z-50 animate-fade-in">
+          <div className="bg-white border border-green-200 text-green-700 px-6 py-4 rounded-xl shadow-2xl flex items-center space-x-3 animate-fade-in transform transition-all duration-300 hover:scale-105">
+            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
             <div>
-              <div className="font-semibold">Success!</div>
-              <div className="text-sm">{decodeURIComponent(message)}</div>
+              <div className="font-bold text-green-800">Success!</div>
+              <div className="text-sm font-medium">{popupMessage}</div>
             </div>
+            <button 
+              onClick={() => setShowSuccessPopup(false)}
+              className="text-green-500 hover:text-green-700 ml-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
           </div>
         </div>
       )}

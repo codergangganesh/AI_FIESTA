@@ -27,6 +27,13 @@ export default function ContactPage() {
 
   const supabase = createClient()
 
+  // Handle navigation when user is not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/auth')
+    }
+  }, [user, loading, router])
+
   // Subscribe to contact messages in real-time for the current user
   useEffect(() => {
     if (!user?.id) return
@@ -65,8 +72,8 @@ export default function ContactPage() {
     )
   }
 
+  // Show nothing while redirecting
   if (!user) {
-    router.push('/auth')
     return null
   }
 
@@ -123,7 +130,7 @@ export default function ContactPage() {
       
       // Show success modal
       setShowModal(true)
-      // Reset form
+      // Reset form after successful submission
       setFormData({ 
         name: user?.user_metadata?.full_name || '',
         email: user?.email || '',

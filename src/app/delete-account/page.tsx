@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ArrowLeft, AlertTriangle, Trash2, Shield, Lock } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
@@ -18,6 +18,7 @@ export default function DeleteAccountPage() {
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false)
   
   const CONFIRM_TEXT = 'DELETE MY ACCOUNT'
 
@@ -77,14 +78,25 @@ export default function DeleteAccountPage() {
       // Sign out the user
       await signOut()
       
-      // Account deleted successfully, redirect to home page with success message
-      router.push('/?deleted=true&message=Your%20account%20has%20been%20successfully%20deleted.')
+      // Show success popup
+      setShowSuccessPopup(true)
     } catch (error: any) {
       console.error('Error deleting account:', error)
       setError(error.message || 'Failed to delete account. Please try again.')
       setIsLoading(false)
     }
   }
+
+  // Handle success popup and redirect
+  useEffect(() => {
+    if (showSuccessPopup) {
+      const timer = setTimeout(() => {
+        router.push('/?deleted=true&message=Your%20account%20has%20been%20successfully%20deleted.')
+      }, 3000)
+      
+      return () => clearTimeout(timer)
+    }
+  }, [showSuccessPopup, router])
 
   const consequences = [
     {
@@ -110,6 +122,39 @@ export default function DeleteAccountPage() {
         ? 'bg-gradient-to-br from-gray-900 via-red-900 to-gray-900' 
         : 'bg-gradient-to-br from-slate-50 via-red-50 to-slate-50'
     }`}>
+      {/* Success Popup */}
+      {showSuccessPopup && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
+          <div className={`relative rounded-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-100 ${
+            darkMode 
+              ? 'bg-gray-800 border border-gray-700' 
+              : 'bg-white border border-slate-200'
+          }`}>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </div>
+              <h3 className={`text-2xl font-bold mb-2 transition-colors duration-200 ${
+                darkMode ? 'text-white' : 'text-slate-900'
+              }`}>
+                Account Deleted!
+              </h3>
+              <p className={`mb-6 transition-colors duration-200 ${
+                darkMode ? 'text-gray-300' : 'text-slate-600'
+              }`}>
+                Your account has been successfully deleted. You will be redirected shortly.
+              </p>
+              <div className="flex justify-center">
+                <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className={`backdrop-blur-sm border-b transition-colors duration-200 ${
         darkMode 

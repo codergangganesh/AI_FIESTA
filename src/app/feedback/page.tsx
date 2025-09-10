@@ -34,6 +34,13 @@ export default function FeedbackPage() {
 
   const supabase = createClient();
 
+  // Handle navigation when user is not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/auth');
+    }
+  }, [user, loading, router]);
+
   // Fetch existing feedback
   useEffect(() => {
     const fetchFeedback = async () => {
@@ -78,8 +85,8 @@ export default function FeedbackPage() {
     );
   }
 
+  // Show nothing while redirecting
   if (!user) {
-    router.push('/auth');
     return null;
   }
 

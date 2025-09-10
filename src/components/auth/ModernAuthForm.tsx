@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Eye, EyeOff, Mail, Lock, User, ArrowRight, Github } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 
@@ -16,10 +16,22 @@ export default function ModernAuthForm() {
   })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
 
   const { signIn, signUp, signInWithGoogle, signInWithGithub } = useAuth()
   const router = useRouter()
   const supabase = createClient()
+  const searchParams = useSearchParams()
+
+  // Check for success message from URL params
+  useEffect(() => {
+    const message = searchParams.get('message')
+    if (message) {
+      setSuccessMessage(decodeURIComponent(message))
+      // Clear the message from URL after displaying
+      window.history.replaceState({}, document.title, '/auth')
+    }
+  }, [searchParams])
 
   const checkEmailExists = async (email: string) => {
     try {
@@ -45,6 +57,7 @@ export default function ModernAuthForm() {
     e.preventDefault()
     setLoading(true)
     setError('')
+    setSuccessMessage('')
 
     try {
       if (isLogin) {
@@ -78,8 +91,14 @@ export default function ModernAuthForm() {
             setError(error.message)
           }
         } else {
-          // After successful signup, redirect to login page
-          router.push('/auth?message=Account%20created%20successfully.%20Please%20sign%20in.')
+          // After successful signup, reset form and show success message
+          setFormData({
+            email: '',
+            password: '',
+            confirmPassword: ''
+          })
+          setIsLogin(true)
+          setSuccessMessage('Account created successfully. Please sign in.')
         }
       }
     } catch (err) {
@@ -92,6 +111,8 @@ export default function ModernAuthForm() {
   const handleGoogleSignIn = async () => {
     try {
       setLoading(true)
+      setError('')
+      setSuccessMessage('')
       await signInWithGoogle()
     } catch (err) {
       setError('Failed to sign in with Google. Please try again.')
@@ -102,6 +123,8 @@ export default function ModernAuthForm() {
   const handleGithubSignIn = async () => {
     try {
       setLoading(true)
+      setError('')
+      setSuccessMessage('')
       await signInWithGithub()
     } catch (err) {
       setError('Failed to sign in with GitHub. Please try again.')
@@ -117,26 +140,15 @@ export default function ModernAuthForm() {
   }
 
   return (
-    <div className="w-full animate-fade-in">
-      {/* Mobile Logo - Only visible on mobile */}
-      <div className="lg:hidden text-center mb-8 animate-float">
-        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl ring-4 ring-blue-400/20">
-          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-          </svg>
-        </div>
-        <h1 className="text-2xl font-bold text-slate-900 mb-1">AI Fiesta</h1>
-        <p className="text-slate-600">Your Journey to AI Excellence</p>
-      </div>
-
+    <div className="w-full">
       {/* Form Header */}
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-slate-900 mb-2 bg-gradient-to-r from-slate-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
+        <h2 className="text-2xl font-bold text-white mb-2">
           {isLogin ? 'Welcome Back!' : 'Join AI Fiesta!'}
         </h2>
-        <p className="text-slate-600">
+        <p className="text-violet-300">
           {isLogin 
-            ? 'Sign in to continue your AI journey with AI Fiesta'
+            ? 'Sign in to continue your AI journey'
             : 'Create your account and start comparing AI models'
           }
         </p>
@@ -144,20 +156,28 @@ export default function ModernAuthForm() {
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Success Message */}
+        {successMessage && (
+          <div className="bg-green-500/20 border border-green-500/30 text-green-200 px-4 py-3 rounded-xl text-sm backdrop-blur-sm">
+            {successMessage}
+          </div>
+        )}
+
+        {/* Error Message */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+          <div className="bg-red-500/20 border border-red-500/30 text-red-200 px-4 py-3 rounded-xl text-sm backdrop-blur-sm">
             {error}
           </div>
         )}
 
         {/* Email Field */}
         <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-2">
+          <label className="block text-sm font-semibold text-violet-200 mb-2">
             Email
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Mail className="h-5 w-5 text-slate-400" />
+              <Mail className="h-5 w-5 text-violet-400" />
             </div>
             <input
               type="email"
@@ -166,19 +186,19 @@ export default function ModernAuthForm() {
               onChange={handleChange}
               placeholder="Enter your email"
               required
-              className="w-full pl-12 pr-4 py-4 bg-slate-900/5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all duration-200 text-slate-900 placeholder:text-slate-500"
+              className="w-full pl-12 pr-4 py-4 bg-black/30 border border-violet-500/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all duration-200 text-white placeholder:text-violet-300/50 backdrop-blur-sm"
             />
           </div>
         </div>
 
         {/* Password Field */}
         <div>
-          <label className="block text-sm font-semibold text-slate-700 mb-2">
+          <label className="block text-sm font-semibold text-violet-200 mb-2">
             Password
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <Lock className="h-5 w-5 text-slate-400" />
+              <Lock className="h-5 w-5 text-violet-400" />
             </div>
             <input
               type={showPassword ? 'text' : 'password'}
@@ -187,12 +207,12 @@ export default function ModernAuthForm() {
               onChange={handleChange}
               placeholder="Enter your password"
               required
-              className="w-full pl-12 pr-12 py-4 bg-slate-900/5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all duration-200 text-slate-900 placeholder:text-slate-500"
+              className="w-full pl-12 pr-12 py-4 bg-black/30 border border-violet-500/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all duration-200 text-white placeholder:text-violet-300/50 backdrop-blur-sm"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-slate-600"
+              className="absolute inset-y-0 right-0 pr-4 flex items-center text-violet-400 hover:text-violet-300"
             >
               {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
             </button>
@@ -202,12 +222,12 @@ export default function ModernAuthForm() {
         {/* Confirm Password Field - Only for Signup */}
         {!isLogin && (
           <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
+            <label className="block text-sm font-semibold text-violet-200 mb-2">
               Confirm Password
             </label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Lock className="h-5 w-5 text-slate-400" />
+                <Lock className="h-5 w-5 text-violet-400" />
               </div>
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -216,7 +236,7 @@ export default function ModernAuthForm() {
                 onChange={handleChange}
                 placeholder="Confirm your password"
                 required
-                className="w-full pl-12 pr-4 py-4 bg-slate-900/5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all duration-200 text-slate-900 placeholder:text-slate-500"
+                className="w-full pl-12 pr-4 py-4 bg-black/30 border border-violet-500/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500 transition-all duration-200 text-white placeholder:text-violet-300/50 backdrop-blur-sm"
               />
             </div>
           </div>
@@ -226,7 +246,7 @@ export default function ModernAuthForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full flex items-center justify-center space-x-3 px-6 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98]"
+          className="w-full flex items-center justify-center space-x-3 px-6 py-4 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 text-white rounded-xl font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-violet-500/30 transform hover:scale-[1.02] active:scale-[0.98] border border-violet-500/50"
         >
           {loading ? (
             <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
@@ -241,10 +261,10 @@ export default function ModernAuthForm() {
         {/* Divider */}
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-200" />
+            <div className="w-full border-t border-violet-500/30" />
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-4 bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 text-slate-500 font-medium">
+            <span className="px-4 bg-black/30 text-violet-300 font-medium backdrop-blur-sm">
               OR CONTINUE WITH
             </span>
           </div>
@@ -256,7 +276,7 @@ export default function ModernAuthForm() {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={loading}
-            className="flex items-center justify-center space-x-2 px-4 py-3 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center justify-center space-x-2 px-4 py-3 bg-black/30 border border-violet-500/30 rounded-xl hover:bg-violet-900/20 transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -264,37 +284,36 @@ export default function ModernAuthForm() {
               <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
               <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
             </svg>
-            <span className="text-slate-700 font-medium">Google</span>
+            <span className="text-violet-200 font-medium">Google</span>
           </button>
 
           <button
             type="button"
             onClick={handleGithubSignIn}
             disabled={loading}
-            className="flex items-center justify-center space-x-2 px-4 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center justify-center space-x-2 px-4 py-3 bg-black/30 border border-violet-500/30 rounded-xl hover:bg-violet-900/20 transition-all duration-200 hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed backdrop-blur-sm"
           >
-            <Github className="w-5 h-5" />
-            <span className="font-medium">GitHub</span>
+            <Github className="w-5 h-5 text-violet-300" />
+            <span className="text-violet-200 font-medium">GitHub</span>
           </button>
         </div>
 
         {/* Toggle Login/Signup */}
         <div className="text-center">
-          <p className="text-slate-600">
+          <p className="text-violet-300/80">
             {isLogin ? 'New to AI Fiesta? Join our community of learners and' : 'Already have an account?'}{' '}
             <button
               type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-blue-600 hover:text-blue-700 font-semibold hover:underline transition-colors duration-200"
+              onClick={() => {
+                setIsLogin(!isLogin)
+                setError('')
+                setSuccessMessage('')
+              }}
+              className="text-violet-400 hover:text-violet-300 font-semibold hover:underline transition-colors duration-200"
             >
               {isLogin ? 'start your AI journey today!' : 'Sign in here'}
             </button>
           </p>
-          {isLogin && (
-            <p className="text-slate-600 mt-1">
-              {isLogin ? 'Create an account' : 'Sign in to your account'}
-            </p>
-          )}
         </div>
       </form>
     </div>
