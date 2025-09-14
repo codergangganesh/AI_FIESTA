@@ -25,14 +25,14 @@ export default function Navigation() {
     <nav className="bg-white border-r border-gray-200 w-64 min-h-screen fixed left-0 top-0 z-40">
       <div className="flex flex-col h-full">
         {/* Logo */}
-        <div className="flex items-center space-x-3 p-6 border-b border-gray-200">
+        <Link href="/chat" className="flex items-center space-x-3 p-6 border-b border-gray-200">
           <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
             <Brain className="w-6 h-6 text-white" />
           </div>
           <span className="text-xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">
             AI Fiesta
           </span>
-        </div>
+        </Link>
 
         {/* Navigation Items */}
         <div className="flex-1 overflow-y-auto py-6">

@@ -1,4 +1,18 @@
-'use client'
+// ... existing code ...
+          {/* Logo + App Name */}
+          <Link href="/chat" className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+              <Brain className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h1 className={`text-xl font-bold ${
+                darkMode ? 'text-white' : 'text-gray-900'
+              }`}>
+                AI Fiesta
+              </h1>
+            </div>
+          </Link>
+// ... existing code ...'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -71,7 +85,7 @@ export default function Header({ darkMode, toggleDarkMode }: HeaderProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo + App Name */}
-          <div className="flex items-center space-x-3">
+          <Link href="/chat" className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
               <Brain className="w-6 h-6 text-white" />
             </div>
@@ -81,13 +95,8 @@ export default function Header({ darkMode, toggleDarkMode }: HeaderProps) {
               }`}>
                 AI Fiesta
               </h1>
-              <p className={`text-xs ${
-                darkMode ? 'text-gray-400' : 'text-gray-500'
-              }`}>
-                Compare AI Models
-              </p>
             </div>
-          </div>
+          </Link>
 
           {/* Center Navigation */}
           <nav className="hidden md:flex items-center space-x-1 relative">

@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AI Fiesta - Compare AI Models Side by Side",
+  title: "AI Fiesta",
   description: "Compare responses from multiple AI models simultaneously. Get insights from GPT-5, Claude 4, Gemini 2.5, and more in one place.",
 };
 
