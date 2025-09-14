@@ -22,6 +22,7 @@ interface ChatSession {
   message: string
   responses: ChatResponse[]
   timestamp: Date
+  selectedModels: string[]  // Store selected models per session
   bestResponse?: string
 }
 
@@ -29,13 +30,46 @@ export default function ModernChatInterface() {
   const { darkMode, toggleDarkMode } = useDarkMode()
   const { user } = useAuth()
   const [message, setMessage] = useState('')
-  const [currentSession, setCurrentSession] = useState<ChatSession | null>(null)
+  const [chatSessions, setChatSessions] = useState<ChatSession[]>([])
+  const [currentSessionId, setCurrentSessionId] = useState<string | null>(null)
   const [loading, setLoading] = useState<string[]>([])
   const [selectedModels, setSelectedModels] = useState<string[]>(
     AI_MODELS.slice(0, 3).map(model => model.id)
   )
   const [showModelSelector, setShowModelSelector] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Load chat sessions from localStorage on component mount
+  useEffect(() => {
+    const savedSessions = localStorage.getItem('aiFiestaChatSessions')
+    if (savedSessions) {
+      try {
+        const parsedSessions = JSON.parse(savedSessions)
+        // Convert timestamp strings back to Date objects
+        const sessionsWithDates = parsedSessions.map((session: any) => ({
+          ...session,
+          timestamp: new Date(session.timestamp),
+          selectedModels: session.selectedModels || [] // Ensure selectedModels exists
+        }))
+        setChatSessions(sessionsWithDates)
+      } catch (e) {
+        console.error('Failed to parse saved sessions:', e)
+      }
+    }
+  }, [])
+
+  // Save chat sessions to localStorage whenever they change
+  useEffect(() => {
+    if (chatSessions.length > 0) {
+      // When saving, convert Date objects to strings
+      const sessionsToSave = chatSessions.map(session => ({
+        ...session,
+        timestamp: session.timestamp.toISOString(),
+        selectedModels: session.selectedModels
+      }))
+      localStorage.setItem('aiFiestaChatSessions', JSON.stringify(sessionsToSave))
+    }
+  }, [chatSessions])
 
   useEffect(() => {
     // Auto-resize textarea
@@ -46,7 +80,7 @@ export default function ModernChatInterface() {
   }, [message])
 
   const handleNewChat = () => {
-    setCurrentSession(null)
+    setCurrentSessionId(null)
     setMessage('')
     setLoading([])
   }
@@ -67,15 +101,19 @@ export default function ModernChatInterface() {
     const currentMsg = message.trim()
     setLoading(selectedModels)
     
-    // Create new session
+    // Create new session with current selected models
+    const newSessionId = Date.now().toString()
     const newSession: ChatSession = {
-      id: Date.now().toString(),
+      id: newSessionId,
       message: currentMsg,
       responses: [],
-      timestamp: new Date()
+      timestamp: new Date(),
+      selectedModels: [...selectedModels]  // Store the models selected for this session
     }
     
-    setCurrentSession(newSession)
+    // Add to sessions list
+    setChatSessions(prev => [...prev, newSession])
+    setCurrentSessionId(newSessionId)
     setMessage('')
 
     try {
@@ -97,10 +135,11 @@ export default function ModernChatInterface() {
       const data = await response.json()
       
       // Update session with responses
-      setCurrentSession(prev => prev ? {
-        ...prev,
-        responses: data.responses
-      } : null)
+      setChatSessions(prev => prev.map(session => 
+        session.id === newSessionId 
+          ? { ...session, responses: data.responses } 
+          : session
+      ))
       
       // Save conversation to history
       try {
@@ -132,10 +171,11 @@ export default function ModernChatInterface() {
         success: false
       }))
       
-      setCurrentSession(prev => prev ? {
-        ...prev,
-        responses: errorResponses
-      } : null)
+      setChatSessions(prev => prev.map(session => 
+        session.id === newSessionId 
+          ? { ...session, responses: errorResponses } 
+          : session
+      ))
     } finally {
       setLoading([])
     }
@@ -149,23 +189,26 @@ export default function ModernChatInterface() {
   }
 
   const handleMarkBest = (modelId: string) => {
-    setCurrentSession(prev => {
-      if (!prev) return null
-      const newBestResponse = prev.bestResponse === modelId ? undefined : modelId
-      return {
-        ...prev,
-        bestResponse: newBestResponse
+    if (!currentSessionId) return
+    
+    setChatSessions(prev => prev.map(session => {
+      if (session.id === currentSessionId) {
+        const newBestResponse = session.bestResponse === modelId ? undefined : modelId
+        return {
+          ...session,
+          bestResponse: newBestResponse
+        }
       }
-    })
+      return session
+    }))
   }
 
   const getModelById = (modelId: string) => {
     return AI_MODELS.find(model => model.id === modelId)
   }
 
-  const getResponseForModel = (modelId: string) => {
-    return currentSession?.responses.find(response => response.model === modelId)
-  }
+  // Get current session
+  const currentSession = chatSessions.find(session => session.id === currentSessionId) || null
 
   const suggestedPrompts = [
     "Explain quantum computing in simple terms",
@@ -346,84 +389,97 @@ export default function ModernChatInterface() {
 
         {/* Chat Content */}
         <div className="flex-1 overflow-hidden">
-          {currentSession ? (
+          {chatSessions.length > 0 ? (
             <div className="h-full flex flex-col">
-              {/* User Message */}
-              <div className={`border-b p-6 transition-colors duration-200 ${
-                darkMode 
-                  ? 'border-gray-700/30 bg-gray-800/30' 
-                  : 'border-slate-200/30 bg-white/30'
-              }`}>
-                <div className="max-w-4xl mx-auto">
-                  <div className="flex items-start space-x-4">
-                    <div className={`w-8 h-8 bg-gradient-to-br rounded-lg flex items-center justify-center transition-colors duration-200 ${
-                      darkMode 
-                        ? 'from-blue-600 to-purple-600' 
-                        : 'from-slate-600 to-slate-700'
-                    }`}>
-                      <span className="text-white text-sm font-bold">
-                        {user?.user_metadata?.full_name 
-                          ? user.user_metadata.full_name.charAt(0).toUpperCase() 
-                          : user?.email?.charAt(0).toUpperCase() || 'U'}
-                      </span>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2">
-                        <p className={`font-medium transition-colors duration-200 ${
-                          darkMode ? 'text-white' : 'text-slate-900'
-                        }`}>
-                          {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'}
-                        </p>
-                        <span className={`text-xs px-2 py-1 rounded-full transition-colors duration-200 ${
-                          darkMode 
-                            ? 'bg-blue-900/30 text-blue-400' 
-                            : 'bg-blue-100 text-blue-700'
-                        }`}>
-                          You
-                        </span>
-                      </div>
-                      <p className={`mt-2 transition-colors duration-200 ${
-                        darkMode ? 'text-gray-200' : 'text-slate-800'
-                      }`}>{currentSession.message}</p>
-                      <p className={`text-xs mt-1 transition-colors duration-200 ${
-                        darkMode ? 'text-gray-400' : 'text-slate-500'
-                      }`}>
-                        {currentSession.timestamp.toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* AI Responses */}
+              {/* All Chat Sessions */}
               <div className="flex-1 overflow-y-auto p-6">
-                <div className={`grid gap-6 max-w-7xl mx-auto ${
-                  selectedModels.length === 1 ? 'grid-cols-1 max-w-4xl' :
-                  selectedModels.length === 2 ? 'grid-cols-1 lg:grid-cols-2' :
-                  selectedModels.length === 3 ? 'grid-cols-1 lg:grid-cols-3' :
-                  selectedModels.length <= 4 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4' :
-                  selectedModels.length <= 6 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' :
-                  'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
-                }`}>
-                  {selectedModels.map((modelId) => {
-                    const model = getModelById(modelId)
-                    const response = getResponseForModel(modelId)
-                    const isLoading = loading.includes(modelId)
-                    
-                    if (!model) return null
+                <div className="max-w-7xl mx-auto space-y-8">
+                  {chatSessions.map((session) => (
+                    <div key={session.id} className={`rounded-2xl border transition-colors duration-200 ${
+                      darkMode 
+                        ? 'bg-gray-800/30 border-gray-700/30' 
+                        : 'bg-white/30 border-slate-200/30'
+                    }`}>
+                      {/* User Message */}
+                      <div className={`border-b p-6 transition-colors duration-200 ${
+                        darkMode 
+                          ? 'border-gray-700/30' 
+                          : 'border-slate-200/30'
+                      }`}>
+                        <div className="max-w-4xl mx-auto">
+                          <div className="flex items-start space-x-4">
+                            <div className={`w-8 h-8 bg-gradient-to-br rounded-lg flex items-center justify-center transition-colors duration-200 ${
+                              darkMode 
+                                ? 'from-blue-600 to-purple-600' 
+                                : 'from-slate-600 to-slate-700'
+                            }`}>
+                              <span className="text-white text-sm font-bold">
+                                {user?.user_metadata?.full_name 
+                                  ? user.user_metadata.full_name.charAt(0).toUpperCase() 
+                                  : user?.email?.charAt(0).toUpperCase() || 'U'}
+                              </span>
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2">
+                                <p className={`font-medium transition-colors duration-200 ${
+                                  darkMode ? 'text-white' : 'text-slate-900'
+                                }`}>
+                                  {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'}
+                                </p>
+                                <span className={`text-xs px-2 py-1 rounded-full transition-colors duration-200 ${
+                                  darkMode 
+                                    ? 'bg-blue-900/30 text-blue-400' 
+                                    : 'bg-blue-100 text-blue-700'
+                                }`}>
+                                  You
+                                </span>
+                              </div>
+                              <p className={`mt-2 transition-colors duration-200 ${
+                                darkMode ? 'text-gray-200' : 'text-slate-800'
+                              }`}>{session.message}</p>
+                              <p className={`text-xs mt-1 transition-colors duration-200 ${
+                                darkMode ? 'text-gray-400' : 'text-slate-500'
+                              }`}>
+                                {session.timestamp.toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
 
-                    return (
-                      <AIResponseCard
-                        key={modelId}
-                        model={model}
-                        content={response?.content || ''}
-                        loading={isLoading}
-                        error={response?.error}
-                        isBestResponse={currentSession?.bestResponse === modelId}
-                        onMarkBest={() => handleMarkBest(modelId)}
-                      />
-                    )
-                  })}
+                      {/* AI Responses */}
+                      <div className="p-6">
+                        <div className={`grid gap-6 ${
+                          session.selectedModels.length === 1 ? 'grid-cols-1 max-w-4xl' :
+                          session.selectedModels.length === 2 ? 'grid-cols-1 lg:grid-cols-2' :
+                          session.selectedModels.length === 3 ? 'grid-cols-1 lg:grid-cols-3' :
+                          session.selectedModels.length <= 4 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-4' :
+                          session.selectedModels.length <= 6 ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' :
+                          'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
+                        }`}>
+                          {session.selectedModels.map((modelId) => {
+                            const model = getModelById(modelId)
+                            const response = session.responses.find(r => r.model === modelId)
+                            const isLoading = loading.includes(modelId) && session.id === currentSessionId
+                            
+                            if (!model) return null
+
+                            return (
+                              <AIResponseCard
+                                key={`${session.id}-${modelId}`}
+                                model={model}
+                                content={response?.content || ''}
+                                loading={isLoading}
+                                error={response?.error}
+                                isBestResponse={session.bestResponse === modelId}
+                                onMarkBest={() => handleMarkBest(modelId)}
+                              />
+                            )
+                          })}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
