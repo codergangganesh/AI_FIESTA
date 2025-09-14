@@ -36,9 +36,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Get initial user
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUser(user);
-      setLoading(false);
+      try {
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error) {
+          console.error('Error getting user:', error);
+          // Handle network errors specifically
+          if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            console.error('Network connectivity issue detected. Please check your internet connection and Supabase configuration.');
+          }
+        }
+        setUser(user);
+      } catch (error: any) {
+        console.error('Unexpected error getting user:', error);
+        // Handle network errors specifically
+        if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+          console.error('Network connectivity issue detected. Please check your internet connection and Supabase configuration.');
+        }
+      } finally {
+        setLoading(false);
+      }
     };
 
     getUser();

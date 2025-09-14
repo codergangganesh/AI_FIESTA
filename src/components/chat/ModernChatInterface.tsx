@@ -80,9 +80,14 @@ export default function ModernChatInterface() {
   }, [message])
 
   const handleNewChat = () => {
+    // Clear current session data
     setCurrentSessionId(null)
     setMessage('')
     setLoading([])
+    
+    // Clear all chat history from localStorage for a fresh start
+    localStorage.removeItem('aiFiestaChatSessions')
+    setChatSessions([])
   }
 
   const handleModelToggle = (modelId: string) => {
