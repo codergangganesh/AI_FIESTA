@@ -1,11 +1,10 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { User, Settings, LogOut, Trash2, ChevronUp, Moon, Sun, DollarSign, Activity, Crown } from 'lucide-react'
+import { User, Settings, LogOut, ChevronUp, Moon, Sun, DollarSign, Activity, Crown } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import AccountSettingsModal from './AccountSettingsModal'
-import DeleteAccountModal from './DeleteAccountModal'
 
 interface ProfileDropdownProps {
   darkMode?: boolean
@@ -88,11 +87,6 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
   const handleUsage = () => {
     setIsOpen(false)
     router.push('/usage')
-  }
-
-  const handleDeleteAccount = () => {
-    setIsOpen(false)
-    router.push('/delete-account')
   }
 
   const getUserInitials = () => {
@@ -275,18 +269,7 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
                 <span className="font-medium">Sign Out</span>
               </button>
 
-              {/* Delete Account */}
-              <button
-                onClick={handleDeleteAccount}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
-                  darkMode 
-                    ? 'hover:bg-red-900/20 text-red-400 hover:text-red-300' 
-                    : 'hover:bg-red-50 text-red-600 hover:text-red-700'
-                }`}
-              >
-                <Trash2 className="w-5 h-5" />
-                <span className="font-medium">Delete Account</span>
-              </button>
+              {/* Delete Account - REMOVED */}
             </div>
           </div>
         )}
@@ -299,17 +282,7 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
         darkMode={darkMode}
       />
 
-      {/* Delete Account Confirmation Modal */}
-      <DeleteAccountModal
-        isOpen={showDeleteConfirm}
-        onClose={() => setShowDeleteConfirm(false)}
-        onConfirm={() => {
-          setShowDeleteConfirm(false)
-          // Handle account deletion
-          console.log('Account deletion confirmed')
-        }}
-        darkMode={darkMode}
-      />
+      {/* Delete Account Confirmation Modal - REMOVED */}
     </>
   )
 }

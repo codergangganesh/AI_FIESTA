@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ArrowLeft, User, Lock, Mail, Trash2, Moon, Sun, Bell, Shield, CreditCard, Database, Settings as SettingsIcon } from 'lucide-react'
+import { ArrowLeft, User, Lock, Mail, Moon, Sun, Bell, Shield, CreditCard, Database, Settings as SettingsIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { useDarkMode } from '@/contexts/DarkModeContext'
@@ -47,19 +47,45 @@ export default function AccountSettingsPage() {
   }
 
   const handleChangePassword = async () => {
+    if (!formData.newPassword) {
+      setMessage('Please enter a new password.')
+      return
+    }
+    
     if (formData.newPassword !== formData.confirmPassword) {
       setMessage('New passwords do not match.')
       return
     }
     
+    if (formData.newPassword.length < 6) {
+      setMessage('New password must be at least 6 characters.')
+      return
+    }
+    
     setIsLoading(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Update password directly without verification since account deletion is removed
+      const response = await fetch('/api/update-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          newPassword: formData.newPassword
+        })
+      })
+      
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to update password')
+      }
+      
       setMessage('Password changed successfully!')
       setFormData(prev => ({ ...prev, currentPassword: '', newPassword: '', confirmPassword: '' }))
       setTimeout(() => setMessage(''), 3000)
-    } catch (error) {
-      setMessage('Failed to change password. Please try again.')
+    } catch (error: any) {
+      console.error('Error changing password:', error)
+      setMessage(error.message || 'Failed to change password. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -108,12 +134,6 @@ export default function AccountSettingsPage() {
       label: 'Data & Privacy', 
       icon: Database,
       description: 'Export data and privacy controls'
-    },
-    { 
-      id: 'delete', 
-      label: 'Delete Account', 
-      icon: Trash2,
-      description: 'Permanently delete your account'
     }
   ]
 
@@ -570,48 +590,7 @@ export default function AccountSettingsPage() {
                   </div>
                 )}
 
-                {/* Delete Account Tab */}
-                {activeTab === 'delete' && (
-                  <div className="space-y-8">
-                    <div className="border-b border-current border-opacity-10 pb-6">
-                      <h2 className={`text-2xl font-bold transition-colors duration-200 ${
-                        darkMode ? 'text-white' : 'text-slate-900'
-                      }`}>
-                        Delete Account
-                      </h2>
-                      <p className={`mt-2 transition-colors duration-200 ${
-                        darkMode ? 'text-gray-400' : 'text-slate-600'
-                      }`}>
-                        Permanently delete your account and all associated data
-                      </p>
-                    </div>
-                    
-                    <div className={`p-6 rounded-xl border transition-colors duration-200 ${
-                      darkMode 
-                        ? 'bg-red-900/20 border-red-700/50' 
-                        : 'bg-red-50 border-red-200'
-                    }`}>
-                      <h3 className={`font-semibold mb-2 transition-colors duration-200 ${
-                        darkMode ? 'text-red-400' : 'text-red-700'
-                      }`}>
-                        Warning: This action cannot be undone
-                      </h3>
-                      <p className={`mb-4 transition-colors duration-200 ${
-                        darkMode ? 'text-red-300' : 'text-red-600'
-                      }`}>
-                        Deleting your account will permanently remove all your data, conversations, and settings. This action is irreversible.
-                      </p>
-                      
-                      <Link
-                        href="/delete-account"
-                        className="inline-flex items-center space-x-2 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        <span>Proceed to Delete Account</span>
-                      </Link>
-                    </div>
-                  </div>
-                )}
+                {/* Delete Account Tab - REMOVED */}
               </div>
             </div>
           </div>

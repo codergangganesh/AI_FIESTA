@@ -1,18 +1,16 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 
 export default function AuthCallback() {
   const router = useRouter()
   const { user, loading } = useAuth()
-  const [checking, setChecking] = useState(true)
 
   useEffect(() => {
     // Wait for auth state to be determined
     if (!loading) {
-      setChecking(false)
       // If user is authenticated, redirect to chat
       if (user) {
         router.push('/chat')
@@ -29,7 +27,6 @@ export default function AuthCallback() {
         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
         <h2 className="text-2xl font-bold text-gray-800 mb-2">Completing Authentication</h2>
         <p className="text-gray-600">Please wait while we complete your sign in...</p>
-        {checking && <p className="text-gray-500 mt-2">Checking authentication status...</p>}
       </div>
     </div>
   )

@@ -1,0 +1,35 @@
+import { NextResponse } from 'next/server'
+import { createServerSupabaseClient } from '@/utils/supabase/server'
+
+export async function GET() {
+  try {
+    const supabase = createServerSupabaseClient()
+    
+    // Test if we can access the oauth_user_passwords table
+    const { data, error } = await supabase
+      .from('oauth_user_passwords')
+      .select('user_id')
+      .limit(1)
+    
+    if (error) {
+      return NextResponse.json({ 
+        success: false, 
+        error: error.message,
+        tableExists: false
+      })
+    }
+    
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Table exists and is accessible',
+      tableExists: true,
+      rowCount: data?.length || 0
+    })
+  } catch (error: any) {
+    return NextResponse.json({ 
+      success: false, 
+      error: error.message,
+      tableExists: false
+    })
+  }
+}
