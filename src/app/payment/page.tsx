@@ -55,7 +55,6 @@ const pricingPlans: PricingPlan[] = [
       { text: '5,000 API calls per month', icon: Globe },
       { text: 'Advanced metrics & analytics', icon: TrendingUp },
       { text: 'Export results (CSV, JSON)', icon: GitCompare },
-      { text: 'Hyperparameter tuning', icon: Sparkles },
       { text: 'Email support', icon: Headphones },
     ]
   },
@@ -71,7 +70,6 @@ const pricingPlans: PricingPlan[] = [
       { text: '50,000 API calls per month', icon: Globe },
       { text: 'Advanced metrics & analytics', icon: TrendingUp },
       { text: 'Export results (All formats)', icon: GitCompare },
-      { text: 'Hyperparameter tuning', icon: Sparkles },
       { text: 'Model explainability', icon: Zap },
       { text: 'Custom models', icon: Crown },
       { text: '24/7 priority support', icon: Headphones },

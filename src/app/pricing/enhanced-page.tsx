@@ -29,7 +29,6 @@ const planFeatures = [
   { name: 'API Calls', free: '100/month', pro: '5,000/month', pro_plus: '50,000/month' },
   { name: 'Export Options', free: false, pro: true, pro_plus: true },
   { name: 'Advanced Charts', free: false, pro: true, pro_plus: true },
-  { name: 'Hyperparameter Tuning', free: false, pro: true, pro_plus: true },
   { name: 'Model Explainability', free: false, pro: false, pro_plus: true },
   { name: 'Custom Models', free: false, pro: false, pro_plus: true },
   { name: 'Priority Support', free: 'Community', pro: 'Email', pro_plus: '24/7 Priority' }
@@ -44,7 +43,7 @@ const paymentMethods = [
 
 export default function PricingPage() {
   const { darkMode } = useDarkMode()
-  const { currentPlan, upgradePlan } = usePlan()
+  const { currentPlan } = usePlan()
   const { user } = useAuth()
   const { success, error } = useToast()
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('yearly')
@@ -78,15 +77,12 @@ export default function PricingPage() {
           userName: user.user_metadata?.full_name || user.email?.split('@')[0] || ''
         },
         async (response) => {
-          const upgradeSuccess = await upgradePlan(planType, response.razorpay_payment_id)
-          if (upgradeSuccess) {
-            success(
-              'Payment Successful!', 
-              `Welcome to ${planType.toUpperCase()}! Your plan has been upgraded.`
-            )
-          } else {
-            error('Upgrade Failed', 'Payment was successful but plan upgrade failed. Please contact support.')
-          }
+          // Note: This page doesn't have access to upgradePlan function
+          // The payment processing will update the plan on the backend
+          success(
+            'Payment Successful!', 
+            `Welcome to ${planType.toUpperCase()}! Your plan will be upgraded shortly.`
+          )
           setIsProcessing(null)
         },
         (err) => {

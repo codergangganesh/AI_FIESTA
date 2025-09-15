@@ -74,13 +74,6 @@ export default function AdvancedSidebar({ className = '' }: AdvancedSidebarProps
       description: 'Charts & Graphs'
     },
     {
-      id: 'tuning',
-      label: 'Hyperparameter Tuning',
-      icon: TrendingUp,
-      href: '/hyperparameter-tuning',
-      description: 'AutoML & Optimization'
-    },
-    {
       id: 'explainability',
       label: 'Explainability',
       icon: Lightbulb,

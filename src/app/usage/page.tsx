@@ -120,14 +120,6 @@ export default function UsagePage() {
           status: 'success'
         },
         {
-          id: '3',
-          type: 'Hyperparameter Tuning',
-          description: 'Grid search optimization for classification model',
-          timestamp: '1 hour ago',
-          cost: 0.25,
-          status: 'pending'
-        },
-        {
           id: '4',
           type: 'API Call',
           description: 'Batch inference on 1,000 text samples',

@@ -53,25 +53,6 @@ CREATE TABLE IF NOT EXISTS model_comparisons (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Hyperparameter Tuning Jobs Table
-CREATE TABLE IF NOT EXISTS hyperparameter_jobs (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  name VARCHAR(255) NOT NULL,
-  model_name VARCHAR(100) NOT NULL,
-  parameters JSONB NOT NULL, -- Parameter configuration
-  search_strategy VARCHAR(50) DEFAULT 'grid_search' CHECK (search_strategy IN ('grid_search', 'random_search', 'bayesian')),
-  status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'running', 'completed', 'failed', 'cancelled')),
-  progress INTEGER DEFAULT 0 CHECK (progress >= 0 AND progress <= 100),
-  best_score DECIMAL(5, 4),
-  best_parameters JSONB,
-  total_trials INTEGER DEFAULT 0,
-  completed_trials INTEGER DEFAULT 0,
-  results JSONB, -- Trial results and metrics
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
 -- Model Explainability Results Table
 CREATE TABLE IF NOT EXISTS explainability_results (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -199,8 +180,6 @@ CREATE INDEX IF NOT EXISTS idx_payment_history_subscription_id ON payment_histor
 CREATE INDEX IF NOT EXISTS idx_payment_history_customer_id ON payment_history(customer_id);
 CREATE INDEX IF NOT EXISTS idx_model_comparisons_user_id ON model_comparisons(user_id);
 CREATE INDEX IF NOT EXISTS idx_model_comparisons_status ON model_comparisons(status);
-CREATE INDEX IF NOT EXISTS idx_hyperparameter_jobs_user_id ON hyperparameter_jobs(user_id);
-CREATE INDEX IF NOT EXISTS idx_hyperparameter_jobs_status ON hyperparameter_jobs(status);
 CREATE INDEX IF NOT EXISTS idx_explainability_results_user_id ON explainability_results(user_id);
 CREATE INDEX IF NOT EXISTS idx_dataset_analyses_user_id ON dataset_analyses(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_settings_user_id ON user_settings(user_id);
@@ -215,7 +194,6 @@ CREATE INDEX IF NOT EXISTS idx_billing_history_user_id ON billing_history(user_i
 ALTER TABLE user_plans ENABLE ROW LEVEL SECURITY;
 ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE model_comparisons ENABLE ROW LEVEL SECURITY;
-ALTER TABLE hyperparameter_jobs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE explainability_results ENABLE ROW LEVEL SECURITY;
 ALTER TABLE dataset_analyses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_settings ENABLE ROW LEVEL SECURITY;
@@ -227,7 +205,6 @@ ALTER TABLE billing_history ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can access their own plan" ON user_plans FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "Users can access their own payments" ON payments FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "Users can access their own comparisons" ON model_comparisons FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "Users can access their own tuning jobs" ON hyperparameter_jobs FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "Users can access their own explainability results" ON explainability_results FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "Users can access their own dataset analyses" ON dataset_analyses FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "Users can access their own settings" ON user_settings FOR ALL USING (auth.uid() = user_id);
@@ -334,6 +311,5 @@ $$ LANGUAGE plpgsql;
 -- Add triggers for tables with updated_at columns
 CREATE TRIGGER update_user_plans_updated_at BEFORE UPDATE ON user_plans FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_model_comparisons_updated_at BEFORE UPDATE ON model_comparisons FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER update_hyperparameter_jobs_updated_at BEFORE UPDATE ON hyperparameter_jobs FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_dataset_analyses_updated_at BEFORE UPDATE ON dataset_analyses FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_user_settings_updated_at BEFORE UPDATE ON user_settings FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();

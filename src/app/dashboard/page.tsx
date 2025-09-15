@@ -101,13 +101,6 @@ export default function DashboardPage() {
           status: 'success'
         },
         {
-          id: '3',
-          type: 'Hyperparameter Tuning',
-          description: 'Running grid search optimization',
-          timestamp: '1 hour ago',
-          status: 'pending'
-        },
-        {
           id: '4',
           type: 'Model Export',
           description: 'Downloaded comparison report for project X',
@@ -348,8 +341,7 @@ export default function DashboardPage() {
                   {[
                     { label: 'New Comparison', href: '/chat', icon: GitCompare },
                     { label: 'Analyze Dataset', href: '/dataset-analysis', icon: Database },
-                    { label: 'View Charts', href: '/visualization', icon: BarChart3 },
-                    { label: 'Tune Parameters', href: '/hyperparameter-tuning', icon: TrendingUp }
+                    { label: 'View Charts', href: '/visualization', icon: BarChart3 }
                   ].map((action, index) => {
                     const Icon = action.icon
                     return (
