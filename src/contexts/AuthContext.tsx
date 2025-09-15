@@ -12,6 +12,7 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   signInWithGithub: () => Promise<void>;
+  deleteAccount: (password: string) => Promise<{ error?: { message: string } }>;
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -22,6 +23,7 @@ export const AuthContext = createContext<AuthContextType>({
   signOut: async () => {},
   signInWithGoogle: async () => {},
   signInWithGithub: async () => {},
+  deleteAccount: async () => ({ error: { message: 'Not implemented' } }),
 });
 
 export function useAuth() {
@@ -32,6 +34,88 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
+
+  // Define deleteAccount inside AuthProvider to have access to supabase client
+  const deleteAccount = async (password: string) => {
+    try {
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (!user) {
+        if (userError) {
+          console.error('Error getting user:', userError);
+        }
+        return { error: new Error('User not authenticated') };
+      }
+
+      // First, delete all user data from the database
+      const { error: deleteDataError } = await supabase
+        .from('conversations')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (deleteDataError) {
+        console.error('Error deleting user data:', deleteDataError);
+        return { error: deleteDataError };
+      }
+
+      // For password verification, we'll sign in first to verify the password
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email!,
+        password,
+      });
+
+      if (signInError) {
+        console.error('Password verification failed:', signInError);
+        return { error: new Error('Incorrect password') };
+      }
+
+      // First delete the password data from oauth_user_passwords table
+      const { error: deletePasswordError } = await supabase
+        .from('oauth_user_passwords')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (deletePasswordError) {
+        console.error('Error deleting password data:', deletePasswordError);
+        return { error: deletePasswordError };
+      }
+
+      // Now update the profiles table to mark as deleted
+      // First try updating the deleted_at field
+      const { error: updateDeletedAtError } = await supabase
+        .from('profiles')
+        .update({
+          deleted_at: new Date().toISOString(),
+        })
+        .eq('id', user.id);
+
+      if (updateDeletedAtError) {
+        console.error('Error updating deleted_at field:', updateDeletedAtError);
+        return { error: updateDeletedAtError };
+      }
+
+      // Then update the email to avoid conflicts
+      const { error: updateEmailError } = await supabase
+        .from('profiles')
+        .update({
+          email: `${user.email}_deleted_${Date.now()}`
+        })
+        .eq('id', user.id);
+
+      if (updateEmailError) {
+        console.error('Error updating email:', updateEmailError);
+        return { error: updateEmailError };
+      }
+
+      // Sign out the user
+      await signOut();
+      
+      return {};
+    } catch (error) {
+      console.error('Unexpected error during account deletion:', error);
+      return { error: error instanceof Error ? error : new Error('Unknown error') };
+    }
+  };
 
   useEffect(() => {
     // Get initial user
@@ -141,6 +225,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // Always clear the user state regardless of Supabase response
       setUser(null);
+      
+      // Clear chat sessions from localStorage
+      localStorage.removeItem('aiFiestaChatSessions');
     } catch (error: any) {
       console.error('Unexpected error during sign out:', error);
       
@@ -151,6 +238,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // Even if there's an error, clear the user state
       setUser(null);
+      
+      // Clear chat sessions from localStorage
+      localStorage.removeItem('aiFiestaChatSessions');
     } finally {
       // Redirect to auth page to ensure clean state
       if (typeof window !== 'undefined') {
@@ -229,6 +319,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signOut,
     signInWithGoogle,
     signInWithGithub,
+    deleteAccount,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

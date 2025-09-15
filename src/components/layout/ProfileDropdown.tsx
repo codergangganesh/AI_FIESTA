@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { User, Settings, LogOut, ChevronUp, Moon, Sun, DollarSign, Activity, Crown, Trash2 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
+import DeleteAccountDialog from '@/components/auth/DeleteAccountDialog'
 
 interface ProfileDropdownProps {
   darkMode?: boolean
@@ -11,12 +12,11 @@ interface ProfileDropdownProps {
 }
 
 export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: ProfileDropdownProps) {
-  const { user, signOut } = useAuth()
+  const { user, signOut, deleteAccount } = useAuth() // Now properly typed
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
-  const [isHovered, setIsHovered] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -28,9 +28,6 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
     document.addEventListener('mousedown', handleClickOutside)
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current)
-      }
     }
   }, [])
 
@@ -47,34 +44,19 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
   }
 
   const handleMouseEnter = () => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-    }
-    setIsHovered(true)
     setIsOpen(true)
   }
 
   const handleMouseLeave = () => {
-    setIsHovered(false)
-    timeoutRef.current = setTimeout(() => {
-      if (!isHovered) {
-        setIsOpen(false)
-      }
-    }, 150)
+    setIsOpen(false)
   }
 
   const handleDropdownMouseEnter = () => {
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current)
-    }
-    setIsHovered(true)
+    setIsOpen(true)
   }
 
   const handleDropdownMouseLeave = () => {
-    setIsHovered(false)
-    timeoutRef.current = setTimeout(() => {
-      setIsOpen(false)
-    }, 150)
+    setIsOpen(false)
   }
 
   const handleAccountSettings = () => {
@@ -84,7 +66,7 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
 
   const handleDeleteAccount = () => {
     setIsOpen(false)
-    router.push('/delete-account')
+    setIsDeleteDialogOpen(true)
   }
 
   const handlePricing = () => {
@@ -111,10 +93,7 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
     if (user?.user_metadata?.avatar_url) {
       return user.user_metadata.avatar_url
     }
-    // If not, check if there's an avatar_url directly on the user object
-    if (user?.avatar_url) {
-      return user.avatar_url
-    }
+    // If not, return null
     return null
   }
 
@@ -152,15 +131,15 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
           {/* User Info */}
           <div className="hidden sm:block text-left">
             <p className={`text-sm font-medium truncate max-w-24 ${
-              darkMode ? 'text-white' : 'text-slate-900'
-            }`}>
-              {getUserDisplayName()}
-            </p>
-            <p className={`text-xs truncate max-w-24 ${
-              darkMode ? 'text-gray-400' : 'text-slate-500'
-            }`}>
-              {user.email}
-            </p>
+            darkMode ? 'text-white' : 'text-slate-900'
+          }`}>
+            {getUserDisplayName()}
+          </p>
+          <p className={`text-xs truncate max-w-24 ${
+            darkMode ? 'text-gray-400' : 'text-slate-500'
+          }`}>
+            {user.email}
+          </p>
           </div>
           
           <ChevronUp className={`w-4 h-4 transition-transform duration-200 ${
@@ -173,9 +152,10 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
           <div 
             className={`absolute right-0 bottom-full mb-2 w-72 rounded-2xl shadow-2xl border backdrop-blur-xl z-50 overflow-hidden transition-all duration-200 ${
               darkMode 
-                ? 'bg-gray-800/90 border-gray-700' 
-                : 'bg-white/90 border-slate-200/50'
+                ? 'bg-gray-800/95 border-gray-700 text-gray-100 shadow-gray-900/20' 
+                : 'bg-white/95 border-slate-200/50 text-slate-900 shadow-black/10'
             }`}
+            style={{ top: 'auto', bottom: '100%', marginBottom: '0.5rem' }}
             onMouseEnter={handleDropdownMouseEnter}
             onMouseLeave={handleDropdownMouseLeave}
           >
@@ -184,7 +164,9 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
               darkMode ? 'border-gray-700' : 'border-slate-200/50'
             }`}>
               <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                <div className={`w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg ${
+                  darkMode ? 'bg-opacity-90' : 'bg-opacity-100'
+                }`}>
                   {profilePicture ? (
                     <img src={profilePicture} alt="Profile" className="w-full h-full rounded-xl object-cover" />
                   ) : (
@@ -267,8 +249,7 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
                   darkMode 
                     ? 'hover:bg-gray-700/50 text-gray-300 hover:text-white' 
                     : 'hover:bg-slate-100/50 text-slate-700 hover:text-slate-900'
-                }`}
-              >
+                }`}>
                 <Activity className="w-5 h-5" />
                 <span className="font-medium">Usage</span>
               </button>
@@ -280,8 +261,7 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
                   darkMode 
                     ? 'hover:bg-gray-700/50 text-gray-300 hover:text-white' 
                     : 'hover:bg-slate-100/50 text-slate-700 hover:text-slate-900'
-                }`}
-              >
+                }`}>
                 <Settings className="w-5 h-5" />
                 <span className="font-medium">Account Settings</span>
               </button>
@@ -293,8 +273,7 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
                   darkMode 
                     ? 'hover:bg-gray-700/50 text-red-400 hover:text-red-300' 
                     : 'hover:bg-slate-100/50 text-red-600 hover:text-red-700'
-                }`}
-              >
+                }`}>
                 <Trash2 className="w-5 h-5" />
                 <span className="font-medium">Delete Account</span>
               </button>
@@ -306,8 +285,7 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
                   darkMode 
                     ? 'hover:bg-gray-700/50 text-gray-300 hover:text-white' 
                     : 'hover:bg-slate-100/50 text-slate-700 hover:text-slate-900'
-                }`}
-              >
+                }`}>
                 <LogOut className="w-5 h-5" />
                 <span className="font-medium">Sign Out</span>
               </button>
@@ -315,6 +293,14 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
           </div>
         )}
       </div>
+
+      {/* Delete Account Dialog */}
+      {isDeleteDialogOpen && (
+        <DeleteAccountDialog
+          isOpen={isDeleteDialogOpen}
+          onClose={() => setIsDeleteDialogOpen(false)}
+        />
+      )}
     </>
   )
 }

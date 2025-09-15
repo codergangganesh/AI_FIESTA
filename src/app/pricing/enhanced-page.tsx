@@ -1,12 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useDarkMode } from '@/contexts/DarkModeContext'
 import { usePlan } from '@/contexts/PlanContext'
 import { useAuth } from '@/contexts/AuthContext'
-import { useToast } from '@/contexts/NotificationContext'
-import AdvancedSidebar from '@/components/layout/AdvancedSidebar'
 import { processPayment, formatPrice, calculateDiscount, PLAN_PRICES } from '@/lib/razorpay'
+import { useToast } from '@/contexts/NotificationContext'
 import {
   Check,
   X,
@@ -43,11 +42,24 @@ const paymentMethods = [
 
 export default function PricingPage() {
   const { darkMode } = useDarkMode()
-  const { currentPlan } = usePlan()
+  const { plan: currentPlan } = usePlan()
   const { user } = useAuth()
   const { success, error } = useToast()
   const [billingCycle, setBillingCycle] = useState<BillingCycle>('yearly')
   const [isProcessing, setIsProcessing] = useState<string | null>(null)
+
+  // Keep the same pricing data in both modes
+  const planFeatures = [
+    { name: 'Model Comparisons', free: '10/month', pro: '500/month', pro_plus: 'Unlimited' },
+    { name: 'AI Models Access', free: '2 models', pro: '4 models', pro_plus: '6+ models' },
+    { name: 'Storage', free: '1 GB', pro: '10 GB', pro_plus: '100 GB' },
+    { name: 'API Calls', free: '100/month', pro: '5,000/month', pro_plus: '50,000/month' },
+    { name: 'Export Options', free: false, pro: true, pro_plus: true },
+    { name: 'Advanced Charts', free: false, pro: true, pro_plus: true },
+    { name: 'Model Explainability', free: false, pro: false, pro_plus: true },
+    { name: 'Custom Models', free: false, pro: false, pro_plus: true },
+    { name: 'Priority Support', free: 'Community', pro: 'Email', pro_plus: '24/7 Priority' }
+  ]
 
   const handlePlanUpgrade = async (planType: 'pro' | 'pro_plus') => {
     if (!user) {
@@ -55,7 +67,7 @@ export default function PricingPage() {
       return
     }
 
-    if (currentPlan?.type === planType) {
+    if (currentPlan === planType) {
       success('Already Subscribed', `You're already on the ${planType.toUpperCase()} plan`)
       return
     }
@@ -99,6 +111,10 @@ export default function PricingPage() {
     }
   }
 
+  const isPlanActive = (planType: string) => {
+    return currentPlan === planType
+  }
+
   const renderFeature = (feature: any, planType: 'free' | 'pro' | 'pro_plus') => {
     const value = feature[planType]
     
@@ -117,10 +133,6 @@ export default function PricingPage() {
     )
   }
 
-  const isPlanActive = (planType: string) => {
-    return currentPlan?.type === planType
-  }
-
   const discount = calculateDiscount(PLAN_PRICES.pro.monthly, PLAN_PRICES.pro.yearly)
 
   return (
@@ -129,8 +141,6 @@ export default function PricingPage() {
         ? 'bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900' 
         : 'bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50'
     }`}>
-      <AdvancedSidebar />
-      
       <div className="ml-16 lg:ml-72 transition-all duration-300">
         {/* Header */}
         <div className={`backdrop-blur-sm border-b transition-colors duration-200 ${
@@ -158,7 +168,7 @@ export default function PricingPage() {
                     : 'bg-blue-100 text-blue-700 border border-blue-200'
                 }`}>
                   <Crown className="w-4 h-4 mr-2" />
-                  Current Plan: {currentPlan.type === 'free' ? 'Free Plan' : currentPlan.type === 'pro' ? 'Pro Plan' : 'Pro Plus Plan'}
+                  Current Plan: {currentPlan === 'free' ? 'Free Plan' : currentPlan === 'pro' ? 'Pro Plan' : 'Pro Plus Plan'}
                 </div>
               )}
               

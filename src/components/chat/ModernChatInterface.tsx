@@ -38,6 +38,18 @@ export default function ModernChatInterface() {
   )
   const [showModelSelector, setShowModelSelector] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  
+  // Create a ref to store the user ID
+  const userIdRef = useRef<string | null>(null)
+  
+  // Effect to handle user ID changes
+  useEffect(() => {
+    if (user && user.id !== userIdRef.current) {
+      // User ID changed, clear chat sessions
+      setChatSessions([])
+      userIdRef.current = user.id
+    }
+  }, [user]) // This is safe now as we only care about the user object
 
   // Load chat sessions from localStorage on component mount
   useEffect(() => {
@@ -56,7 +68,7 @@ export default function ModernChatInterface() {
         console.error('Failed to parse saved sessions:', e)
       }
     }
-  }, [])
+  }, []) // Empty dependency array since we only want this to run once
 
   // Save chat sessions to localStorage whenever they change
   useEffect(() => {
