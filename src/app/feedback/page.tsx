@@ -526,7 +526,7 @@ export default function FeedbackPage() {
                       <div className="flex">
                         {[...Array(5)].map((_, i) => (
                           <Star
-                            key={i}
+                            key={`star-${feedback.id}-${i}`}
                             className={`w-5 h-5 ${
                               i < feedback.rating 
                                 ? darkMode ? 'text-yellow-400 fill-current' : 'text-yellow-500 fill-current'
