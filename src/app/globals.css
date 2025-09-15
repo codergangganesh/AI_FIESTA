@@ -14,9 +14,21 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #000000; /* Black */
+    --foreground: #ffffff; /* White */
   }
+}
+
+/* Custom dark mode variables for black, violet, and gold theme */
+.dark {
+  --background: #000000; /* Black */
+  --foreground: #ffffff; /* White */
+  --primary: #8b5cf6; /* Violet */
+  --primary-dark: #7c3aed; /* Darker Violet */
+  --secondary: #d4af37; /* Gold */
+  --secondary-dark: #b8860b; /* Darker Gold */
+  --accent: #a78bfa; /* Light Violet */
+  --muted: #4c1d95; /* Very Dark Violet */
 }
 
 body {

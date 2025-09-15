@@ -60,25 +60,11 @@ export default function AdvancedSidebar({ className = '' }: AdvancedSidebarProps
       description: 'Compare AI Models'
     },
     {
-      id: 'dataset',
-      label: 'Dataset Analysis',
-      icon: Database,
-      href: '/dataset-analysis',
-      description: 'Data Insights & EDA'
-    },
-    {
       id: 'visualization',
       label: 'Visualization',
       icon: BarChart3,
       href: '/visualization',
       description: 'Charts & Graphs'
-    },
-    {
-      id: 'explainability',
-      label: 'Explainability',
-      icon: Lightbulb,
-      href: '/explainability',
-      description: 'Model Interpretability'
     },
     {
       id: 'contact',

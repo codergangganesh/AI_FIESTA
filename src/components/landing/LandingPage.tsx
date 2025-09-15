@@ -237,10 +237,11 @@ export default function LandingPage() {
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            {/* Badge */}
-            <div className="inline-flex items-center space-x-2 bg-white/60 backdrop-blur-sm border border-slate-200/50 rounded-full px-4 py-2 mb-8">
+            {/* Badge with glowing gold effect */}
+            <div className="inline-flex items-center space-x-2 bg-white/60 backdrop-blur-sm border border-slate-200/50 rounded-full px-4 py-2 mb-8 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 via-transparent to-yellow-400/10 opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
               <Sparkles className="w-4 h-4 text-blue-500" />
-              <span className="text-sm font-medium text-slate-700">Compare 9+ Premium AI Models</span>
+              <span className="text-sm font-medium text-slate-700 relative z-10">Compare 9+ Premium AI Models</span>
             </div>
             
             <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black mb-8">
@@ -265,11 +266,13 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
               <Link
                 href={user ? "/chat" : "/auth"}
-                className="group bg-gradient-to-r from-blue-500 to-purple-500 text-white px-8 py-4 rounded-2xl text-lg font-bold hover:shadow-2xl transition-all duration-300 hover:scale-105 flex items-center space-x-3"
+                className="group bg-gradient-to-r from-blue-500 to-purple-500 text-white px-8 py-4 rounded-2xl text-lg font-bold hover:shadow-2xl transition-all duration-300 hover:scale-105 flex items-center space-x-3 relative overflow-hidden"
               >
-                <Play className="w-6 h-6" />
-                <span>Start Comparing</span>
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                {/* Glowing gold effect on hover */}
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-yellow-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                <Play className="w-6 h-6 relative z-10" />
+                <span className="relative z-10">Start Comparing</span>
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform relative z-10" />
               </Link>
               
               <div className="flex items-center space-x-4 text-slate-600">
@@ -282,35 +285,39 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Enhanced Stats */}
+            {/* Enhanced Stats with glowing gold effect */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8 max-w-4xl mx-auto">
-              <div className="group text-center p-6 bg-white/40 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/60 transition-all duration-300 hover:scale-105">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <div className="group text-center p-6 bg-white/40 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/60 transition-all duration-300 hover:scale-105 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 to-yellow-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center mx-auto mb-3 relative z-10">
                   <Cpu className="w-6 h-6 text-white" />
                 </div>
-                <div className="text-3xl font-bold text-slate-900 mb-2">9+</div>
-                <div className="text-slate-600 font-medium">AI Models</div>
+                <div className="text-3xl font-bold text-slate-900 mb-2 relative z-10">9+</div>
+                <div className="text-slate-600 font-medium relative z-10">AI Models</div>
               </div>
-              <div className="group text-center p-6 bg-white/40 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/60 transition-all duration-300 hover:scale-105">
-                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <div className="group text-center p-6 bg-white/40 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/60 transition-all duration-300 hover:scale-105 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 to-yellow-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center mx-auto mb-3 relative z-10">
                   <MessageSquare className="w-6 h-6 text-white" />
                 </div>
-                <div className="text-3xl font-bold text-slate-900 mb-2">1</div>
-                <div className="text-slate-600 font-medium">Universal Input</div>
+                <div className="text-3xl font-bold text-slate-900 mb-2 relative z-10">1</div>
+                <div className="text-slate-600 font-medium relative z-10">Universal Input</div>
               </div>
-              <div className="group text-center p-6 bg-white/40 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/60 transition-all duration-300 hover:scale-105">
-                <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <div className="group text-center p-6 bg-white/40 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/60 transition-all duration-300 hover:scale-105 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 to-yellow-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl flex items-center justify-center mx-auto mb-3 relative z-10">
                   <Infinity className="w-6 h-6 text-white" />
                 </div>
-                <div className="text-3xl font-bold text-slate-900 mb-2">∞</div>
-                <div className="text-slate-600 font-medium">Comparisons</div>
+                <div className="text-3xl font-bold text-slate-900 mb-2 relative z-10">∞</div>
+                <div className="text-slate-600 font-medium relative z-10">Comparisons</div>
               </div>
-              <div className="group text-center p-6 bg-white/40 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/60 transition-all duration-300 hover:scale-105">
-                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-xl flex items-center justify-center mx-auto mb-3">
+              <div className="group text-center p-6 bg-white/40 backdrop-blur-sm rounded-2xl border border-white/20 hover:bg-white/60 transition-all duration-300 hover:scale-105 relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 to-yellow-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-yellow-500 rounded-xl flex items-center justify-center mx-auto mb-3 relative z-10">
                   <Zap className="w-6 h-6 text-white" />
                 </div>
-                <div className="text-3xl font-bold text-slate-900 mb-2">0.5s</div>
-                <div className="text-slate-600 font-medium">Avg Response</div>
+                <div className="text-3xl font-bold text-slate-900 mb-2 relative z-10">0.5s</div>
+                <div className="text-slate-600 font-medium relative z-10">Avg Response</div>
               </div>
             </div>
           </div>
@@ -321,9 +328,10 @@ export default function LandingPage() {
       <section className="py-24 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
-            <div className="inline-flex items-center space-x-2 bg-white/60 backdrop-blur-sm border border-slate-200/50 rounded-full px-4 py-2 mb-6">
-              <Zap className="w-4 h-4 text-blue-500" />
-              <span className="text-sm font-medium text-slate-700">Powerful Features</span>
+            <div className="inline-flex items-center space-x-2 bg-white/60 backdrop-blur-sm border border-slate-200/50 rounded-full px-4 py-2 mb-6 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 via-transparent to-yellow-400/10 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-full"></div>
+              <Zap className="w-4 h-4 text-blue-500 relative z-10" />
+              <span className="text-sm font-medium text-slate-700 relative z-10">Powerful Features</span>
             </div>
             <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent mb-6">
               Everything You Need
@@ -338,10 +346,13 @@ export default function LandingPage() {
               const Icon = feature.icon
               return (
                 <div key={index} className="group relative bg-white/60 backdrop-blur-sm border border-slate-200/50 rounded-2xl p-8 hover:shadow-2xl transition-all duration-300 hover:scale-105">
-                  <div className={`w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg`}>
+                  {/* Glowing gold effect on hover */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 to-yellow-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
+                  
+                  <div className={`w-16 h-16 bg-gradient-to-br ${feature.gradient} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform shadow-lg relative z-10`}>
                     <Icon className="w-8 h-8 text-white" />
                   </div>
-                  <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center justify-between mb-4 relative z-10">
                     <h3 className="text-xl font-bold text-slate-900">
                       {feature.title}
                     </h3>
@@ -349,7 +360,7 @@ export default function LandingPage() {
                       {feature.stats}
                     </div>
                   </div>
-                  <p className="text-slate-600 leading-relaxed">
+                  <p className="text-slate-600 leading-relaxed relative z-10">
                     {feature.description}
                   </p>
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -378,9 +389,10 @@ export default function LandingPage() {
         
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
-            <div className="inline-flex items-center space-x-2 bg-white/60 backdrop-blur-sm border border-slate-200/50 rounded-full px-4 py-2 mb-6">
-              <Star className="w-4 h-4 text-blue-500" />
-              <span className="text-sm font-medium text-slate-700">Trusted by Thousands</span>
+            <div className="inline-flex items-center space-x-2 bg-white/60 backdrop-blur-sm border border-slate-200/50 rounded-full px-4 py-2 mb-6 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 via-transparent to-yellow-400/10 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-full"></div>
+              <Star className="w-4 h-4 text-blue-500 relative z-10" />
+              <span className="text-sm font-medium text-slate-700 relative z-10">Trusted by Thousands</span>
             </div>
             <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent mb-6">
               What Our Users Say
@@ -421,10 +433,13 @@ export default function LandingPage() {
               }
             ].map((testimonial, index) => (
               <div key={index} className="group bg-white/80 backdrop-blur-sm border border-slate-200/50 rounded-2xl p-8 hover:shadow-xl transition-all duration-300 hover:scale-105 relative overflow-hidden">
-                {/* Decorative gradient overlay */}
-                <div className={`absolute inset-0 bg-gradient-to-br ${testimonial.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-2xl`}></div>
+                {/* Glowing gold effect on hover */}
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 to-yellow-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
                 
-                <div className="relative">
+                {/* Decorative gradient overlay */}
+                <div className={`absolute inset-0 bg-gradient-to-br ${testimonial.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-2xl relative z-10`}></div>
+                
+                <div className="relative z-20">
                   {/* Rating stars */}
                   <div className="flex items-center space-x-1 mb-4">
                     {[...Array(testimonial.rating)].map((_, i) => (
@@ -484,9 +499,10 @@ export default function LandingPage() {
       <section className="py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20">
-            <div className="inline-flex items-center space-x-2 bg-white/60 backdrop-blur-sm border border-slate-200/50 rounded-full px-4 py-2 mb-6">
-              <Play className="w-4 h-4 text-blue-500" />
-              <span className="text-sm font-medium text-slate-700">How It Works</span>
+            <div className="inline-flex items-center space-x-2 bg-white/60 backdrop-blur-sm border border-slate-200/50 rounded-full px-4 py-2 mb-6 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 via-transparent to-yellow-400/10 opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-full"></div>
+              <Play className="w-4 h-4 text-blue-500 relative z-10" />
+              <span className="text-sm font-medium text-slate-700 relative z-10">How It Works</span>
             </div>
             <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent mb-6">
               Three Simple Steps
@@ -604,6 +620,9 @@ export default function LandingPage() {
             >
               {/* Animated background on hover */}
               <div className="absolute inset-0 bg-gradient-to-r from-blue-50 to-purple-50 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+              
+              {/* Glowing gold effect on hover */}
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 to-yellow-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl"></div>
               
               <Sparkles className="w-6 h-6 relative z-10 group-hover:rotate-12 transition-transform duration-300" />
               <span className="relative z-10">Start Free Today</span>

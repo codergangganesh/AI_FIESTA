@@ -24,8 +24,8 @@ export function DarkModeProvider({ children }: { children: React.ReactNode }) {
     // Apply theme to document
     if (darkMode) {
       document.documentElement.classList.add('dark')
-      document.body.style.backgroundColor = '#111827' // gray-900
-      document.body.style.color = '#ffffff'
+      document.body.style.backgroundColor = '#000000' // Black
+      document.body.style.color = '#ffffff' // White
     } else {
       document.documentElement.classList.remove('dark')
       document.body.style.backgroundColor = '#ffffff'

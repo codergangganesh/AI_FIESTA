@@ -53,39 +53,6 @@ CREATE TABLE IF NOT EXISTS model_comparisons (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Model Explainability Results Table
-CREATE TABLE IF NOT EXISTS explainability_results (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  comparison_id UUID REFERENCES model_comparisons(id) ON DELETE CASCADE,
-  model_name VARCHAR(100) NOT NULL,
-  method VARCHAR(50) NOT NULL CHECK (method IN ('shap', 'lime', 'integrated_gradients')),
-  feature_importance JSONB, -- Feature importance scores
-  local_explanations JSONB, -- Local explanations for predictions
-  global_explanations JSONB, -- Global model behavior
-  visualizations JSONB, -- Chart data and configs
-  created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
--- Dataset Analysis Table
-CREATE TABLE IF NOT EXISTS dataset_analyses (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  name VARCHAR(255) NOT NULL,
-  file_name VARCHAR(255) NOT NULL,
-  file_size INTEGER NOT NULL,
-  file_type VARCHAR(50) NOT NULL,
-  status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'completed', 'failed')),
-  progress INTEGER DEFAULT 0 CHECK (progress >= 0 AND progress <= 100),
-  summary_stats JSONB, -- Basic statistics
-  eda_results JSONB, -- Exploratory data analysis results
-  insights JSONB, -- Generated insights and recommendations
-  visualizations JSONB, -- Chart configurations
-  quality_score INTEGER CHECK (quality_score >= 0 AND quality_score <= 100),
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  updated_at TIMESTAMPTZ DEFAULT NOW()
-);
-
 -- User Settings Table (Enhanced)
 CREATE TABLE IF NOT EXISTS user_settings (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -180,8 +147,6 @@ CREATE INDEX IF NOT EXISTS idx_payment_history_subscription_id ON payment_histor
 CREATE INDEX IF NOT EXISTS idx_payment_history_customer_id ON payment_history(customer_id);
 CREATE INDEX IF NOT EXISTS idx_model_comparisons_user_id ON model_comparisons(user_id);
 CREATE INDEX IF NOT EXISTS idx_model_comparisons_status ON model_comparisons(status);
-CREATE INDEX IF NOT EXISTS idx_explainability_results_user_id ON explainability_results(user_id);
-CREATE INDEX IF NOT EXISTS idx_dataset_analyses_user_id ON dataset_analyses(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_settings_user_id ON user_settings(user_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_user_id ON notifications(user_id);
 CREATE INDEX IF NOT EXISTS idx_notifications_read ON notifications(read);
@@ -194,8 +159,6 @@ CREATE INDEX IF NOT EXISTS idx_billing_history_user_id ON billing_history(user_i
 ALTER TABLE user_plans ENABLE ROW LEVEL SECURITY;
 ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE model_comparisons ENABLE ROW LEVEL SECURITY;
-ALTER TABLE explainability_results ENABLE ROW LEVEL SECURITY;
-ALTER TABLE dataset_analyses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 ALTER TABLE api_usage ENABLE ROW LEVEL SECURITY;
@@ -205,8 +168,6 @@ ALTER TABLE billing_history ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can access their own plan" ON user_plans FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "Users can access their own payments" ON payments FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "Users can access their own comparisons" ON model_comparisons FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "Users can access their own explainability results" ON explainability_results FOR ALL USING (auth.uid() = user_id);
-CREATE POLICY "Users can access their own dataset analyses" ON dataset_analyses FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "Users can access their own settings" ON user_settings FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "Users can access their own notifications" ON notifications FOR ALL USING (auth.uid() = user_id);
 CREATE POLICY "Users can access their own API usage" ON api_usage FOR ALL USING (auth.uid() = user_id);
@@ -311,5 +272,4 @@ $$ LANGUAGE plpgsql;
 -- Add triggers for tables with updated_at columns
 CREATE TRIGGER update_user_plans_updated_at BEFORE UPDATE ON user_plans FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_model_comparisons_updated_at BEFORE UPDATE ON model_comparisons FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER update_dataset_analyses_updated_at BEFORE UPDATE ON dataset_analyses FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 CREATE TRIGGER update_user_settings_updated_at BEFORE UPDATE ON user_settings FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
