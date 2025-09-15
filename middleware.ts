@@ -5,7 +5,16 @@ export async function middleware(request: NextRequest) {
   const { supabase, supabaseResponse } = createClient(request)
 
   // Refresh session if expired - required for Server Components
-  await supabase.auth.getUser()
+  try {
+    await supabase.auth.getUser()
+  } catch (error) {
+    // Handle AuthSessionMissingError gracefully
+    if (error instanceof Error && error.message.includes('Auth session missing')) {
+      console.log('No active session in middleware, continuing with request')
+    } else {
+      console.error('Error in middleware auth check:', error)
+    }
+  }
 
   return supabaseResponse
 }

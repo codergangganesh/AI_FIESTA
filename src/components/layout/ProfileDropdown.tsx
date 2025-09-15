@@ -38,9 +38,18 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
   }, [])
 
   const handleSignOut = async () => {
-    await signOut()
-    setIsOpen(false)
-    router.push('/')
+    try {
+      await signOut()
+    } catch (error) {
+      console.error('Error during sign out:', error)
+      // Even if there's an error, redirect to auth page
+      if (typeof window !== 'undefined') {
+        window.location.href = '/auth'
+      }
+    } finally {
+      setIsOpen(false)
+      router.push('/')
+    }
   }
 
   const handleMouseEnter = () => {

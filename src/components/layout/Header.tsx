@@ -1,18 +1,4 @@
-// ... existing code ...
-          {/* Logo + App Name */}
-          <Link href="/chat" className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-              <Brain className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className={`text-xl font-bold ${
-                darkMode ? 'text-white' : 'text-gray-900'
-              }`}>
-                AI Fiesta
-              </h1>
-            </div>
-          </Link>
-// ... existing code ...'use client'
+'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -72,8 +58,17 @@ export default function Header({ darkMode, toggleDarkMode }: HeaderProps) {
   }
 
   const handleSignOut = async () => {
-    await signOut()
-    setShowProfileDropdown(false)
+    try {
+      await signOut()
+    } catch (error) {
+      console.error('Error during sign out:', error)
+      // Even if there's an error, redirect to auth page
+      if (typeof window !== 'undefined') {
+        window.location.href = '/auth'
+      }
+    } finally {
+      setShowProfileDropdown(false)
+    }
   }
 
   return (

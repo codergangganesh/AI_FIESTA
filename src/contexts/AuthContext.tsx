@@ -39,19 +39,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         const { data: { user }, error } = await supabase.auth.getUser();
         if (error) {
-          console.error('Error getting user:', error);
-          // Handle network errors specifically
-          if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-            console.error('Network connectivity issue detected. Please check your internet connection and Supabase configuration.');
+          // Handle AuthSessionMissingError specifically
+          if (error.message.includes('Auth session missing')) {
+            console.log('No active session found during initial load');
+            setUser(null);
+          } else {
+            console.error('Error getting user:', error);
+            // Handle network errors specifically
+            if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+              console.error('Network connectivity issue detected. Please check your internet connection and Supabase configuration.');
+            }
           }
+        } else {
+          setUser(user);
         }
-        setUser(user);
       } catch (error: any) {
         console.error('Unexpected error getting user:', error);
         // Handle network errors specifically
         if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
           console.error('Network connectivity issue detected. Please check your internet connection and Supabase configuration.');
         }
+        // Set user to null in case of any error
+        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -116,10 +125,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signOut = async () => {
     try {
-      await supabase.auth.signOut();
+      // First check if there's a user/session before attempting to sign out
+      const { data: { user }, error: getUserError } = await supabase.auth.getUser();
+      
+      // Only attempt to sign out if there's an active user and no error getting user
+      if (user && !getUserError) {
+        const { error: signOutError } = await supabase.auth.signOut();
+        if (signOutError) {
+          console.error('Supabase sign out error:', signOutError);
+        }
+      } else if (getUserError && !getUserError.message.includes('Auth session missing')) {
+        // Log unexpected errors but ignore AuthSessionMissingError
+        console.error('Error getting user for sign out:', getUserError);
+      }
+      
+      // Always clear the user state regardless of Supabase response
       setUser(null);
-    } catch (error) {
-      console.error('Error signing out:', error);
+    } catch (error: any) {
+      console.error('Unexpected error during sign out:', error);
+      
+      // Specifically handle AuthSessionMissingError
+      if (error?.message?.includes('Auth session missing')) {
+        console.log('No active session found, proceeding with local logout');
+      }
+      
+      // Even if there's an error, clear the user state
+      setUser(null);
+    } finally {
+      // Redirect to auth page to ensure clean state
+      if (typeof window !== 'undefined') {
+        window.location.href = '/auth';
+      }
     }
   };
 

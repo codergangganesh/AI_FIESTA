@@ -8,7 +8,7 @@ import ModernModelShowcase from './ModernModelShowcase'
 import { useEffect, useState } from 'react'
 
 export default function LandingPage() {
-  const { user } = useAuth()
+  const { user, signOut } = useAuth()
   const searchParams = useSearchParams()
   const [showSuccessPopup, setShowSuccessPopup] = useState(false)
   const [popupMessage, setPopupMessage] = useState('')
@@ -99,6 +99,18 @@ export default function LandingPage() {
     }
   ]
 
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Error during sign out:', error);
+      // Even if there's an error, redirect to auth page
+      if (typeof window !== 'undefined') {
+        window.location.href = '/auth';
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       {/* Success Message Popup */}
@@ -155,13 +167,36 @@ export default function LandingPage() {
                       <div className="absolute inset-0 rounded-lg border-2 border-yellow-400/50 group-hover:border-yellow-400 transition-all duration-300"></div>
                       <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-yellow-400/10 to-yellow-600/10 opacity-100 group-hover:opacity-100 transition-all duration-300"></div>
                     </div>
-                    
+                      
                     {/* Gold shine effect - always visible with enhanced hover effect */}
                     <div className="absolute top-0 right-0 w-10 h-full bg-gradient-to-l from-yellow-400/20 to-transparent transform translate-x-0 group-hover:-translate-x-full transition-transform duration-500 ease-in-out"></div>
-                    
+                      
                     {/* Black background with gold text - always visible */}
                     <div className="relative flex items-center space-x-1.5 bg-black px-3 py-1.5 rounded-lg">
-                      <span className="text-yellow-400 text-xs tracking-widest">PRICING</span>
+                      <span className="text-yellow-400 text-xs tracking-widest">Pricing</span>
+                      <svg className="w-3 h-3 text-yellow-400 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                  </Link>
+                    
+                  {/* Feedback link with modern black and gold design - responsive and smaller font */}
+                  <Link
+                    href="/public-feedback"
+                    className="relative flex items-center space-x-2 px-3 py-1.5 rounded-lg font-bold transition-all duration-300 group overflow-hidden whitespace-nowrap"
+                  >
+                    {/* Animated gold border - always visible with hover effect */}
+                    <div className="absolute inset-0 rounded-lg">
+                      <div className="absolute inset-0 rounded-lg border-2 border-yellow-400/50 group-hover:border-yellow-400 transition-all duration-300"></div>
+                      <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-yellow-400/10 to-yellow-600/10 opacity-100 group-hover:opacity-100 transition-all duration-300"></div>
+                    </div>
+                      
+                    {/* Gold shine effect - always visible with enhanced hover effect */}
+                    <div className="absolute top-0 right-0 w-10 h-full bg-gradient-to-l from-yellow-400/20 to-transparent transform translate-x-0 group-hover:-translate-x-full transition-transform duration-500 ease-in-out"></div>
+                      
+                    {/* Black background with gold text - always visible */}
+                    <div className="relative flex items-center space-x-1.5 bg-black px-3 py-1.5 rounded-lg">
+                      <span className="text-yellow-400 text-xs tracking-widest">Feedback</span>
                       <svg className="w-3 h-3 text-yellow-400 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
@@ -198,12 +233,20 @@ export default function LandingPage() {
                       </Link>
                       <div className="border-t border-slate-200/50 my-2"></div>
                       <Link
-                        href="/"
+                        href="/public-feedback"
                         className="flex items-center space-x-2 px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                      >
+                        <Star className="w-4 h-4" />
+                        <span>User Voices</span>
+                      </Link>
+                      <div className="border-t border-slate-200/50 my-2"></div>
+                      <button
+                        onClick={handleSignOut}
+                        className="flex items-center space-x-2 px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors w-full text-left"
                       >
                         <LogOut className="w-4 h-4" />
                         <span>Logout</span>
-                      </Link>
+                      </button>
                     </div>
                   </div>
                 </>
@@ -213,7 +256,7 @@ export default function LandingPage() {
                   href="/auth"
                   className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-xl text-sm font-semibold hover:shadow-lg transition-all duration-200 hover:scale-105"
                 >
-                  Sign In
+                  Get Started
                 </Link>
               )}
             </div>
