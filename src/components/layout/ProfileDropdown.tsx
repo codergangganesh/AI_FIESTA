@@ -1,10 +1,9 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { User, Settings, LogOut, ChevronUp, Moon, Sun, DollarSign, Activity, Crown } from 'lucide-react'
+import { User, Settings, LogOut, ChevronUp, Moon, Sun, DollarSign, Activity, Crown, Trash2 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
-import AccountSettingsModal from './AccountSettingsModal'
 
 interface ProfileDropdownProps {
   darkMode?: boolean
@@ -16,8 +15,6 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const [isHovered, setIsHovered] = useState(false)
-  const [showAccountSettings, setShowAccountSettings] = useState(false)
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
@@ -42,12 +39,9 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
       await signOut()
     } catch (error) {
       console.error('Error during sign out:', error)
-      // Even if there's an error, redirect to auth page
-      if (typeof window !== 'undefined') {
-        window.location.href = '/auth'
-      }
     } finally {
       setIsOpen(false)
+      // Redirect to home page after sign out
       router.push('/')
     }
   }
@@ -88,6 +82,11 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
     router.push('/account-settings')
   }
 
+  const handleDeleteAccount = () => {
+    setIsOpen(false)
+    router.push('/delete-account')
+  }
+
   const handlePricing = () => {
     setIsOpen(false)
     router.push('/payment')
@@ -107,7 +106,21 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
     return user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'
   }
 
+  const getProfilePicture = () => {
+    // Check if avatar_url exists in user_metadata
+    if (user?.user_metadata?.avatar_url) {
+      return user.user_metadata.avatar_url
+    }
+    // If not, check if there's an avatar_url directly on the user object
+    if (user?.avatar_url) {
+      return user.avatar_url
+    }
+    return null
+  }
+
   if (!user) return null
+
+  const profilePicture = getProfilePicture()
 
   return (
     <>
@@ -129,7 +142,11 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
               ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white' 
               : 'bg-gradient-to-br from-blue-500 to-purple-600 text-white'
           }`}>
-            {getUserInitials()}
+            {profilePicture ? (
+              <img src={profilePicture} alt="Profile" className="w-full h-full rounded-lg object-cover" />
+            ) : (
+              getUserInitials()
+            )}
           </div>
           
           {/* User Info */}
@@ -168,7 +185,11 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
             }`}>
               <div className="flex items-center space-x-3">
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-white font-bold text-lg shadow-lg">
-                  {getUserInitials()}
+                  {profilePicture ? (
+                    <img src={profilePicture} alt="Profile" className="w-full h-full rounded-xl object-cover" />
+                  ) : (
+                    getUserInitials()
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <h3 className={`font-semibold truncate ${
@@ -265,6 +286,19 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
                 <span className="font-medium">Account Settings</span>
               </button>
 
+              {/* Delete Account */}
+              <button
+                onClick={handleDeleteAccount}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
+                  darkMode 
+                    ? 'hover:bg-gray-700/50 text-red-400 hover:text-red-300' 
+                    : 'hover:bg-slate-100/50 text-red-600 hover:text-red-700'
+                }`}
+              >
+                <Trash2 className="w-5 h-5" />
+                <span className="font-medium">Delete Account</span>
+              </button>
+
               {/* Sign Out */}
               <button
                 onClick={handleSignOut}
@@ -277,21 +311,10 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
                 <LogOut className="w-5 h-5" />
                 <span className="font-medium">Sign Out</span>
               </button>
-
-              {/* Delete Account - REMOVED */}
             </div>
           </div>
         )}
       </div>
-
-      {/* Account Settings Modal */}
-      <AccountSettingsModal
-        isOpen={showAccountSettings}
-        onClose={() => setShowAccountSettings(false)}
-        darkMode={darkMode}
-      />
-
-      {/* Delete Account Confirmation Modal - REMOVED */}
     </>
   )
 }

@@ -33,6 +33,27 @@ export default function LandingPage() {
     }
   }, [searchParams])
 
+  const getUserInitials = () => {
+    if (!user?.email) return 'U'
+    return user.email.charAt(0).toUpperCase()
+  }
+
+  const getUserDisplayName = () => {
+    return user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'
+  }
+
+  const getProfilePicture = () => {
+    // Check if avatar_url exists in user_metadata
+    if (user?.user_metadata?.avatar_url) {
+      return user.user_metadata.avatar_url
+    }
+    // If not, check if there's an avatar_url directly on the user object
+    if (user?.avatar_url) {
+      return user.avatar_url
+    }
+    return null
+  }
+
   const features = [
     {
       icon: MessageSquare,
@@ -110,6 +131,8 @@ export default function LandingPage() {
       }
     }
   };
+
+  const profilePicture = getProfilePicture();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
@@ -206,7 +229,11 @@ export default function LandingPage() {
                   {/* Profile icon for logged-in users */}
                   <div className="relative group">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold cursor-pointer">
-                      {user.email?.charAt(0).toUpperCase() || 'U'}
+                      {profilePicture ? (
+                        <img src={profilePicture} alt="Profile" className="w-full h-full rounded-full object-cover" />
+                      ) : (
+                        user.email?.charAt(0).toUpperCase() || 'U'
+                      )}
                     </div>
                     {/* Dropdown menu */}
                     <div className="absolute right-0 mt-2 w-48 rounded-xl bg-white/90 backdrop-blur-xl border border-slate-200/50 shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
