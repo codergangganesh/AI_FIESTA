@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Send, Settings, Plus, MessageSquare, History, Sparkles, Brain } from 'lucide-react'
+import { Send, Settings, Plus, MessageSquare, History, Sparkles, Brain, BarChart3 } from 'lucide-react'
 import { useDarkMode } from '@/contexts/DarkModeContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { AI_MODELS } from '@/config/ai-models'
@@ -294,6 +294,18 @@ export default function ModernChatInterface() {
           >
             <MessageSquare className="w-5 h-5 transition-colors group-hover:text-blue-600" />
             <span className="font-medium">Current Chat</span>
+          </Link>
+          
+          <Link
+            href="/dashboard"
+            className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
+              darkMode 
+                ? 'text-gray-300 hover:text-white hover:bg-gray-700/50' 
+                : 'text-slate-700 hover:text-slate-900 hover:bg-slate-100/50'
+            }`}
+          >
+            <BarChart3 className="w-5 h-5 transition-colors group-hover:text-blue-600" />
+            <span className="font-medium">Dashboard</span>
           </Link>
           
           <Link

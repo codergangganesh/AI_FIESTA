@@ -7,17 +7,12 @@ import NotificationBell from '@/components/ui/NotificationBell'
 import {
   Home,
   GitCompare,
-  Database,
-  BarChart3,
-  Settings,
-  Lightbulb,
   DollarSign,
   Activity,
   User,
   ChevronLeft,
   ChevronRight,
   Brain,
-  TrendingUp,
   Zap,
   Mail,
   Star
@@ -58,13 +53,6 @@ export default function AdvancedSidebar({ className = '' }: AdvancedSidebarProps
       icon: GitCompare,
       href: '/chat',
       description: 'Compare AI Models'
-    },
-    {
-      id: 'visualization',
-      label: 'Visualization',
-      icon: BarChart3,
-      href: '/visualization',
-      description: 'Charts & Graphs'
     },
     {
       id: 'contact',

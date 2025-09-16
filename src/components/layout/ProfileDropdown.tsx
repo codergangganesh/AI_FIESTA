@@ -1,7 +1,22 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { User, Settings, LogOut, ChevronUp, Moon, Sun, DollarSign, Activity, Crown, Trash2 } from 'lucide-react'
+import { 
+  User, 
+  Settings, 
+  LogOut, 
+  ChevronUp, 
+  Moon, 
+  Sun, 
+  DollarSign, 
+  Activity, 
+  Crown, 
+  Trash2,
+  MessageSquare,
+  Send,
+  BarChart3,
+  Phone
+} from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import DeleteAccountDialog from '@/components/auth/DeleteAccountDialog'
@@ -198,6 +213,96 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
 
             {/* Menu Items */}
             <div className="p-2">
+              {/* Chat */}
+              <button
+                onClick={() => {
+                  setIsOpen(false)
+                  router.push('/chat')
+                }}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
+                  darkMode 
+                    ? 'hover:bg-gray-700/50 text-gray-300 hover:text-white' 
+                    : 'hover:bg-slate-100/50 text-slate-700 hover:text-slate-900'
+                }`}>
+                <MessageSquare className="w-5 h-5" />
+                <span className="font-medium">Chat</span>
+              </button>
+              
+              {/* Feedback */}
+              <button
+                onClick={() => {
+                  setIsOpen(false)
+                  router.push('/feedback')
+                }}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
+                  darkMode 
+                    ? 'hover:bg-gray-700/50 text-gray-300 hover:text-white' 
+                    : 'hover:bg-slate-100/50 text-slate-700 hover:text-slate-900'
+                }`}>
+                <Send className="w-5 h-5" />
+                <span className="font-medium">Feedback</span>
+              </button>
+              
+              {/* Pricing */}
+              <button
+                onClick={() => {
+                  setIsOpen(false)
+                  router.push('/payment')
+                }}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
+                  darkMode 
+                    ? 'hover:bg-gray-700/50 text-gray-300 hover:text-white' 
+                    : 'hover:bg-slate-100/50 text-slate-700 hover:text-slate-900'
+                }`}>
+                <DollarSign className="w-5 h-5" />
+                <span className="font-medium">Pricing</span>
+              </button>
+              
+              {/* Dashboard */}
+              <button
+                onClick={() => {
+                  setIsOpen(false)
+                  router.push('/dashboard')
+                }}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
+                  darkMode 
+                    ? 'hover:bg-gray-700/50 text-gray-300 hover:text-white' 
+                    : 'hover:bg-slate-100/50 text-slate-700 hover:text-slate-900'
+                }`}>
+                <BarChart3 className="w-5 h-5" />
+                <span className="font-medium">Dashboard</span>
+              </button>
+              
+              {/* Usage */}
+              <button
+                onClick={() => {
+                  setIsOpen(false)
+                  router.push('/usage')
+                }}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
+                  darkMode 
+                    ? 'hover:bg-gray-700/50 text-gray-300 hover:text-white' 
+                    : 'hover:bg-slate-100/50 text-slate-700 hover:text-slate-900'
+                }`}>
+                <Activity className="w-5 h-5" />
+                <span className="font-medium">Usage</span>
+              </button>
+              
+              {/* Contact */}
+              <button
+                onClick={() => {
+                  setIsOpen(false)
+                  router.push('/contact')
+                }}
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
+                  darkMode 
+                    ? 'hover:bg-gray-700/50 text-gray-300 hover:text-white' 
+                    : 'hover:bg-slate-100/50 text-slate-700 hover:text-slate-900'
+                }`}>
+                <Phone className="w-5 h-5" />
+                <span className="font-medium">Contact</span>
+              </button>
+
               {/* Dark Mode Toggle */}
               <button
                 onClick={() => {
@@ -208,8 +313,7 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
                   darkMode 
                     ? 'hover:bg-gray-700/50 text-gray-300 hover:text-white' 
                     : 'hover:bg-slate-100/50 text-slate-700 hover:text-slate-900'
-                }`}
-              >
+                }`}>
                 <div className="flex items-center space-x-3">
                   {darkMode ? (
                     <Sun className="w-5 h-5" />
@@ -227,31 +331,6 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
                     darkMode ? 'translate-x-4' : 'translate-x-0'
                   }`} />
                 </div>
-              </button>
-
-              {/* Pricing */}
-              <button
-                onClick={handlePricing}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
-                  darkMode 
-                    ? 'hover:bg-gray-700/50 text-gray-300 hover:text-white' 
-                    : 'hover:bg-slate-100/50 text-slate-700 hover:text-slate-900'
-                }`}
-              >
-                <DollarSign className="w-5 h-5" />
-                <span className="font-medium">Pricing</span>
-              </button>
-
-              {/* Usage */}
-              <button
-                onClick={handleUsage}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
-                  darkMode 
-                    ? 'hover:bg-gray-700/50 text-gray-300 hover:text-white' 
-                    : 'hover:bg-slate-100/50 text-slate-700 hover:text-slate-900'
-                }`}>
-                <Activity className="w-5 h-5" />
-                <span className="font-medium">Usage</span>
               </button>
 
               {/* Account Settings */}

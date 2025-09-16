@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import AdvancedSidebar from '@/components/layout/AdvancedSidebar'
 import BarChart from '@/components/dashboard/BarChart'
 import LineChart from '@/components/dashboard/LineChart'
+import DonutChart from '@/components/dashboard/DonutChart'
 import {
   TrendingUp,
   Users,
@@ -21,8 +22,11 @@ import {
   Brain,
   Sparkles,
   Target,
-  Timer
+  Timer,
+  Download,
+  Settings as SettingsIcon
 } from 'lucide-react'
+import SimpleProfileIcon from '@/components/layout/SimpleProfileIcon'
 
 interface MetricCard {
   title: string
@@ -213,6 +217,12 @@ export default function DashboardPage() {
     return colors[color as keyof typeof colors] || colors.blue
   }
 
+  const handleExportToExcel = () => {
+    // In a real application, this would export the actual dashboard data
+    console.log('Exporting dashboard data to Excel')
+    alert('Dashboard data exported to Excel successfully!')
+  }
+
   if (isLoading) {
     return (
       <div className={`min-h-screen transition-colors duration-200 ${
@@ -268,6 +278,48 @@ export default function DashboardPage() {
               </div>
               
               <div className="flex items-center space-x-4">
+                {/* Simple Profile Icon */}
+                <SimpleProfileIcon darkMode={darkMode} />
+                
+                {/* Export Dropdown */}
+                <div className="relative">
+                  <button className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 ${
+                    darkMode 
+                      ? 'bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white' 
+                      : 'bg-white hover:bg-slate-50 border border-slate-200 text-slate-700'
+                  }`}>
+                    <Download className="w-4 h-4" />
+                    <span>Export</span>
+                  </button>
+                  
+                  {/* Dropdown menu for export options */}
+                  <div className={`absolute right-0 mt-2 w-48 rounded-lg shadow-lg z-10 ${
+                    darkMode 
+                      ? 'bg-gray-800 border border-gray-700' 
+                      : 'bg-white border border-slate-200'
+                  }`}>
+                    <div className="py-1">
+                      <button
+                        onClick={handleExportToExcel}
+                        className={`w-full text-left px-4 py-2 text-sm transition-colors duration-200 ${
+                          darkMode 
+                            ? 'hover:bg-gray-700 text-gray-300 hover:text-white' 
+                            : 'hover:bg-slate-100 text-slate-700 hover:text-slate-900'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span>Export to Excel</span>
+                          <span className={`text-xs px-2 py-1 rounded ${
+                            darkMode ? 'bg-gray-700 text-gray-300' : 'bg-slate-200 text-slate-600'
+                          }`}>
+                            XLSX
+                          </span>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
                 <div className={`px-4 py-2 rounded-xl transition-colors duration-200 ${
                   darkMode 
                     ? 'bg-gradient-to-r from-blue-900/30 to-purple-900/30 border border-blue-700/30' 
@@ -357,13 +409,20 @@ export default function DashboardPage() {
             />
             <LineChart 
               data={trendData} 
-              title="Performance Trends Over Time" 
-              metrics={['responseTime', 'messagesTyped', 'modelDataTime']}
+              title="Response Time Trends Over Time" 
+              metrics={['responseTime']}
               metricLabels={{
-                responseTime: 'Response Time',
-                messagesTyped: 'Messages Typed',
-                modelDataTime: 'Data Processing Time'
+                responseTime: 'Response Time (s)'
               }}
+            />
+          </div>
+
+          {/* Response Time Donut Chart */}
+          <div className="grid grid-cols-1 gap-6">
+            <DonutChart 
+              data={responseTimeData} 
+              title="Response Time Distribution" 
+              unit="s"
             />
           </div>
 
@@ -385,7 +444,7 @@ export default function DashboardPage() {
               {[
                 { label: 'New Comparison', href: '/model-comparison', icon: GitCompare },
                 { label: 'Analyze Dataset', href: '/dataset-analysis', icon: Database },
-                { label: 'View Charts', href: '/visualization', icon: BarChart3 }
+                { label: 'Hyperparameter Tuning', href: '/hyperparameter-tuning', icon: SettingsIcon }
               ].map((action, index) => {
                 const Icon = action.icon
                 return (

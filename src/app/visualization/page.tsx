@@ -1,12 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useDarkMode } from '@/contexts/DarkModeContext'
 import AdvancedSidebar from '@/components/layout/AdvancedSidebar'
+import PieChart from '@/components/visualization/PieChart'
+import LineChart from '@/components/visualization/LineChart'
 import {
   BarChart3,
-  PieChart,
-  LineChart,
+  PieChart as PieChartIcon,
+  LineChart as LineChartIcon,
   TrendingUp,
   Download,
   Eye,
@@ -16,21 +18,25 @@ import {
   Target,
   Zap,
   Activity,
-  Brain
+  Brain,
+  ChevronDown
 } from 'lucide-react'
+import SimpleProfileIcon from '@/components/layout/SimpleProfileIcon'
 
 interface ChartData {
   name: string
   value: number
-  color?: string
+  color: string
 }
 
-interface MetricTrend {
+interface TrendDataPoint {
   period: string
   accuracy: number
   precision: number
   recall: number
   f1Score: number
+  responseTime: number
+  cost: number
 }
 
 export default function VisualizationPage() {
@@ -38,6 +44,7 @@ export default function VisualizationPage() {
   const [selectedChart, setSelectedChart] = useState('accuracy-comparison')
   const [timeRange, setTimeRange] = useState('7d')
   const [isLoading, setIsLoading] = useState(false)
+  const [isExportDropdownOpen, setIsExportDropdownOpen] = useState(false)
 
   // Mock data for different charts
   const accuracyData: ChartData[] = [
@@ -67,13 +74,13 @@ export default function VisualizationPage() {
     { name: 'GPT-4', value: 0.03, color: '#3B82F6' }
   ]
 
-  const trendData: MetricTrend[] = [
-    { period: 'Week 1', accuracy: 89.2, precision: 87.5, recall: 91.0, f1Score: 89.2 },
-    { period: 'Week 2', accuracy: 90.1, precision: 88.3, recall: 91.8, f1Score: 90.0 },
-    { period: 'Week 3', accuracy: 91.5, precision: 89.7, recall: 93.2, f1Score: 91.4 },
-    { period: 'Week 4', accuracy: 92.8, precision: 91.2, recall: 94.1, f1Score: 92.6 },
-    { period: 'Week 5', accuracy: 93.4, precision: 91.8, recall: 94.8, f1Score: 93.3 },
-    { period: 'Week 6', accuracy: 94.2, precision: 92.5, recall: 95.6, f1Score: 94.0 }
+  const trendData: { period: string; [key: string]: number | string }[] = [
+    { period: 'Week 1', accuracy: 89.2, precision: 87.5, recall: 91.0, f1Score: 89.2, responseTime: 2.8, cost: 0.012 },
+    { period: 'Week 2', accuracy: 90.1, precision: 88.3, recall: 91.8, f1Score: 90.0, responseTime: 2.6, cost: 0.011 },
+    { period: 'Week 3', accuracy: 91.5, precision: 89.7, recall: 93.2, f1Score: 91.4, responseTime: 2.3, cost: 0.010 },
+    { period: 'Week 4', accuracy: 92.8, precision: 91.2, recall: 94.1, f1Score: 92.6, responseTime: 2.1, cost: 0.009 },
+    { period: 'Week 5', accuracy: 93.4, precision: 91.8, recall: 94.8, f1Score: 93.3, responseTime: 1.8, cost: 0.007 },
+    { period: 'Week 6', accuracy: 94.2, precision: 92.5, recall: 95.6, f1Score: 94.0, responseTime: 1.5, cost: 0.005 }
   ]
 
   const charts = [
@@ -87,6 +94,13 @@ export default function VisualizationPage() {
     setIsLoading(true)
     await new Promise(resolve => setTimeout(resolve, 1000))
     setIsLoading(false)
+  }
+
+  const handleExport = (format: string) => {
+    console.log(`Exporting data as ${format}`)
+    // In a real application, this would trigger the actual export functionality
+    alert(`Exporting data as ${format}`)
+    setIsExportDropdownOpen(false)
   }
 
   const renderBarChart = (data: ChartData[], title: string, unit: string = '%') => {
@@ -115,13 +129,6 @@ export default function VisualizationPage() {
               }`}
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-            </button>
-            <button className={`p-2 rounded-lg transition-all duration-200 ${
-              darkMode 
-                ? 'hover:bg-gray-700 text-gray-400 hover:text-white' 
-                : 'hover:bg-slate-100 text-slate-400 hover:text-slate-600'
-            }`}>
-              <Download className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -159,82 +166,6 @@ export default function VisualizationPage() {
     )
   }
 
-  const renderTrendChart = () => {
-    return (
-      <div className={`rounded-2xl p-6 transition-colors duration-200 ${
-        darkMode 
-          ? 'bg-gray-800/60 border border-gray-700/50' 
-          : 'bg-white/80 border border-slate-200/50'
-      }`}>
-        <div className="flex items-center justify-between mb-6">
-          <h3 className={`text-xl font-bold transition-colors duration-200 ${
-            darkMode ? 'text-white' : 'text-slate-900'
-          }`}>
-            Performance Trends
-          </h3>
-          <select
-            value={timeRange}
-            onChange={(e) => setTimeRange(e.target.value)}
-            className={`px-3 py-2 rounded-lg border transition-all duration-200 ${
-              darkMode
-                ? 'bg-gray-700 border-gray-600 text-white'
-                : 'bg-white border-slate-200 text-slate-900'
-            } focus:outline-none focus:ring-2 focus:ring-blue-500/20`}
-          >
-            <option value="7d">Last 7 days</option>
-            <option value="30d">Last 30 days</option>
-            <option value="90d">Last 90 days</option>
-          </select>
-        </div>
-        
-        {/* Simple line chart representation */}
-        <div className="relative h-64">
-          <div className="absolute inset-0 flex items-end justify-between px-4">
-            {trendData.map((point, index) => (
-              <div key={index} className="flex flex-col items-center space-y-2">
-                <div className="relative">
-                  <div 
-                    className="w-3 bg-blue-500 rounded-t transition-all duration-1000"
-                    style={{ height: `${(point.accuracy / 100) * 200}px` }}
-                  ></div>
-                  <div className={`absolute -top-8 left-1/2 transform -translate-x-1/2 text-xs font-bold px-2 py-1 rounded ${
-                    darkMode ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-700'
-                  }`}>
-                    {point.accuracy}%
-                  </div>
-                </div>
-                <span className={`text-xs transition-colors duration-200 ${
-                  darkMode ? 'text-gray-400' : 'text-slate-500'
-                }`}>
-                  {point.period}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Legend */}
-        <div className="mt-6 flex flex-wrap gap-4">
-          {[
-            { name: 'Accuracy', color: 'bg-blue-500' },
-            { name: 'Precision', color: 'bg-green-500' },
-            { name: 'Recall', color: 'bg-yellow-500' },
-            { name: 'F1-Score', color: 'bg-purple-500' }
-          ].map((metric, index) => (
-            <div key={index} className="flex items-center space-x-2">
-              <div className={`w-3 h-3 rounded-full ${metric.color}`}></div>
-              <span className={`text-sm transition-colors duration-200 ${
-                darkMode ? 'text-gray-300' : 'text-slate-600'
-              }`}>
-                {metric.name}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className={`min-h-screen transition-colors duration-200 ${
       darkMode 
@@ -244,6 +175,17 @@ export default function VisualizationPage() {
       <AdvancedSidebar />
       
       <div className="ml-16 lg:ml-72 transition-all duration-300">
+        {/* Add simple profile icon at the top */}
+        <div className={`sticky top-0 z-50 backdrop-blur-sm border-b transition-colors duration-200 ${
+          darkMode 
+            ? 'bg-gray-800/60 border-gray-700/30' 
+            : 'bg-white/60 border-slate-200/30'
+        }`}>
+          <div className="px-6 py-4 flex justify-end">
+            <SimpleProfileIcon darkMode={darkMode} />
+          </div>
+        </div>
+        
         {/* Header */}
         <div className={`backdrop-blur-sm border-b transition-colors duration-200 ${
           darkMode 
@@ -275,14 +217,57 @@ export default function VisualizationPage() {
                   <span>Filters</span>
                 </button>
                 
-                <button className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 ${
-                  darkMode 
-                    ? 'bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white' 
-                    : 'bg-white hover:bg-slate-50 border border-slate-200 text-slate-700'
-                }`}>
-                  <Download className="w-4 h-4" />
-                  <span>Export</span>
-                </button>
+                {/* Export Dropdown */}
+                <div className="relative">
+                  <button 
+                    onClick={() => setIsExportDropdownOpen(!isExportDropdownOpen)}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 ${
+                      darkMode 
+                        ? 'bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white' 
+                        : 'bg-white hover:bg-slate-50 border border-slate-200 text-slate-700'
+                    }`}
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>Export</span>
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+                  
+                  {isExportDropdownOpen && (
+                    <div className={`absolute right-0 mt-2 w-48 rounded-lg shadow-lg z-10 ${
+                      darkMode 
+                        ? 'bg-gray-800 border border-gray-700' 
+                        : 'bg-white border border-slate-200'
+                    }`}>
+                      <div className="py-1">
+                        {[
+                          { label: 'Download as PNG', format: 'PNG' },
+                          { label: 'Export to PDF', format: 'PDF' },
+                          { label: 'Save as Excel', format: 'XLSX' },
+                          { label: 'Export Raw Data', format: 'CSV' }
+                        ].map((option, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handleExport(option.format)}
+                            className={`w-full text-left px-4 py-2 text-sm transition-colors duration-200 ${
+                              darkMode 
+                                ? 'hover:bg-gray-700 text-gray-300 hover:text-white' 
+                                : 'hover:bg-slate-100 text-slate-700 hover:text-slate-900'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span>{option.label}</span>
+                              <span className={`text-xs px-2 py-1 rounded ${
+                                darkMode ? 'bg-gray-700 text-gray-300' : 'bg-slate-200 text-slate-600'
+                              }`}>
+                                {option.format}
+                              </span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -317,165 +302,42 @@ export default function VisualizationPage() {
 
         {/* Main Content */}
         <div className="p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             {/* Main Chart Area */}
-            <div className="lg:col-span-2">
-              {selectedChart === 'accuracy-comparison' && renderBarChart(accuracyData, 'Model Accuracy Comparison', '%')}
-              {selectedChart === 'response-time' && renderBarChart(responseTimeData, 'Average Response Time', 's')}
-              {selectedChart === 'cost-analysis' && renderBarChart(costData, 'Cost per 1K Tokens', '$')}
-              {selectedChart === 'performance-trends' && renderTrendChart()}
-            </div>
-
-            {/* Side Panel */}
-            <div className="space-y-6">
-              {/* Chart Info */}
-              <div className={`rounded-2xl p-6 transition-colors duration-200 ${
-                darkMode 
-                  ? 'bg-gray-800/60 border border-gray-700/50' 
-                  : 'bg-white/80 border border-slate-200/50'
-              }`}>
-                <h3 className={`text-lg font-bold mb-4 transition-colors duration-200 ${
-                  darkMode ? 'text-white' : 'text-slate-900'
-                }`}>
-                  Chart Information
-                </h3>
-                
-                {charts.filter(chart => chart.id === selectedChart).map(chart => {
-                  const Icon = chart.icon
-                  return (
-                    <div key={chart.id} className="space-y-4">
-                      <div className="flex items-center space-x-3">
-                        <div className={`p-3 rounded-xl ${
-                          darkMode ? 'bg-blue-600' : 'bg-blue-100'
-                        }`}>
-                          <Icon className={`w-6 h-6 ${
-                            darkMode ? 'text-white' : 'text-blue-600'
-                          }`} />
-                        </div>
-                        <div>
-                          <h4 className={`font-semibold transition-colors duration-200 ${
-                            darkMode ? 'text-white' : 'text-slate-900'
-                          }`}>
-                            {chart.name}
-                          </h4>
-                          <p className={`text-sm transition-colors duration-200 ${
-                            darkMode ? 'text-gray-400' : 'text-slate-600'
-                          }`}>
-                            {chart.description}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-3">
-                        <div className="flex justify-between">
-                          <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-slate-600'}`}>
-                            Last Updated
-                          </span>
-                          <span className={`text-sm font-medium ${darkMode ? 'text-white' : 'text-slate-900'}`}>
-                            2 minutes ago
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-slate-600'}`}>
-                            Data Points
-                          </span>
-                          <span className={`text-sm font-medium ${darkMode ? 'text-white' : 'text-slate-900'}`}>
-                            {selectedChart === 'performance-trends' ? trendData.length : accuracyData.length}
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-slate-600'}`}>
-                            Chart Type
-                          </span>
-                          <span className={`text-sm font-medium ${darkMode ? 'text-white' : 'text-slate-900'}`}>
-                            {selectedChart === 'performance-trends' ? 'Line Chart' : 'Bar Chart'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-
-              {/* Quick Stats */}
-              <div className={`rounded-2xl p-6 transition-colors duration-200 ${
-                darkMode 
-                  ? 'bg-gray-800/60 border border-gray-700/50' 
-                  : 'bg-white/80 border border-slate-200/50'
-              }`}>
-                <h3 className={`text-lg font-bold mb-4 transition-colors duration-200 ${
-                  darkMode ? 'text-white' : 'text-slate-900'
-                }`}>
-                  Quick Stats
-                </h3>
-                
-                <div className="space-y-4">
-                  {[
-                    { label: 'Best Performer', value: 'GPT-4', sublabel: '94.2% accuracy' },
-                    { label: 'Fastest Response', value: 'GPT-3.5', sublabel: '1.2s average' },
-                    { label: 'Most Cost-Effective', value: 'GPT-3.5', sublabel: '$0.002/1K tokens' },
-                    { label: 'Trending Up', value: 'Claude-3', sublabel: '+5.2% this week' }
-                  ].map((stat, index) => (
-                    <div key={index} className={`p-3 rounded-lg transition-colors duration-200 ${
-                      darkMode ? 'bg-gray-700/30' : 'bg-slate-50'
-                    }`}>
-                      <div className="flex justify-between items-center">
-                        <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-slate-600'}`}>
-                          {stat.label}
-                        </span>
-                        <div className="text-right">
-                          <p className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>
-                            {stat.value}
-                          </p>
-                          <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-slate-500'}`}>
-                            {stat.sublabel}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Export Options */}
-              <div className={`rounded-2xl p-6 transition-colors duration-200 ${
-                darkMode 
-                  ? 'bg-gray-800/60 border border-gray-700/50' 
-                  : 'bg-white/80 border border-slate-200/50'
-              }`}>
-                <h3 className={`text-lg font-bold mb-4 transition-colors duration-200 ${
-                  darkMode ? 'text-white' : 'text-slate-900'
-                }`}>
-                  Export Options
-                </h3>
-                
-                <div className="space-y-2">
-                  {[
-                    { label: 'Download as PNG', format: 'PNG' },
-                    { label: 'Export to PDF', format: 'PDF' },
-                    { label: 'Save as Excel', format: 'XLSX' },
-                    { label: 'Export Raw Data', format: 'CSV' }
-                  ].map((option, index) => (
-                    <button
-                      key={index}
-                      className={`w-full text-left p-3 rounded-lg transition-all duration-200 ${
-                        darkMode 
-                          ? 'hover:bg-gray-700/50 text-gray-300 hover:text-white' 
-                          : 'hover:bg-slate-100 text-slate-700 hover:text-slate-900'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">{option.label}</span>
-                        <span className={`text-xs px-2 py-1 rounded ${
-                          darkMode ? 'bg-gray-700 text-gray-300' : 'bg-slate-200 text-slate-600'
-                        }`}>
-                          {option.format}
-                        </span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
+            <div>
+              {selectedChart === 'accuracy-comparison' && (
+                <LineChart 
+                  data={trendData}
+                  title="Model Accuracy Over Time"
+                  metrics={['accuracy']}
+                  metricLabels={{ accuracy: 'Accuracy (%)' }}
+                />
+              )}
+              {selectedChart === 'response-time' && (
+                <LineChart 
+                  data={trendData}
+                  title="Response Time Over Time"
+                  metrics={['responseTime']}
+                  metricLabels={{ responseTime: 'Response Time (s)' }}
+                />
+              )}
+              {selectedChart === 'cost-analysis' && (
+                <PieChart 
+                  data={costData} 
+                  title="Cost Analysis Distribution" 
+                />
+              )}
+              {selectedChart === 'performance-trends' && (
+                <LineChart 
+                  data={trendData}
+                  title="Performance Trends"
+                  metrics={['accuracy', 'responseTime']}
+                  metricLabels={{
+                    accuracy: 'Accuracy (%)',
+                    responseTime: 'Response Time (s)'
+                  }}
+                />
+              )}
             </div>
           </div>
         </div>

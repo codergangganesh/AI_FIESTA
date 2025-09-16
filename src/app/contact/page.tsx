@@ -8,6 +8,7 @@ import AdvancedSidebar from '@/components/layout/AdvancedSidebar'
 import { Mail, Send, Phone, MessageSquare, Clock } from 'lucide-react'
 import { createClient } from '@/utils/supabase/client'
 import SimplifiedNavigation from '@/components/SimplifiedNavigation'
+import SimpleProfileIcon from '@/components/layout/SimpleProfileIcon'
 
 export default function ContactPage() {
   const { user, loading } = useAuth()
@@ -192,6 +193,17 @@ export default function ContactPage() {
     }`}>
       <AdvancedSidebar />
       <div className="ml-16 lg:ml-72">
+        {/* Add simple profile icon at the top */}
+        <div className={`sticky top-0 z-50 backdrop-blur-sm border-b transition-colors duration-200 ${
+          darkMode 
+            ? 'bg-gray-800/60 border-gray-700/30' 
+            : 'bg-white/60 border-slate-200/30'
+        }`}>
+          <div className="px-6 py-4 flex justify-end">
+            <SimpleProfileIcon darkMode={darkMode} />
+          </div>
+        </div>
+        
         <SimplifiedNavigation />
         
         <main className="max-w-6xl mx-auto px-6 py-8">
