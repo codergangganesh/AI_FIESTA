@@ -6,9 +6,10 @@ import { useSearchParams } from 'next/navigation'
 import { ArrowRight, MessageSquare, Zap, BarChart3, Shield, Clock, Users, Brain, Sparkles, Star, ChevronRight, Play, Globe, TrendingUp, Award, Infinity, Cpu, Layers, GitBranch, Settings as SettingsIcon, LogOut } from 'lucide-react'
 import ModernModelShowcase from './ModernModelShowcase'
 import { useEffect, useState } from 'react'
+import { useDarkMode } from '@/contexts/DarkModeContext'
 
 export default function LandingPage() {
-  const { user } = useAuth()
+  const { user, signOut } = useAuth()
   const { darkMode } = useDarkMode()
   const [showSuccessPopup, setShowSuccessPopup] = useState(false)
   const [popupMessage, setPopupMessage] = useState('')
@@ -46,14 +47,11 @@ export default function LandingPage() {
   const getProfilePicture = () => {
     // Check if avatar_url exists in user_metadata
     if (user?.user_metadata?.avatar_url) {
-      return user.user_metadata.avatar_url
+      return user.user_metadata.avatar_url;
     }
-    // If not, check if there's an avatar_url directly on the user object
-    if (user?.avatar_url) {
-      return user.avatar_url
-    }
-    return null
-  }
+    // If not, return null (the avatar_url does not exist directly on the user object)
+    return null;
+  };
   
   const features = [
     {
