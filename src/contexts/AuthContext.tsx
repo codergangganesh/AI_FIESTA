@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User } from '@supabase/supabase-js';
 import { createClient } from '@/utils/supabase/client';
+import DeleteAccountSuccessDialog from '@/components/auth/DeleteAccountSuccessDialog';
 
 interface AuthContextType {
   user: User | null;
@@ -13,6 +14,7 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<void>;
   signInWithGithub: () => Promise<void>;
   deleteAccount: (password: string) => Promise<{ error?: { message: string } }>;
+  showDeleteSuccess: boolean;
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -24,6 +26,7 @@ export const AuthContext = createContext<AuthContextType>({
   signInWithGoogle: async () => {},
   signInWithGithub: async () => {},
   deleteAccount: async () => ({ error: { message: 'Not implemented' } }),
+  showDeleteSuccess: false,
 });
 
 export function useAuth() {
@@ -33,6 +36,7 @@ export function useAuth() {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false);
   const supabase = createClient();
 
   // Define deleteAccount inside AuthProvider to have access to supabase client
@@ -109,6 +113,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Sign out the user
       await signOut();
+      
+      // Show success popup
+      setShowDeleteSuccess(true);
+      
+      // Hide success popup and redirect after 3 seconds
+      setTimeout(() => {
+        setShowDeleteSuccess(false);
+        if (typeof window !== 'undefined') {
+          window.location.href = '/';
+        }
+      }, 3000);
       
       return {};
     } catch (error) {
@@ -320,7 +335,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signInWithGoogle,
     signInWithGithub,
     deleteAccount,
+    showDeleteSuccess,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+      {showDeleteSuccess && <DeleteAccountSuccessDialog isOpen={showDeleteSuccess} />}
+    </AuthContext.Provider>
+  );
 }
