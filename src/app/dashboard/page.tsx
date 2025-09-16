@@ -53,6 +53,7 @@ interface PerformanceTrendData {
   responseTime: number
   messagesTyped: number
   modelDataTime: number
+  [key: string]: string | number
 }
 
 export default function DashboardPage() {
@@ -366,145 +367,43 @@ export default function DashboardPage() {
             />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Recent Activity */}
-            <div className="lg:col-span-2">
-              <div className={`rounded-2xl overflow-hidden transition-colors duration-200 ${
-                darkMode 
-                  ? 'bg-gray-800/60 border border-gray-700/50' 
-                  : 'bg-white/80 border border-slate-200/50'
+          {/* Quick Actions */}
+          <div className={`rounded-2xl overflow-hidden transition-colors duration-200 ${
+            darkMode 
+              ? 'bg-gray-800/60 border border-gray-700/50' 
+              : 'bg-white/80 border border-slate-200/50'
+          }`}>
+            <div className="p-6 border-b border-current border-opacity-10">
+              <h2 className={`text-xl font-bold transition-colors duration-200 ${
+                darkMode ? 'text-white' : 'text-slate-900'
               }`}>
-                <div className="p-6 border-b border-current border-opacity-10">
-                  <h2 className={`text-xl font-bold transition-colors duration-200 ${
-                    darkMode ? 'text-white' : 'text-slate-900'
-                  }`}>
-                    Recent Activity
-                  </h2>
-                </div>
-                
-                <div className="p-6">
-                  <div className="space-y-4">
-                    {recentActivities.map((activity) => (
-                      <div
-                        key={activity.id}
-                        className={`flex items-start space-x-4 p-4 rounded-xl transition-colors duration-200 ${
-                          darkMode ? 'bg-gray-700/30' : 'bg-slate-50'
-                        }`}
-                      >
-                        <div className="flex-shrink-0 mt-1">
-                          {getStatusIcon(activity.status)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
-                            <p className={`text-sm font-medium transition-colors duration-200 ${
-                              darkMode ? 'text-white' : 'text-slate-900'
-                            }`}>
-                              {activity.type}
-                            </p>
-                            <span className={`text-xs transition-colors duration-200 ${
-                              darkMode ? 'text-gray-400' : 'text-slate-500'
-                            }`}>
-                              {activity.timestamp}
-                            </span>
-                          </div>
-                          <p className={`text-sm mt-1 transition-colors duration-200 ${
-                            darkMode ? 'text-gray-400' : 'text-slate-600'
-                          }`}>
-                            {activity.description}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+                Quick Actions
+              </h2>
             </div>
-
-            {/* Quick Actions */}
-            <div className="space-y-6">
-              <div className={`rounded-2xl overflow-hidden transition-colors duration-200 ${
-                darkMode 
-                  ? 'bg-gray-800/60 border border-gray-700/50' 
-                  : 'bg-white/80 border border-slate-200/50'
-              }`}>
-                <div className="p-6 border-b border-current border-opacity-10">
-                  <h2 className={`text-xl font-bold transition-colors duration-200 ${
-                    darkMode ? 'text-white' : 'text-slate-900'
-                  }`}>
-                    Quick Actions
-                  </h2>
-                </div>
-                
-                <div className="p-6 space-y-3">
-                  {[
-                    { label: 'New Comparison', href: '/model-comparison', icon: GitCompare },
-                    { label: 'Analyze Dataset', href: '/dataset-analysis', icon: Database },
-                    { label: 'View Charts', href: '/visualization', icon: BarChart3 }
-                  ].map((action, index) => {
-                    const Icon = action.icon
-                    return (
-                      <a
-                        key={index}
-                        href={action.href}
-                        className={`flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 group ${
-                          darkMode 
-                            ? 'hover:bg-gray-700/50 text-gray-300 hover:text-white' 
-                            : 'hover:bg-slate-100 text-slate-700 hover:text-slate-900'
-                        }`}
-                      >
-                        <Icon className="w-5 h-5" />
-                        <span className="text-sm font-medium">{action.label}</span>
-                        <ArrowUpRight className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                      </a>
-                    )
-                  })}
-                </div>
-              </div>
-
-              {/* Usage Overview */}
-              <div className={`rounded-2xl overflow-hidden transition-colors duration-200 ${
-                darkMode 
-                  ? 'bg-gray-800/60 border border-gray-700/50' 
-                  : 'bg-white/80 border border-slate-200/50'
-              }`}>
-                <div className="p-6 border-b border-current border-opacity-10">
-                  <h2 className={`text-xl font-bold transition-colors duration-200 ${
-                    darkMode ? 'text-white' : 'text-slate-900'
-                  }`}>
-                    Usage This Month
-                  </h2>
-                </div>
-                
-                <div className="p-6 space-y-4">
-                  <div className="space-y-3">
-                    <div className="flex justify-between text-sm">
-                      <span className={darkMode ? 'text-gray-300' : 'text-slate-600'}>
-                        API Calls
-                      </span>
-                      <span className={darkMode ? 'text-white' : 'text-slate-900'}>
-                        1,247 / 2,000
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-                      <div className="bg-blue-600 h-2 rounded-full" style={{width: '62%'}}></div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <div className="flex justify-between text-sm">
-                      <span className={darkMode ? 'text-gray-300' : 'text-slate-600'}>
-                        Storage
-                      </span>
-                      <span className={darkMode ? 'text-white' : 'text-slate-900'}>
-                        2.3 GB / 5 GB
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-                      <div className="bg-purple-600 h-2 rounded-full" style={{width: '46%'}}></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            
+            <div className="p-6 space-y-3">
+              {[
+                { label: 'New Comparison', href: '/model-comparison', icon: GitCompare },
+                { label: 'Analyze Dataset', href: '/dataset-analysis', icon: Database },
+                { label: 'View Charts', href: '/visualization', icon: BarChart3 }
+              ].map((action, index) => {
+                const Icon = action.icon
+                return (
+                  <a
+                    key={index}
+                    href={action.href}
+                    className={`flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 group ${
+                      darkMode 
+                        ? 'hover:bg-gray-700/50 text-gray-300 hover:text-white' 
+                        : 'hover:bg-slate-100 text-slate-700 hover:text-slate-900'
+                    }`}
+                  >
+                    <Icon className="w-5 h-5" />
+                    <span className="text-sm font-medium">{action.label}</span>
+                    <ArrowUpRight className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                  </a>
+                )
+              })}
             </div>
           </div>
         </div>
