@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useDarkMode } from '@/contexts/DarkModeContext'
 import { useAuth } from '@/contexts/AuthContext'
 import AdvancedSidebar from '@/components/layout/AdvancedSidebar'
@@ -24,7 +24,8 @@ import {
   Target,
   Timer,
   Download,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  X
 } from 'lucide-react'
 import SimpleProfileIcon from '@/components/layout/SimpleProfileIcon'
 
@@ -69,6 +70,10 @@ export default function DashboardPage() {
   const [comparisonData, setComparisonData] = useState<ModelComparisonData[]>([])
   const [trendData, setTrendData] = useState<PerformanceTrendData[]>([])
   const [hasComparisons, setHasComparisons] = useState(false)
+  const [isExportOpen, setIsExportOpen] = useState(false)
+  const [exportPosition, setExportPosition] = useState<'bottom' | 'top'>('bottom')
+  
+  const exportRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     // Simulate loading dashboard data
@@ -167,6 +172,37 @@ export default function DashboardPage() {
     loadDashboardData()
   }, [])
 
+  // Close export dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (exportRef.current && !exportRef.current.contains(event.target as Node)) {
+        setIsExportOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
+
+  // Position dropdown based on available space
+  useEffect(() => {
+    if (isExportOpen && exportRef.current) {
+      const buttonRect = exportRef.current.getBoundingClientRect()
+      const dropdownHeight = 200 // Approximate height
+      const spaceBelow = window.innerHeight - buttonRect.bottom
+      const spaceAbove = buttonRect.top
+      
+      // Position dropdown above if not enough space below
+      if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
+        setExportPosition('top')
+      } else {
+        setExportPosition('bottom')
+      }
+    }
+  }, [isExportOpen])
+
   // Transform comparison data for bar charts
   const responseTimeData = comparisonData.map(item => ({
     name: item.modelName,
@@ -217,10 +253,123 @@ export default function DashboardPage() {
     return colors[color as keyof typeof colors] || colors.blue
   }
 
+  // Function to convert data to CSV format
+  const convertToCSV = (data: any[]) => {
+    if (!data || data.length === 0) return ''
+    
+    const headers = Object.keys(data[0]).join(',')
+    const rows = data.map(obj => 
+      Object.values(obj).map(value => 
+        typeof value === 'string' ? `"${value}"` : value
+      ).join(',')
+    ).join('\n')
+    
+    return `${headers}\n${rows}`
+  }
+
+  // Function to download data as CSV
+  const downloadCSV = (data: any[], filename: string) => {
+    const csv = convertToCSV(data)
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.setAttribute('href', url)
+    link.setAttribute('download', filename)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
+  // Function to download data as JSON
+  const downloadJSON = (data: any, filename: string) => {
+    const json = JSON.stringify(data, null, 2)
+    const blob = new Blob([json], { type: 'application/json;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.setAttribute('href', url)
+    link.setAttribute('download', filename)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
+  // Export dashboard data to Excel (CSV format)
   const handleExportToExcel = () => {
-    // In a real application, this would export the actual dashboard data
-    console.log('Exporting dashboard data to Excel')
-    alert('Dashboard data exported to Excel successfully!')
+    // Prepare data for export
+    const exportData = {
+      timestamp: new Date().toISOString(),
+      user: user?.email,
+      metrics: metrics,
+      comparisonData: comparisonData,
+      trendData: trendData,
+      recentActivities: recentActivities
+    }
+    
+    // Download as JSON for now (in a real app, you might use a library like xlsx)
+    downloadJSON(exportData, `dashboard-export-${new Date().toISOString().slice(0, 10)}.json`)
+    setIsExportOpen(false)
+  }
+
+  // Export dashboard data to CSV
+  const handleExportToCSV = () => {
+    // Prepare data for export in a structured format
+    let csvContent = "Dashboard Export Report\n"
+    csvContent += `Generated on: ${new Date().toISOString()}\n`
+    csvContent += `User: ${user?.email || 'N/A'}\n\n`
+    
+    // Metrics section
+    csvContent += "Metrics\n"
+    csvContent += "Title,Value,Change,Trend\n"
+    metrics.forEach(metric => {
+      csvContent += `"${metric.title}","${metric.value}","${metric.change}","${metric.trend}"\n`
+    })
+    
+    csvContent += "\n"
+    
+    // Comparison Data section
+    csvContent += "Model Comparison Data\n"
+    csvContent += "Model Name,Response Time (s),Messages Typed,Data Processing Time (s)\n"
+    comparisonData.forEach(data => {
+      csvContent += `"${data.modelName}",${data.responseTime},${data.messagesTyped},${data.modelDataTime}\n`
+    })
+    
+    csvContent += "\n"
+    
+    // Trend Data section
+    csvContent += "Performance Trends\n"
+    csvContent += "Period,Response Time (s),Messages Typed,Data Processing Time (s)\n"
+    trendData.forEach(data => {
+      csvContent += `"${data.period}",${data.responseTime},${data.messagesTyped},${data.modelDataTime}\n`
+    })
+    
+    csvContent += "\n"
+    
+    // Recent Activities section
+    csvContent += "Recent Activities\n"
+    csvContent += "Type,Description,Timestamp,Status\n"
+    recentActivities.forEach(activity => {
+      csvContent += `"${activity.type}","${activity.description}","${activity.timestamp}","${activity.status}"\n`
+    })
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.setAttribute('href', url)
+    link.setAttribute('download', `dashboard-export-${new Date().toISOString().slice(0, 10)}.csv`)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    setIsExportOpen(false)
+  }
+
+  // Export dashboard data to PDF (placeholder)
+  const handleExportToPDF = () => {
+    // In a real implementation, you would use a library like jsPDF or html2pdf
+    alert('PDF export functionality would generate a professional report of your dashboard data.')
+    setIsExportOpen(false)
   }
 
   if (isLoading) {
@@ -277,47 +426,104 @@ export default function DashboardPage() {
                 </p>
               </div>
               
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
                 {/* Simple Profile Icon */}
                 <SimpleProfileIcon darkMode={darkMode} />
                 
                 {/* Export Dropdown */}
-                <div className="relative">
-                  <button className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 ${
-                    darkMode 
-                      ? 'bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white' 
-                      : 'bg-white hover:bg-slate-50 border border-slate-200 text-slate-700'
-                  }`}>
+                <div className="relative" ref={exportRef}>
+                  <button 
+                    onClick={() => setIsExportOpen(!isExportOpen)}
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 ${
+                      darkMode 
+                        ? 'bg-gray-700/80 hover:bg-gray-600 text-gray-200 hover:text-white border border-gray-600' 
+                        : 'bg-white/90 hover:bg-white border border-slate-200 text-slate-700 hover:text-slate-900 shadow-sm'
+                    }`}
+                  >
                     <Download className="w-4 h-4" />
-                    <span>Export</span>
+                    <span className="font-medium">Export</span>
                   </button>
                   
                   {/* Dropdown menu for export options */}
-                  <div className={`absolute right-0 mt-2 w-48 rounded-lg shadow-lg z-10 ${
-                    darkMode 
-                      ? 'bg-gray-800 border border-gray-700' 
-                      : 'bg-white border border-slate-200'
-                  }`}>
-                    <div className="py-1">
-                      <button
-                        onClick={handleExportToExcel}
-                        className={`w-full text-left px-4 py-2 text-sm transition-colors duration-200 ${
-                          darkMode 
-                            ? 'hover:bg-gray-700 text-gray-300 hover:text-white' 
-                            : 'hover:bg-slate-100 text-slate-700 hover:text-slate-900'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span>Export to Excel</span>
-                          <span className={`text-xs px-2 py-1 rounded ${
-                            darkMode ? 'bg-gray-700 text-gray-300' : 'bg-slate-200 text-slate-600'
+                  {isExportOpen && (
+                    <div 
+                      className={`absolute right-0 w-56 rounded-xl shadow-xl z-20 overflow-hidden transform transition-all duration-200 ease-in-out ${
+                        darkMode 
+                          ? 'bg-gray-800/95 border border-gray-700 backdrop-blur-xl' 
+                          : 'bg-white/95 border border-slate-200 backdrop-blur-xl'
+                      }`}
+                      style={exportPosition === 'top' ? { bottom: '100%', marginBottom: '0.5rem' } : { top: '100%', marginTop: '0.5rem' }}
+                    >
+                      <div className="py-1">
+                        <div className={`px-4 py-3 border-b ${
+                          darkMode ? 'border-gray-700' : 'border-slate-200'
+                        }`}>
+                          <h3 className={`text-sm font-semibold ${
+                            darkMode ? 'text-gray-200' : 'text-slate-800'
                           }`}>
-                            XLSX
-                          </span>
+                            Export Dashboard Data
+                          </h3>
                         </div>
-                      </button>
+                        <button
+                          onClick={handleExportToExcel}
+                          className={`w-full text-left px-4 py-3 text-sm transition-colors duration-200 flex items-center justify-between ${
+                            darkMode 
+                              ? 'hover:bg-gray-700/50 text-gray-300 hover:text-white' 
+                              : 'hover:bg-slate-100 text-slate-700 hover:text-slate-900'
+                          }`}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <div className={`w-8 h-8 rounded-md flex items-center justify-center ${
+                              darkMode ? 'bg-blue-900/30' : 'bg-blue-100'
+                            }`}>
+                              <span className={`text-xs font-bold ${
+                                darkMode ? 'text-blue-400' : 'text-blue-600'
+                              }`}>XLSX</span>
+                            </div>
+                            <span>Export to Excel</span>
+                          </div>
+                        </button>
+                        <button
+                          onClick={handleExportToCSV}
+                          className={`w-full text-left px-4 py-3 text-sm transition-colors duration-200 flex items-center justify-between ${
+                            darkMode 
+                              ? 'hover:bg-gray-700/50 text-gray-300 hover:text-white' 
+                              : 'hover:bg-slate-100 text-slate-700 hover:text-slate-900'
+                          }`}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <div className={`w-8 h-8 rounded-md flex items-center justify-center ${
+                              darkMode ? 'bg-green-900/30' : 'bg-green-100'
+                            }`}>
+                              <span className={`text-xs font-bold ${
+                                darkMode ? 'text-green-400' : 'text-green-600'
+                              }`}>CSV</span>
+                            </div>
+                            <span>Export to CSV</span>
+                          </div>
+                        </button>
+                        <button
+                          onClick={handleExportToPDF}
+                          className={`w-full text-left px-4 py-3 text-sm transition-colors duration-200 flex items-center justify-between ${
+                            darkMode 
+                              ? 'hover:bg-gray-700/50 text-gray-300 hover:text-white' 
+                              : 'hover:bg-slate-100 text-slate-700 hover:text-slate-900'
+                          }`}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <div className={`w-8 h-8 rounded-md flex items-center justify-center ${
+                              darkMode ? 'bg-red-900/30' : 'bg-red-100'
+                            }`}>
+                              <span className={`text-xs font-bold ${
+                                darkMode ? 'text-red-400' : 'text-red-600'
+                              }`}>PDF</span>
+                            </div>
+                            <span>Export to PDF</span>
+                          </div>
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
                 
                 <div className={`px-4 py-2 rounded-xl transition-colors duration-200 ${
