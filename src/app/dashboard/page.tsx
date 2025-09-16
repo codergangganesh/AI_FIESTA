@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { useDarkMode } from '@/contexts/DarkModeContext'
 import { useAuth } from '@/contexts/AuthContext'
 import AdvancedSidebar from '@/components/layout/AdvancedSidebar'
+import BarChart from '@/components/dashboard/BarChart'
+import LineChart from '@/components/dashboard/LineChart'
 import {
   TrendingUp,
   Users,
@@ -17,7 +19,9 @@ import {
   AlertCircle,
   ArrowUpRight,
   Brain,
-  Sparkles
+  Sparkles,
+  Target,
+  Timer
 } from 'lucide-react'
 
 interface MetricCard {
@@ -37,12 +41,29 @@ interface RecentActivity {
   status: 'success' | 'pending' | 'error'
 }
 
+interface ModelComparisonData {
+  modelName: string
+  responseTime: number
+  messagesTyped: number
+  modelDataTime: number
+}
+
+interface PerformanceTrendData {
+  period: string
+  responseTime: number
+  messagesTyped: number
+  modelDataTime: number
+}
+
 export default function DashboardPage() {
   const { darkMode } = useDarkMode()
   const { user } = useAuth()
   const [metrics, setMetrics] = useState<MetricCard[]>([])
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [comparisonData, setComparisonData] = useState<ModelComparisonData[]>([])
+  const [trendData, setTrendData] = useState<PerformanceTrendData[]>([])
+  const [hasComparisons, setHasComparisons] = useState(false)
 
   useEffect(() => {
     // Simulate loading dashboard data
@@ -109,11 +130,56 @@ export default function DashboardPage() {
         }
       ])
 
+      // Check if user has made any comparisons
+      // In a real app, this would come from the database
+      const userHasComparisons = Math.random() > 0.5 // Random for demo purposes
+      setHasComparisons(userHasComparisons)
+
+      if (userHasComparisons) {
+        // Sample comparison data
+        setComparisonData([
+          { modelName: 'GPT-4', responseTime: 1.2, messagesTyped: 24, modelDataTime: 0.8 },
+          { modelName: 'Claude-3', responseTime: 1.5, messagesTyped: 22, modelDataTime: 1.1 },
+          { modelName: 'Gemini Pro', responseTime: 1.8, messagesTyped: 20, modelDataTime: 1.3 },
+          { modelName: 'LLaMA 3', responseTime: 2.1, messagesTyped: 18, modelDataTime: 1.7 },
+          { modelName: 'Qwen 2.5', responseTime: 2.3, messagesTyped: 16, modelDataTime: 1.9 }
+        ])
+
+        // Sample trend data
+        setTrendData([
+          { period: 'Week 1', responseTime: 2.1, messagesTyped: 15, modelDataTime: 1.8 },
+          { period: 'Week 2', responseTime: 1.9, messagesTyped: 17, modelDataTime: 1.6 },
+          { period: 'Week 3', responseTime: 1.7, messagesTyped: 19, modelDataTime: 1.4 },
+          { period: 'Week 4', responseTime: 1.5, messagesTyped: 21, modelDataTime: 1.2 },
+          { period: 'Week 5', responseTime: 1.3, messagesTyped: 23, modelDataTime: 1.0 },
+          { period: 'Week 6', responseTime: 1.2, messagesTyped: 24, modelDataTime: 0.8 }
+        ])
+      }
+
       setIsLoading(false)
     }
 
     loadDashboardData()
   }, [])
+
+  // Transform comparison data for bar charts
+  const responseTimeData = comparisonData.map(item => ({
+    name: item.modelName,
+    value: item.responseTime,
+    color: '#3B82F6' // Blue
+  }))
+
+  const messagesTypedData = comparisonData.map(item => ({
+    name: item.modelName,
+    value: item.messagesTyped,
+    color: '#10B981' // Green
+  }))
+
+  const modelDataTimeData = comparisonData.map(item => ({
+    name: item.modelName,
+    value: item.modelDataTime,
+    color: '#8B5CF6' // Purple
+  }))
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -268,6 +334,38 @@ export default function DashboardPage() {
             })}
           </div>
 
+          {/* Charts Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <BarChart 
+              data={responseTimeData} 
+              title="Response Time Comparison" 
+              unit="s"
+            />
+            <BarChart 
+              data={messagesTypedData} 
+              title="Messages Typed per Model" 
+              unit=""
+            />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <BarChart 
+              data={modelDataTimeData} 
+              title="Model Data Processing Time" 
+              unit="s"
+            />
+            <LineChart 
+              data={trendData} 
+              title="Performance Trends Over Time" 
+              metrics={['responseTime', 'messagesTyped', 'modelDataTime']}
+              metricLabels={{
+                responseTime: 'Response Time',
+                messagesTyped: 'Messages Typed',
+                modelDataTime: 'Data Processing Time'
+              }}
+            />
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Recent Activity */}
             <div className="lg:col-span-2">
@@ -339,7 +437,7 @@ export default function DashboardPage() {
                 
                 <div className="p-6 space-y-3">
                   {[
-                    { label: 'New Comparison', href: '/chat', icon: GitCompare },
+                    { label: 'New Comparison', href: '/model-comparison', icon: GitCompare },
                     { label: 'Analyze Dataset', href: '/dataset-analysis', icon: Database },
                     { label: 'View Charts', href: '/visualization', icon: BarChart3 }
                   ].map((action, index) => {
