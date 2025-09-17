@@ -3,14 +3,14 @@
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
 import { useSearchParams } from 'next/navigation'
-import { ArrowRight, MessageSquare, Zap, BarChart3, Shield, Clock, Users, Brain, Sparkles, Star, ChevronRight, Play, Globe, TrendingUp, Award, Infinity, Cpu, Layers, GitBranch, Settings as SettingsIcon, LogOut } from 'lucide-react'
+import { ArrowRight, MessageSquare, Zap, BarChart3, Shield, Clock, Users, Brain, Sparkles, Star, ChevronRight, Play, Globe, TrendingUp, Award, Infinity, Cpu, Layers, GitBranch, Settings as SettingsIcon, LogOut, Moon, Sun, DollarSign, MessageCircle } from 'lucide-react'
 import ModernModelShowcase from './ModernModelShowcase'
 import { useEffect, useState } from 'react'
 import { useDarkMode } from '@/contexts/DarkModeContext'
 
 export default function LandingPage() {
   const { user, signOut } = useAuth()
-  const { darkMode } = useDarkMode()
+  const { darkMode, toggleDarkMode } = useDarkMode()
   const [showSuccessPopup, setShowSuccessPopup] = useState(false)
   const [popupMessage, setPopupMessage] = useState('')
   const searchParams = useSearchParams()
@@ -179,106 +179,126 @@ export default function LandingPage() {
             <div className="flex items-center space-x-4">
               {user ? (
                 <>
-                  {/* Pricing link with modern black and gold design - responsive and smaller font */}
+                  {/* Pricing link with modern design - icon only */}
                   <Link
                     href="/payment"
-                    className="relative flex items-center space-x-2 px-3 py-1.5 rounded-lg font-bold transition-all duration-300 group overflow-hidden whitespace-nowrap"
+                    className="relative flex items-center justify-center p-2 rounded-full font-bold transition-all duration-300 group overflow-hidden"
+                    title="Pricing"
                   >
                     {/* Animated gold border - always visible with hover effect */}
-                    <div className="absolute inset-0 rounded-lg">
-                      <div className="absolute inset-0 rounded-lg border-2 border-yellow-400/50 group-hover:border-yellow-400 transition-all duration-300"></div>
-                      <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-yellow-400/10 to-yellow-600/10 opacity-100 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="absolute inset-0 rounded-full">
+                      <div className="absolute inset-0 rounded-full border-2 border-yellow-400/50 group-hover:border-yellow-400 transition-all duration-300"></div>
+                      <div className="absolute inset-0 rounded-full bg-gradient-to-r from-yellow-400/10 to-yellow-600/10 opacity-100 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
                       
-                    {/* Black background with gold text - always visible */}
-                    <div className="relative flex items-center space-x-1.5 bg-black px-3 py-1.5 rounded-lg">
-                      <span className="text-yellow-400 text-xs tracking-widest">Pricing</span>
-                      <svg className="w-3 h-3 text-yellow-400 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0 0 18 0z" />
-                      </svg>
+                    {/* Transparent background with gold icon - always visible */}
+                    <div className="relative flex items-center justify-center p-2 rounded-full">
+                      <DollarSign className="w-5 h-5 text-yellow-400" />
                     </div>
                   </Link>
                   
-                  {/* Feedback link with modern black and gold design - responsive and smaller font */}
+                  {/* Feedback link with modern design - icon only */}
                   <Link
                     href="/public-feedback"
-                    className="relative flex items-center space-x-2 px-3 py-1.5 rounded-lg font-bold transition-all duration-300 group overflow-hidden whitespace-nowrap"
+                    className="relative flex items-center justify-center p-2 rounded-full font-bold transition-all duration-300 group overflow-hidden"
+                    title="Feedback"
                   >
                     {/* Animated gold border - always visible with hover effect */}
-                    <div className="absolute inset-0 rounded-lg">
-                      <div className="absolute inset-0 rounded-lg border-2 border-yellow-400/50 group-hover:border-yellow-400 transition-all duration-300"></div>
-                      <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-yellow-400/10 to-yellow-600/10 opacity-100 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div className="absolute inset-0 rounded-full">
+                      <div className="absolute inset-0 rounded-full border-2 border-yellow-400/50 group-hover:border-yellow-400 transition-all duration-300"></div>
+                      <div className="absolute inset-0 rounded-full bg-gradient-to-r from-yellow-400/10 to-yellow-600/10 opacity-100 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
                       
-                    {/* Black background with gold text - always visible */}
-                    <div className="relative flex items-center space-x-1.5 bg-black px-3 py-1.5 rounded-lg">
-                      <span className="text-yellow-400 text-xs tracking-widest">Feedback</span>
-                      <svg className="w-3 h-3 text-yellow-400 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0 0 18 0z" />
-                      </svg>
+                    {/* Transparent background with gold icon - always visible */}
+                    <div className="relative flex items-center justify-center p-2 rounded-full">
+                      <MessageCircle className="w-5 h-5 text-yellow-400" />
                     </div>
                   </Link>
                   
                   {/* Profile icon for logged-in users */}
-                  <div className="relative group">
-                    <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${darkMode ? 'from-blue-500 to-purple-600' : 'from-blue-500 to-purple-600'} flex items-center justify-center text-white font-bold cursor-pointer`}
+                  <div className="flex items-center space-x-2">
+                    {/* Dark mode toggle button */}
+                    <button
+                      onClick={toggleDarkMode}
+                      className={`p-2 rounded-full ${darkMode ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'} transition-colors duration-200`}
+                      aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
                     >
-                      {getProfilePicture() ? (
-                        <img src={getProfilePicture()} alt="Profile" className="w-full h-full rounded-full object-cover" />
-                      ) : (
-                        user.email?.charAt(0).toUpperCase() || 'U'
-                      )}
-                    </div>
-                    {/* Dropdown menu */}
-                    <div className={`absolute right-0 mt-2 w-48 rounded-xl ${darkMode ? 'bg-gray-800/60 border-gray-700/50' : 'bg-white/90 border-slate-200/50'} shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50`}>
-                      <Link
-                        href="/chat"
-                        className={`flex items-center space-x-2 px-4 py-2 text-slate-700 ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-slate-100'} rounded-lg transition-colors`}
+                      {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                    </button>
+                    
+                    <div className="relative group">
+                      <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${darkMode ? 'from-blue-500 to-purple-600 ring-2 ring-white/30' : 'from-blue-500 to-purple-600'} flex items-center justify-center text-white font-bold cursor-pointer transition-all duration-200 hover:scale-105`}
                       >
-                        <MessageSquare className="w-4 h-4" />
-                        <span>Chat</span>
-                      </Link>
-                      <Link
-                        href="/history"
-                        className={`flex items-center space-x-2 px-4 py-2 text-slate-700 ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-slate-100'} rounded-lg transition-colors`}
-                      >
-                        <Clock className="w-4 h-4" />
-                        <span>History</span>
-                      </Link>
-                      <Link
-                        href="/account-settings"
-                        className={`flex items-center space-x-2 px-4 py-2 text-slate-700 ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-slate-100'} rounded-lg transition-colors`}
-                      >
-                        <SettingsIcon className="w-4 h-4" />
-                        <span>Account Settings</span>
-                      </Link>
-                      <div className={`border-t ${darkMode ? 'border-gray-700/50' : 'border-slate-200/50'} my-2`}></div>
-                      <Link
-                        href="/public-feedback"
-                        className={`flex items-center space-x-2 px-4 py-2 text-slate-700 ${darkMode ? 'hover:bg-gray-700' : 'hover:bg-slate-100'} rounded-lg transition-colors`}
-                      >
-                        <Star className="w-4 h-4" />
-                        <span>User Voices</span>
-                      </Link>
-                      <div className={`border-t ${darkMode ? 'border-gray-700/50' : 'border-slate-200/50'} my-2`}></div>
-                      <button
-                        onClick={handleSignOut}
-                        className="flex items-center space-x-2 px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors w-full text-left"
-                      >
-                        <LogOut className="w-4 h-4" />
-                        <span>Logout</span>
-                      </button>
+                        {profilePicture ? (
+                          <img src={profilePicture} alt="Profile" className="w-full h-full rounded-full object-cover" />
+                        ) : (
+                          <span className={`${darkMode ? 'text-white' : 'text-white'}`}>
+                            {getUserInitials()}
+                          </span>
+                        )}
+                      </div>
+                      {/* Dropdown menu */}
+                      <div className={`absolute right-0 mt-2 w-48 rounded-xl ${darkMode ? 'bg-gray-800/90 border-gray-700/50 backdrop-blur-lg' : 'bg-white/90 border-slate-200/50'} shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50`}>
+                        <Link
+                          href="/chat"
+                          className={`flex items-center space-x-2 px-4 py-2 ${darkMode ? 'text-gray-200 hover:bg-gray-700' : 'text-slate-700 hover:bg-slate-100'} rounded-lg transition-colors`}
+                        >
+                          <MessageSquare className="w-4 h-4" />
+                          <span>Chat</span>
+                        </Link>
+                        <Link
+                          href="/history"
+                          className={`flex items-center space-x-2 px-4 py-2 ${darkMode ? 'text-gray-200 hover:bg-gray-700' : 'text-slate-700 hover:bg-slate-100'} rounded-lg transition-colors`}
+                        >
+                          <Clock className="w-4 h-4" />
+                          <span>History</span>
+                        </Link>
+                        <Link
+                          href="/account-settings"
+                          className={`flex items-center space-x-2 px-4 py-2 ${darkMode ? 'text-gray-200 hover:bg-gray-700' : 'text-slate-700 hover:bg-slate-100'} rounded-lg transition-colors`}
+                        >
+                          <SettingsIcon className="w-4 h-4" />
+                          <span>Account Settings</span>
+                        </Link>
+                        <div className={`border-t ${darkMode ? 'border-gray-700/50' : 'border-slate-200/50'} my-2`}></div>
+                        <Link
+                          href="/public-feedback"
+                          className={`flex items-center space-x-2 px-4 py-2 ${darkMode ? 'text-gray-200 hover:bg-gray-700' : 'text-slate-700 hover:bg-slate-100'} rounded-lg transition-colors`}
+                        >
+                          <Star className="w-4 h-4" />
+                          <span>User Voices</span>
+                        </Link>
+                        <div className={`border-t ${darkMode ? 'border-gray-700/50' : 'border-slate-200/50'} my-2`}></div>
+                        <button
+                          onClick={handleSignOut}
+                          className={`flex items-center space-x-2 px-4 py-2 ${darkMode ? 'text-gray-200 hover:bg-gray-700' : 'text-slate-700 hover:bg-slate-100'} rounded-lg transition-colors w-full text-left`}
+                        >
+                          <LogOut className="w-4 h-4" />
+                          <span>Logout</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </>
               ) : (
-                // Sign in button for non-logged-in users
-                <Link
-                  href="/auth"
-                  className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-xl text-sm font-semibold hover:shadow-lg transition-all duration-200 hover:scale-105"
-                >
-                  Get Started
-                </Link>
+                <div className="flex items-center space-x-4">
+                  {/* Dark mode toggle button for non-logged-in users */}
+                  <button
+                    onClick={toggleDarkMode}
+                    className={`p-2 rounded-full ${darkMode ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'} transition-colors duration-200`}
+                    aria-label={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+                  >
+                    {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                  </button>
+                  
+                  {/* Sign in button for non-logged-in users */}
+                  <Link
+                    href="/auth"
+                    className="bg-gradient-to-r from-blue-500 to-purple-500 text-white px-6 py-3 rounded-xl text-sm font-semibold hover:shadow-lg transition-all duration-200 hover:scale-105"
+                  >
+                    Get Started
+                  </Link>
+                </div>
               )}
             </div>
           </div>
