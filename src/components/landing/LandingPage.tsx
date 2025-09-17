@@ -1148,8 +1148,8 @@ export default function LandingPage() {
                   {[
                     { name: 'Compare Models', href: '/chat' },
                     { name: 'View History', href: '/history' },
-                    { name: 'API Access', href: '/api' },
-                    { name: 'Documentation', href: '/docs' }
+                    // { name: 'API Access', href: '/api' },
+                    // { name: 'Documentation', href: '/docs' }
                   ].map((link, index) => (
                     <li key={index}>
                       <Link 
@@ -1178,7 +1178,13 @@ export default function LandingPage() {
                     'GPT-5',
                     'Claude 4 Sonnet',
                     'Gemini 2.5',
-                    'DeepSeek'
+                    'DeepSeek',
+                    'Qwen 2.5',
+                    'grok',
+                    'Llama',
+                    'Kimi',
+                    'ShisaAI'
+
                   ].map((model, index) => (
                     <li key={index}>
                       <Link 
