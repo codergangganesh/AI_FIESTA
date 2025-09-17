@@ -611,7 +611,11 @@ export default function DashboardPage() {
                 <p className={`mt-1 transition-colors duration-200 ${
                   darkMode ? 'text-gray-300' : 'text-slate-600'
                 }`}>
-                  Welcome back, {user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'}! Here's your AI platform overview.
+                  Welcome back, <span className="text-lg font-bold" style={{
+                    textShadow: '0 0 5px rgba(139, 92, 246, 0.8), 0 0 10px rgba(139, 92, 246, 0.6), 0 0 15px rgba(139, 92, 246, 0.4)',
+                    filter: 'drop-shadow(0 0 8px rgba(139, 92, 246, 0.7))',
+                    color: darkMode ? '#c4b5fd' : '#7c3aed'
+                  }}>{user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'}</span>! Here's your AI platform overview.
                 </p>
               </div>
               
