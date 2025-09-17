@@ -2,10 +2,17 @@
 
 import { AI_MODELS } from '@/config/ai-models'
 import { Brain, Zap, Star } from 'lucide-react'
+import { useDarkMode } from '@/contexts/DarkModeContext'
 
 export default function ModernModelShowcase() {
+  const { darkMode } = useDarkMode()
   // Get the first 6 models for showcase
   const featuredModels = AI_MODELS.slice(0, 6)
+
+  // Dispatch custom event to open the overlay in the parent component
+  const handleViewAllModels = () => {
+    window.dispatchEvent(new CustomEvent('openAllModelsOverlay'))
+  }
 
   const getProviderColor = (provider: string) => {
     const colors: Record<string, string> = {
@@ -14,26 +21,46 @@ export default function ModernModelShowcase() {
       'OpenAI': 'from-green-500 to-blue-500',
       'Meta': 'from-blue-600 to-purple-600',
       'DeepSeek': 'from-purple-500 to-pink-500',
-      'Qwen': 'from-red-500 to-orange-500',
-      'Grok': 'from-gray-700 to-gray-900',
-      'Kimi': 'from-cyan-500 to-blue-500',
-      'Shisa': 'from-pink-500 to-purple-500'
+      'Alibaba': 'from-red-500 to-orange-500',
+      'xAI': 'from-gray-700 to-gray-900',
+      'Moonshot': 'from-cyan-500 to-blue-500',
+      'Augmxnt': 'from-pink-500 to-purple-500'
     }
     return colors[provider] || 'from-slate-500 to-slate-700'
   }
 
   return (
-    <div className="py-24 bg-gradient-to-br from-white to-blue-50">
+    <div className={`py-24 ${
+      darkMode 
+        ? 'bg-gradient-to-br from-gray-900 to-gray-800' 
+        : 'bg-gradient-to-br from-white to-blue-50'
+    }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-20">
-          <div className="inline-flex items-center space-x-2 bg-blue-50 border border-blue-200/50 rounded-full px-4 py-2 mb-6">
-            <Brain className="w-4 h-4 text-blue-500" />
-            <span className="text-sm font-medium text-blue-700">Premium AI Models</span>
+          <div className={`inline-flex items-center space-x-2 rounded-full px-4 py-2 mb-6 ${
+            darkMode 
+              ? 'bg-gray-800 border border-gray-700/50' 
+              : 'bg-blue-50 border border-blue-200/50'
+          }`}>
+            <Brain className={`w-4 h-4 ${
+              darkMode ? 'text-blue-400' : 'text-blue-500'
+            }`} />
+            <span className={`text-sm font-medium ${
+              darkMode ? 'text-blue-400' : 'text-blue-700'
+            }`}>
+              Premium AI Models
+            </span>
           </div>
-          <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent mb-6">
+          <h2 className={`text-4xl sm:text-5xl font-bold bg-gradient-to-r ${
+            darkMode 
+              ? 'from-white to-gray-300' 
+              : 'from-slate-900 to-slate-700'
+          } bg-clip-text text-transparent mb-6`}>
             World-Class AI Models
           </h2>
-          <p className="text-xl text-slate-600 max-w-2xl mx-auto">
+          <p className={`text-xl max-w-2xl mx-auto ${
+            darkMode ? 'text-gray-300' : 'text-slate-600'
+          }`}>
             Access the latest and most powerful AI models from leading companies
           </p>
         </div>
@@ -42,7 +69,11 @@ export default function ModernModelShowcase() {
           {featuredModels.map((model, index) => (
             <div 
               key={index} 
-              className="group bg-white/80 backdrop-blur-sm border border-slate-200/50 rounded-2xl p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 relative overflow-hidden"
+              className={`group backdrop-blur-sm rounded-2xl p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 relative overflow-hidden ${
+                darkMode 
+                  ? 'bg-gray-800/60 border border-gray-700/50' 
+                  : 'bg-white/80 border border-slate-200/50'
+              }`}
             >
               {/* Animated background gradient on hover */}
               <div className={`absolute inset-0 bg-gradient-to-br ${getProviderColor(model.provider)} opacity-0 group-hover:opacity-5 transition-opacity duration-300 rounded-2xl`}></div>
@@ -53,15 +84,27 @@ export default function ModernModelShowcase() {
                     {model.displayName.charAt(0)}
                   </div>
                   <div>
-                    <div className="font-bold text-slate-900 text-lg">{model.displayName}</div>
-                    <div className="text-sm text-slate-600 mt-1">{model.provider}</div>
+                    <div className={`font-bold text-lg ${
+                      darkMode ? 'text-white' : 'text-slate-900'
+                    }`}>
+                      {model.displayName}
+                    </div>
+                    <div className={`text-sm mt-1 ${
+                      darkMode ? 'text-gray-400' : 'text-slate-600'
+                    }`}>
+                      {model.provider}
+                    </div>
                   </div>
                 </div>
                 
                 {/* Status indicator */}
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                  <span className="text-xs text-green-600 font-medium">Active</span>
+                  <span className={`text-xs font-medium ${
+                    darkMode ? 'text-green-400' : 'text-green-600'
+                  }`}>
+                    Active
+                  </span>
                 </div>
               </div>
               
@@ -70,7 +113,11 @@ export default function ModernModelShowcase() {
                 {model.capabilities?.slice(0, 3).map((capability, idx) => (
                   <span 
                     key={idx} 
-                    className="text-xs font-medium px-2.5 py-1 bg-slate-100 text-slate-700 rounded-full"
+                    className={`text-xs font-medium px-2.5 py-1 rounded-full ${
+                      darkMode 
+                        ? 'bg-gray-700 text-gray-300' 
+                        : 'bg-slate-100 text-slate-700'
+                    }`}
                   >
                     {capability}
                   </span>
@@ -78,15 +125,29 @@ export default function ModernModelShowcase() {
               </div>
               
               {/* Performance indicators */}
-              <div className="relative mt-4 pt-4 border-t border-slate-200/50">
+              <div className={`relative mt-4 pt-4 border-t ${
+                darkMode ? 'border-gray-700/50' : 'border-slate-200/50'
+              }`}>
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center space-x-2">
-                    <Zap className="w-4 h-4 text-slate-500" />
-                    <span className="text-slate-600">Speed: {model.speed || 'Medium'}</span>
+                    <Zap className={`w-4 h-4 ${
+                      darkMode ? 'text-gray-400' : 'text-slate-500'
+                    }`} />
+                    <span className={
+                      darkMode ? 'text-gray-300' : 'text-slate-600'
+                    }>
+                      Speed: {model.speed || 'Medium'}
+                    </span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Star className="w-4 h-4 text-slate-500" />
-                    <span className="text-slate-600">Cost: {model.cost || 'Medium'}</span>
+                    <Star className={`w-4 h-4 ${
+                      darkMode ? 'text-gray-400' : 'text-slate-500'
+                    }`} />
+                    <span className={
+                      darkMode ? 'text-gray-300' : 'text-slate-600'
+                    }>
+                      Cost: {model.cost || 'Medium'}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -99,7 +160,10 @@ export default function ModernModelShowcase() {
         
         {/* View all models button */}
         <div className="text-center mt-12">
-          <button className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl font-medium hover:shadow-lg transition-all duration-300 hover:scale-105">
+          <button 
+            onClick={handleViewAllModels}
+            className="inline-flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-xl font-medium hover:shadow-lg transition-all duration-300 hover:scale-105"
+          >
             <span>View All {AI_MODELS.length} Models</span>
             <Zap className="w-4 h-4" />
           </button>

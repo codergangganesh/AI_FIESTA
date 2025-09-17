@@ -8,13 +8,28 @@ import ModernModelShowcase from './ModernModelShowcase'
 import ModernFeedbackAndPricing from './ModernFeedbackAndPricing'
 import { useEffect, useState } from 'react'
 import { useDarkMode } from '@/contexts/DarkModeContext'
+import AllModelsOverlay from './AllModelsOverlay' // Fixed the import path
 
 export default function LandingPage() {
   const { user, signOut } = useAuth()
   const { darkMode, toggleDarkMode } = useDarkMode()
   const [showSuccessPopup, setShowSuccessPopup] = useState(false)
   const [popupMessage, setPopupMessage] = useState('')
+  const [showAllModels, setShowAllModels] = useState(false)
   const searchParams = useSearchParams()
+  
+  // Listen for the custom event to open the overlay
+  useEffect(() => {
+    const handleOpenAllModelsOverlay = () => {
+      setShowAllModels(true)
+    }
+    
+    window.addEventListener('openAllModelsOverlay', handleOpenAllModelsOverlay)
+    
+    return () => {
+      window.removeEventListener('openAllModelsOverlay', handleOpenAllModelsOverlay)
+    }
+  }, [])
   
   // Check for success message in URL parameters
   useEffect(() => {
@@ -140,6 +155,13 @@ export default function LandingPage() {
         ? 'bg-gradient-to-br from-gray-900 via-violet-900 to-black' 
         : 'bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50'
     }`}>
+      {/* Add the AllModelsOverlay component */}
+      <AllModelsOverlay 
+        show={showAllModels} 
+        onClose={() => setShowAllModels(false)} 
+        darkMode={darkMode}
+      />
+      
       {/* Glowing effect overlay for dark mode */}
       {darkMode && (
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
@@ -451,7 +473,7 @@ export default function LandingPage() {
             }`}>
               Send one message to multiple AI models and compare their responses instantly. 
               <span className={`font-semibold ${
-                darkMode ? 'text-blue-400' : 'text-blue-600'
+                darkMode ? 'text-blue-400' : 'text-blue-500'
               }`}>
                 Find the perfect AI
               </span> for every task.
