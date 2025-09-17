@@ -102,42 +102,48 @@ export const useApiUsage = () => {
           setApiUsage({ apiCalls: 0, comparisons: 0, storage: 0 })
         }
         
-        // Set up real-time subscription
+        // Set up real-time subscription with better error handling
         if (isMounted) {
-          channel = supabase
-            .channel('api-usage-changes')
-            .on(
-              'postgres_changes',
-              {
-                event: 'UPDATE',
-                schema: 'public',
-                table: 'user_plans',
-                filter: `user_id=eq.${user.id}`
-              },
-              (payload) => {
-                try {
-                  if (payload.new && payload.new.usage) {
-                    const usage = payload.new.usage as Record<string, number>
-                    if (isMounted) {
-                      setApiUsage({
-                        apiCalls: usage.apiCalls || 0,
-                        comparisons: usage.comparisons || 0,
-                        storage: usage.storage || 0
-                      })
+          try {
+            channel = supabase
+              .channel('api-usage-changes')
+              .on(
+                'postgres_changes',
+                {
+                  event: 'UPDATE',
+                  schema: 'public',
+                  table: 'user_plans',
+                  filter: `user_id=eq.${user.id}`
+                },
+                (payload) => {
+                  try {
+                    if (payload.new && payload.new.usage) {
+                      const usage = payload.new.usage as Record<string, number>
+                      if (isMounted) {
+                        setApiUsage({
+                          apiCalls: usage.apiCalls || 0,
+                          comparisons: usage.comparisons || 0,
+                          storage: usage.storage || 0
+                        })
+                      }
                     }
+                  } catch (error: any) {
+                    console.error('Error processing real-time update:', error.message || error)
                   }
-                } catch (error: any) {
-                  console.error('Error processing real-time update:', error.message || error)
                 }
-              }
-            )
-            .subscribe((status) => {
-              if (status === 'SUBSCRIBED') {
-                console.log('Successfully subscribed to API usage changes')
-              } else if (status === 'CHANNEL_ERROR') {
-                console.error('Error subscribing to API usage changes')
-              }
-            })
+              )
+              .subscribe((status, err) => {
+                if (status === 'SUBSCRIBED') {
+                  console.log('Successfully subscribed to API usage changes')
+                } else if (status === 'CHANNEL_ERROR') {
+                  console.error('Error subscribing to API usage changes:', err?.message || 'Unknown error')
+                } else if (status === 'CLOSED') {
+                  console.log('API usage subscription closed')
+                }
+              })
+          } catch (subscriptionError: any) {
+            console.error('Failed to set up real-time subscription:', subscriptionError.message || subscriptionError)
+          }
         }
       } catch (error: any) {
         console.error('Error fetching API usage:', error.message || error)

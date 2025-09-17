@@ -86,12 +86,12 @@ export default function UsagePage() {
         
         switch (planData.plan_type) {
           case 'pro':
-            apiCallsLimit = 5000
+            apiCallsLimit = 2500
             comparisonsLimit = 500
             storageLimit = 10
             break
           case 'pro_plus':
-            apiCallsLimit = 50000
+            apiCallsLimit = 10000
             comparisonsLimit = -1 // unlimited
             storageLimit = 100
             break
@@ -140,7 +140,7 @@ export default function UsagePage() {
             unit: 'GB',
             percentage: storagePercentage,
             trend: 'stable',
-            change: '0%',
+            change: '2.3%',
             icon: Database,
             color: 'green'
           },
@@ -157,41 +157,7 @@ export default function UsagePage() {
           }
         ])
 
-        setRecentActivity([
-          {
-            id: '1',
-            type: 'Model Comparison',
-            description: 'GPT-4 vs Claude-3 comparison on sentiment analysis',
-            timestamp: '2 minutes ago',
-            cost: 0.15,
-            status: 'success'
-          },
-          {
-            id: '2',
-            type: 'Dataset Processing',
-            description: 'Processed customer reviews dataset (5,000 records)',
-            timestamp: '15 minutes ago',
-            cost: 0.08,
-            status: 'success'
-          },
-          {
-            id: '4',
-            type: 'API Call',
-            description: 'Batch inference on 1,000 text samples',
-            timestamp: '2 hours ago',
-            cost: 0.12,
-            status: 'success'
-          },
-          {
-            id: '5',
-            type: 'Model Export',
-            description: 'Downloaded comparison report (PDF)',
-            timestamp: '3 hours ago',
-            cost: 0.02,
-            status: 'success'
-          }
-        ])
-
+       
         setIsLoading(false)
       } catch (error) {
         console.error('Error loading usage data:', error)
@@ -398,212 +364,6 @@ export default function UsagePage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Recent Activity */}
-            <div className="lg:col-span-2">
-              <div className={`rounded-2xl overflow-hidden transition-colors duration-200 ${
-                darkMode 
-                  ? 'bg-gray-800/60 border border-gray-700/50' 
-                  : 'bg-white/80 border border-slate-200/50'
-              }`}>
-                <div className="p-6 border-b border-current border-opacity-10">
-                  <div className="flex items-center justify-between">
-                    <h2 className={`text-xl font-bold transition-colors duration-200 ${
-                      darkMode ? 'text-white' : 'text-slate-900'
-                    }`}>
-                      Recent Activity
-                    </h2>
-                    <button className={`text-sm font-medium transition-colors duration-200 ${
-                      darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'
-                    }`}>
-                      View All
-                    </button>
-                  </div>
-                </div>
-                
-                <div className="p-6">
-                  <div className="space-y-4">
-                    {recentActivity.map((activity) => (
-                      <div
-                        key={activity.id}
-                        className={`flex items-start space-x-4 p-4 rounded-xl transition-colors duration-200 ${
-                          darkMode ? 'bg-gray-700/30' : 'bg-slate-50'
-                        }`}
-                      >
-                        <div className="flex-shrink-0 mt-1">
-                          {getStatusIcon(activity.status)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className={`text-sm font-medium transition-colors duration-200 ${
-                                darkMode ? 'text-white' : 'text-slate-900'
-                              }`}>
-                                {activity.type}
-                              </p>
-                              <p className={`text-sm mt-1 transition-colors duration-200 ${
-                                darkMode ? 'text-gray-400' : 'text-slate-600'
-                              }`}>
-                                {activity.description}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <p className={`text-sm font-medium transition-colors duration-200 ${
-                                darkMode ? 'text-white' : 'text-slate-900'
-                              }`}>
-                                ₹{activity.cost.toFixed(2)}
-                              </p>
-                              <p className={`text-xs transition-colors duration-200 ${
-                                darkMode ? 'text-gray-400' : 'text-slate-500'
-                              }`}>
-                                {activity.timestamp}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Usage Summary & Upgrade */}
-            <div className="space-y-6">
-              {/* Monthly Summary */}
-              <div className={`rounded-2xl overflow-hidden transition-colors duration-200 ${
-                darkMode 
-                  ? 'bg-gray-800/60 border border-gray-700/50' 
-                  : 'bg-white/80 border border-slate-200/50'
-              }`}>
-                <div className="p-6 border-b border-current border-opacity-10">
-                  <h2 className={`text-xl font-bold transition-colors duration-200 ${
-                    darkMode ? 'text-white' : 'text-slate-900'
-                  }`}>
-                    This Month
-                  </h2>
-                </div>
-                
-                <div className="p-6 space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-slate-600'}`}>
-                      Total Spend
-                    </span>
-                    <span className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>
-                      ₹247.50
-                    </span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-slate-600'}`}>
-                      Comparisons Run
-                    </span>
-                    <span className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>
-                      156
-                    </span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center">
-                    <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-slate-600'}`}>
-                      Models Used
-                    </span>
-                    <span className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-slate-900'}`}>
-                      6 / 6
-                    </span>
-                  </div>
-
-                  <div className="pt-4 border-t border-current border-opacity-10">
-                    <div className="flex justify-between items-center">
-                      <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-slate-600'}`}>
-                        Plan Budget
-                      </span>
-                      <span className={`text-sm font-medium ${darkMode ? 'text-green-400' : 'text-green-600'}`}>
-                        ₹2,752.50 remaining
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Upgrade Prompt */}
-              <div className={`rounded-2xl overflow-hidden transition-colors duration-200 ${
-                darkMode 
-                  ? 'bg-gradient-to-br from-purple-900/30 to-blue-900/30 border border-purple-700/50' 
-                  : 'bg-gradient-to-br from-purple-50 to-blue-50 border border-purple-200'
-              }`}>
-                <div className="p-6">
-                  <div className="text-center">
-                    <div className={`w-12 h-12 mx-auto mb-4 rounded-xl flex items-center justify-center ${
-                      darkMode ? 'bg-purple-600' : 'bg-purple-100'
-                    }`}>
-                      <Crown className={`w-6 h-6 ${
-                        darkMode ? 'text-white' : 'text-purple-600'
-                      }`} />
-                    </div>
-                    
-                    <h3 className={`text-lg font-bold mb-2 transition-colors duration-200 ${
-                      darkMode ? 'text-white' : 'text-slate-900'
-                    }`}>
-                      Upgrade to Pro Plus
-                    </h3>
-                    
-                    <p className={`text-sm mb-4 transition-colors duration-200 ${
-                      darkMode ? 'text-gray-300' : 'text-slate-600'
-                    }`}>
-                      Get access to all AI models, unlimited comparisons, and advanced features
-                    </p>
-                    
-                    <button className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-xl font-semibold transition-all duration-200 hover:shadow-lg">
-                      <Plus className="w-4 h-4 mr-2 inline" />
-                      Upgrade Now
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Quick Stats */}
-              <div className={`rounded-2xl overflow-hidden transition-colors duration-200 ${
-                darkMode 
-                  ? 'bg-gray-800/60 border border-gray-700/50' 
-                  : 'bg-white/80 border border-slate-200/50'
-              }`}>
-                <div className="p-6 border-b border-current border-opacity-10">
-                  <h2 className={`text-xl font-bold transition-colors duration-200 ${
-                    darkMode ? 'text-white' : 'text-slate-900'
-                  }`}>
-                    Quick Stats
-                  </h2>
-                </div>
-                
-                <div className="p-6 space-y-4">
-                  {[
-                    { label: 'Avg. Response Time', value: '1.2s', icon: Clock },
-                    { label: 'Success Rate', value: '99.7%', icon: CheckCircle },
-                    { label: 'Models Available', value: '12+', icon: BarChart3 }
-                  ].map((stat, index) => {
-                    const Icon = stat.icon
-                    return (
-                      <div key={index} className="flex items-center space-x-3">
-                        <div className={`p-2 rounded-lg ${
-                          darkMode ? 'bg-blue-600/20' : 'bg-blue-100'
-                        }`}>
-                          <Icon className={`w-4 h-4 ${
-                            darkMode ? 'text-blue-400' : 'text-blue-600'
-                          }`} />
-                        </div>
-                        <div className="flex-1">
-                          <p className={`text-sm ${darkMode ? 'text-gray-300' : 'text-slate-600'}`}>
-                            {stat.label}
-                          </p>
-                          <p className={`font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>
-                            {stat.value}
-                          </p>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>

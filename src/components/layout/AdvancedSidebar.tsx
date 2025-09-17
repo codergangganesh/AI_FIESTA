@@ -310,53 +310,7 @@ export default function AdvancedSidebar({ className = '' }: AdvancedSidebarProps
             )
           })}
         </nav>
-
-        {/* Bottom Section - API Usage Card */}
-        <div className="p-4 border-t border-current border-opacity-10">
-          <div
-            className={`rounded-xl p-3 transition-colors duration-200 ${
-              darkMode
-                ? 'bg-gradient-to-r from-blue-900/20 to-purple-900/20 border border-blue-700/30'
-                : 'bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200/30'
-            }`}
-          >
-            <div className="flex items-center space-x-3">
-              <div className={`p-2 rounded-lg ${
-                darkMode ? 'bg-blue-600/20' : 'bg-blue-100'
-              }`}>
-                <Zap
-                  className={`w-4 h-4 ${
-                    darkMode ? 'text-blue-400' : 'text-blue-600'
-                  }`}
-                />
-              </div>
-              <div
-                className={`transition-all duration-300 ${
-                  isExpanded ? 'opacity-100 w-auto' : 'opacity-0 w-0'
-                }`}
-              >
-                <p
-                  className={`text-sm font-medium ${
-                    darkMode ? 'text-white' : 'text-slate-900'
-                  }`}
-                >
-                  API Usage
-                </p>
-                <p
-                  className={`text-xs ${
-                    darkMode ? 'text-gray-400' : 'text-slate-500'
-                  }`}
-                >
-                  {loading ? (
-                    'Loading...'
-                  ) : (
-                    <>{apiUsage.apiCalls !== undefined ? `${apiUsage.apiCalls || 0} calls` : '0 calls'}</>
-                  )}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+       
       </div>
 
       </div>

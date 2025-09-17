@@ -26,9 +26,12 @@ import {
   Timer,
   Download,
   Settings as SettingsIcon,
-  X
+  X,
+  Bell
 } from 'lucide-react'
 import SimpleProfileIcon from '@/components/layout/SimpleProfileIcon'
+import NotificationBell from '@/components/ui/NotificationBell'
+import { createClient } from '@/lib/supabase/client'
 
 interface MetricCard {
   title: string
@@ -107,6 +110,7 @@ export default function DashboardPage() {
   const [isExportOpen, setIsExportOpen] = useState(false)
   const [exportPosition, setExportPosition] = useState<'bottom' | 'top'>('bottom')
   const [totalComparisons, setTotalComparisons] = useState(0)
+  const [userPlan, setUserPlan] = useState('free') // New state for user plan
   
   const exportRef = useRef<HTMLDivElement>(null)
   const lastComparisonCount = useRef(0)
@@ -120,6 +124,20 @@ export default function DashboardPage() {
       }
 
       try {
+        // Get user plan
+        const supabase = createClient()
+        const { data: planData, error: planError } = await supabase
+          .from('user_plans')
+          .select('plan_type')
+          .eq('user_id', user.id)
+          .single()
+
+        if (planError) {
+          console.error('Error fetching plan data:', planError)
+        } else {
+          setUserPlan(planData.plan_type)
+        }
+
         // Check if user has made any comparisons
         const comparisonsCount = await databaseClientService.getTotalComparisonsCount()
         const userHasComparisons = comparisonsCount > 0
@@ -556,6 +574,17 @@ export default function DashboardPage() {
     )
   }
 
+  // Function to get plan display name
+  const getPlanDisplayName = () => {
+    switch (userPlan) {
+      case 'pro':
+      case 'pro_plus':
+        return 'Pro Plus'
+      default:
+        return 'Free'
+    }
+  }
+
   return (
     <div className={`min-h-screen transition-colors duration-200 ${
       darkMode 
@@ -587,17 +616,20 @@ export default function DashboardPage() {
               </div>
               
               <div className="flex items-center space-x-3">
+                {/* Notification Bell */}
+                <NotificationBell />
+                
                 {/* Simple Profile Icon */}
                 <SimpleProfileIcon darkMode={darkMode} />
                 
-                {/* Export Dropdown */}
+                {/* Export Dropdown - Modern Design */}
                 <div className="relative" ref={exportRef}>
                   <button 
                     onClick={() => setIsExportOpen(!isExportOpen)}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 ${
+                    className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md ${
                       darkMode 
-                        ? 'bg-gray-700/80 hover:bg-gray-600 text-gray-200 hover:text-white border border-gray-600' 
-                        : 'bg-white/90 hover:bg-white border border-slate-200 text-slate-700 hover:text-slate-900 shadow-sm'
+                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white' 
+                        : 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400 text-white'
                     }`}
                   >
                     <Download className="w-4 h-4" />
@@ -638,9 +670,9 @@ export default function DashboardPage() {
                             }`}>
                               <span className={`text-xs font-bold ${
                                 darkMode ? 'text-blue-400' : 'text-blue-600'
-                              }`}>XLSX</span>
+                              }`}>JSON</span>
                             </div>
-                            <span>Export to Excel</span>
+                            <span>Export to JSON</span>
                           </div>
                         </button>
                         <button
@@ -698,7 +730,7 @@ export default function DashboardPage() {
                     <span className={`text-sm font-medium ${
                       darkMode ? 'text-blue-300' : 'text-blue-700'
                     }`}>
-                      Pro Plan Active
+                      {getPlanDisplayName()}
                     </span>
                   </div>
                 </div>
@@ -792,45 +824,6 @@ export default function DashboardPage() {
             />
           </div>
 
-          {/* Quick Actions */}
-          <div className={`rounded-2xl overflow-hidden transition-colors duration-200 ${
-            darkMode 
-              ? 'bg-gray-800/60 border border-gray-700/50' 
-              : 'bg-white/80 border border-slate-200/50'
-          }`}>
-            <div className="p-6 border-b border-current border-opacity-10">
-              <h2 className={`text-xl font-bold transition-colors duration-200 ${
-                darkMode ? 'text-white' : 'text-slate-900'
-              }`}>
-                Quick Actions
-              </h2>
-            </div>
-            
-            <div className="p-6 space-y-3">
-              {[
-                { label: 'New Comparison', href: '/model-comparison', icon: GitCompare },
-                { label: 'Analyze Dataset', href: '/dataset-analysis', icon: Database },
-                { label: 'Hyperparameter Tuning', href: '/hyperparameter-tuning', icon: SettingsIcon }
-              ].map((action, index) => {
-                const Icon = action.icon
-                return (
-                  <a
-                    key={index}
-                    href={action.href}
-                    className={`flex items-center space-x-3 p-3 rounded-xl transition-all duration-200 group ${
-                      darkMode 
-                        ? 'hover:bg-gray-700/50 text-gray-300 hover:text-white' 
-                        : 'hover:bg-slate-100 text-slate-700 hover:text-slate-900'
-                    }`}
-                  >
-                    <Icon className="w-5 h-5" />
-                    <span className="text-sm font-medium">{action.label}</span>
-                    <ArrowUpRight className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                  </a>
-                )
-              })}
-            </div>
-          </div>
         </div>
       </div>
     </div>
