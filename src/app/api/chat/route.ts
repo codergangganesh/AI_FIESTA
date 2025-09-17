@@ -24,6 +24,21 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Update API usage counter before making the API call
+    try {
+      const { error: usageError } = await supabase.rpc('update_user_usage', {
+        p_user_id: user.id,
+        p_type: 'apiCalls',
+        p_amount: 1
+      })
+      
+      if (usageError) {
+        console.error('Error updating API usage:', usageError.message || usageError)
+      }
+    } catch (usageError: any) {
+      console.error('Error updating API usage:', usageError.message || usageError)
+    }
+
     // Send message to multiple AI models
     const results = await openRouterService.sendMessageToMultipleModels(models, message)
 
@@ -64,28 +79,32 @@ export async function POST(request: NextRequest) {
         })
 
       if (comparisonError) {
-        console.error('Error saving model comparison:', comparisonError)
+        console.error('Error saving model comparison:', comparisonError.message || comparisonError)
       } else {
         console.log('Model comparison saved successfully')
         
-        // Update user plan usage
-        const { error: usageError } = await supabase.rpc('update_user_usage', {
-          p_user_id: user.id,
-          p_type: 'comparisons',
-          p_amount: 1
-        })
-        
-        if (usageError) {
-          console.error('Error updating user usage:', usageError)
+        // Update user plan usage for comparisons
+        try {
+          const { error: usageError } = await supabase.rpc('update_user_usage', {
+            p_user_id: user.id,
+            p_type: 'comparisons',
+            p_amount: 1
+          })
+          
+          if (usageError) {
+            console.error('Error updating user usage:', usageError.message || usageError)
+          }
+        } catch (usageError: any) {
+          console.error('Error updating user usage:', usageError.message || usageError)
         }
       }
-    } catch (saveError) {
-      console.error('Error saving model comparison:', saveError)
+    } catch (saveError: any) {
+      console.error('Error saving model comparison:', saveError.message || saveError)
     }
 
     return NextResponse.json({ responses })
-  } catch (error) {
-    console.error('Error in chat API:', error)
+  } catch (error: any) {
+    console.error('Error in chat API:', error.message || error)
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

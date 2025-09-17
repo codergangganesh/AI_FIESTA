@@ -108,8 +108,17 @@ class DatabaseClientService {
   async getApiUsagePercentage(): Promise<number> {
     try {
       const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return 0
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      
+      if (authError) {
+        console.error('Authentication error:', authError.message)
+        return 0
+      }
+      
+      if (!user) {
+        console.error('No user found')
+        return 0
+      }
 
       // Get API usage from user_plans table
       const { data, error } = await supabase
@@ -119,11 +128,40 @@ class DatabaseClientService {
         .single()
 
       if (error) {
-        console.error('Error fetching API usage:', error)
+        console.error('Error fetching API usage from user_plans:', error.message)
+        // If the user_plans entry doesn't exist, create it
+        if (error.code === 'PGRST116' || error.message.includes('relation') || error.message.includes('not found')) {
+          console.log('User plans entry not found, creating default entry')
+          const defaultUsage = {
+            apiCalls: 0,
+            comparisons: 0,
+            storage: 0
+          }
+          
+          const { error: insertError } = await supabase
+            .from('user_plans')
+            .insert({
+              user_id: user.id,
+              usage: defaultUsage,
+              plan_type: 'free'
+            })
+          
+          if (insertError) {
+            console.error('Error creating initial user plan entry:', insertError.message)
+          }
+        }
         return 0
       }
 
-      if (!data.usage) return 0
+      if (!data) {
+        console.error('No data returned from user_plans query for user:', user.id)
+        return 0
+      }
+
+      if (!data.usage) {
+        console.error('No usage data found in user_plans for user:', user.id)
+        return 0
+      }
 
       const usage = data.usage as Record<string, number>
       const apiCalls = usage.apiCalls || 0
@@ -150,8 +188,8 @@ class DatabaseClientService {
       }
 
       return planLimit > 0 ? Math.round((apiCalls / planLimit) * 100) : 0
-    } catch (error) {
-      console.error('Error in getApiUsagePercentage:', error)
+    } catch (error: any) {
+      console.error('Error in getApiUsagePercentage:', error.message || error)
       return 0
     }
   }

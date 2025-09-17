@@ -114,135 +114,146 @@ export default function DashboardPage() {
   useEffect(() => {
     // Simulate loading dashboard data
     const loadDashboardData = async () => {
-      // Check if user has made any comparisons
-      const comparisonsCount = await databaseClientService.getTotalComparisonsCount()
-      const userHasComparisons = comparisonsCount > 0
-      setHasComparisons(userHasComparisons)
-      setTotalComparisons(comparisonsCount)
-      lastComparisonCount.current = comparisonsCount
-      
-      if (userHasComparisons) {
-        // Get actual data from the database only if user has comparisons
-        const modelsAnalyzed = await databaseClientService.getModelsAnalyzedCount()
-        const accuracyScore = await databaseClientService.getAverageAccuracyScore()
-        const apiUsage = await databaseClientService.getApiUsagePercentage()
-        
-        setMetrics([
-          {
-            title: 'Total Comparisons',
-            value: comparisonsCount.toLocaleString(),
-            change: '+12.5%',
-            trend: 'up',
-            icon: GitCompare,
-            color: 'blue'
-          },
-          {
-            title: 'Models Analyzed',
-            value: modelsAnalyzed.toString(),
-            change: '+8.2%',
-            trend: 'up',
-            icon: Brain,
-            color: 'purple'
-          },
-          {
-            title: 'Accuracy Score',
-            value: accuracyScore > 0 ? `${accuracyScore}%` : '0%',
-            change: '+2.1%',
-            trend: 'up',
-            icon: TrendingUp,
-            color: 'green'
-          },
-          {
-            title: 'API Usage',
-            value: `${apiUsage}%`,
-            change: '-5.4%',
-            trend: 'down',
-            icon: Activity,
-            color: 'orange'
-          }
-        ])
-
-        // Sample comparison data
-        setComparisonData([
-          { modelName: 'GPT-4', responseTime: 1.2, messagesTyped: 24, modelDataTime: 0.8 },
-          { modelName: 'Claude-3', responseTime: 1.5, messagesTyped: 22, modelDataTime: 1.1 },
-          { modelName: 'Gemini Pro', responseTime: 1.8, messagesTyped: 20, modelDataTime: 1.3 },
-          { modelName: 'LLaMA 3', responseTime: 2.1, messagesTyped: 18, modelDataTime: 1.7 },
-          { modelName: 'Qwen 2.5', responseTime: 2.3, messagesTyped: 16, modelDataTime: 1.9 }
-        ])
-
-        // Sample trend data
-        setTrendData([
-          { period: 'Week 1', responseTime: 2.1, messagesTyped: 15, modelDataTime: 1.8 },
-          { period: 'Week 2', responseTime: 1.9, messagesTyped: 17, modelDataTime: 1.6 },
-          { period: 'Week 3', responseTime: 1.7, messagesTyped: 19, modelDataTime: 1.4 },
-          { period: 'Week 4', responseTime: 1.5, messagesTyped: 21, modelDataTime: 1.2 },
-          { period: 'Week 5', responseTime: 1.3, messagesTyped: 23, modelDataTime: 1.0 },
-          { period: 'Week 6', responseTime: 1.2, messagesTyped: 24, modelDataTime: 0.8 }
-        ])
-      } else {
-        // Keep metrics at 0 if no comparisons have been made
-        setMetrics([
-          {
-            title: 'Total Comparisons',
-            value: '0',
-            change: '+0%',
-            trend: 'down',
-            icon: GitCompare,
-            color: 'blue'
-          },
-          {
-            title: 'Models Analyzed',
-            value: '0',
-            change: '+0%',
-            trend: 'down',
-            icon: Brain,
-            color: 'purple'
-          },
-          {
-            title: 'Accuracy Score',
-            value: '0%',
-            change: '+0%',
-            trend: 'down',
-            icon: TrendingUp,
-            color: 'green'
-          },
-          {
-            title: 'API Usage',
-            value: '0%',
-            change: '+0%',
-            trend: 'down',
-            icon: Activity,
-            color: 'orange'
-          }
-        ])
+      if (!user) {
+        setIsLoading(false)
+        return
       }
 
-      setRecentActivities([
-        {
-          id: '1',
-          type: 'Model Comparison',
-          description: 'Compared GPT-4 vs Claude-3 on classification task',
-          timestamp: '2 minutes ago',
-          status: 'success'
-        },
-        {
-          id: '2',
-          type: 'Dataset Analysis',
-          description: 'Processed customer sentiment dataset (10,000 records)',
-          timestamp: '15 minutes ago',
-          status: 'success'
-        },
-        {
-          id: '4',
-          type: 'Model Export',
-          description: 'Downloaded comparison report for project X',
-          timestamp: '2 hours ago',
-          status: 'success'
-        }
-      ])
+      try {
+        // Check if user has made any comparisons
+        const comparisonsCount = await databaseClientService.getTotalComparisonsCount()
+        const userHasComparisons = comparisonsCount > 0
+        setHasComparisons(userHasComparisons)
+        setTotalComparisons(comparisonsCount)
+        lastComparisonCount.current = comparisonsCount
+        
+        if (userHasComparisons) {
+          // Get actual data from the database only if user has comparisons
+          const modelsAnalyzed = await databaseClientService.getModelsAnalyzedCount()
+          const accuracyScore = await databaseClientService.getAverageAccuracyScore()
+          const apiUsage = await databaseClientService.getApiUsagePercentage()
+          
+          if (!user) return; // Check if user is still available
+          
+          setMetrics([
+            {
+              title: 'Total Comparisons',
+              value: comparisonsCount.toLocaleString(),
+              change: '+12.5%',
+              trend: 'up',
+              icon: GitCompare,
+              color: 'blue'
+            },
+            {
+              title: 'Models Analyzed',
+              value: modelsAnalyzed.toString(),
+              change: '+8.2%',
+              trend: 'up',
+              icon: Brain,
+              color: 'purple'
+            },
+            {
+              title: 'Accuracy Score',
+              value: accuracyScore > 0 ? `${accuracyScore}%` : '0%',
+              change: '+2.1%',
+              trend: 'up',
+              icon: TrendingUp,
+              color: 'green'
+            },
+            {
+              title: 'API Usage',
+              value: `${apiUsage}%`,
+              change: '-5.4%',
+              trend: 'down',
+              icon: Activity,
+              color: 'orange'
+            }
+          ])
 
-      setIsLoading(false)
+          // Sample comparison data
+          setComparisonData([
+            { modelName: 'GPT-4', responseTime: 1.2, messagesTyped: 24, modelDataTime: 0.8 },
+            { modelName: 'Claude-3', responseTime: 1.5, messagesTyped: 22, modelDataTime: 1.1 },
+            { modelName: 'Gemini Pro', responseTime: 1.8, messagesTyped: 20, modelDataTime: 1.3 },
+            { modelName: 'LLaMA 3', responseTime: 2.1, messagesTyped: 18, modelDataTime: 1.7 },
+            { modelName: 'Qwen 2.5', responseTime: 2.3, messagesTyped: 16, modelDataTime: 1.9 }
+          ])
+
+          // Sample trend data
+          setTrendData([
+            { period: 'Week 1', responseTime: 2.1, messagesTyped: 15, modelDataTime: 1.8 },
+            { period: 'Week 2', responseTime: 1.9, messagesTyped: 17, modelDataTime: 1.6 },
+            { period: 'Week 3', responseTime: 1.7, messagesTyped: 19, modelDataTime: 1.4 },
+            { period: 'Week 4', responseTime: 1.5, messagesTyped: 21, modelDataTime: 1.2 },
+            { period: 'Week 5', responseTime: 1.3, messagesTyped: 23, modelDataTime: 1.0 },
+            { period: 'Week 6', responseTime: 1.2, messagesTyped: 24, modelDataTime: 0.8 }
+          ])
+        } else {
+          // Keep metrics at 0 if no comparisons have been made
+          setMetrics([
+            {
+              title: 'Total Comparisons',
+              value: '0',
+              change: '+0%',
+              trend: 'down',
+              icon: GitCompare,
+              color: 'blue'
+            },
+            {
+              title: 'Models Analyzed',
+              value: '0',
+              change: '+0%',
+              trend: 'down',
+              icon: Brain,
+              color: 'purple'
+            },
+            {
+              title: 'Accuracy Score',
+              value: '0%',
+              change: '+0%',
+              trend: 'down',
+              icon: TrendingUp,
+              color: 'green'
+            },
+            {
+              title: 'API Usage',
+              value: '0%',
+              change: '+0%',
+              trend: 'down',
+              icon: Activity,
+              color: 'orange'
+            }
+          ])
+        }
+
+        setRecentActivities([
+          {
+            id: '1',
+            type: 'Model Comparison',
+            description: 'Compared GPT-4 vs Claude-3 on classification task',
+            timestamp: '2 minutes ago',
+            status: 'success'
+          },
+          {
+            id: '2',
+            type: 'Dataset Analysis',
+            description: 'Processed customer sentiment dataset (10,000 records)',
+            timestamp: '15 minutes ago',
+            status: 'success'
+          },
+          {
+            id: '4',
+            type: 'Model Export',
+            description: 'Downloaded comparison report for project X',
+            timestamp: '2 hours ago',
+            status: 'success'
+          }
+        ])
+      } catch (error: any) {
+        console.error('Error loading dashboard data:', error.message || error)
+      } finally {
+        setIsLoading(false)
+      }
     }
 
     loadDashboardData()
@@ -250,11 +261,15 @@ export default function DashboardPage() {
     // Set up interval to check for updates
     const interval = setInterval(async () => {
       if (user) {
-        const comparisonsCount = await databaseClientService.getTotalComparisonsCount()
-        if (comparisonsCount !== lastComparisonCount.current) {
-          // Update dashboard metrics when a new comparison is made
-          updateDashboardMetrics()
-          lastComparisonCount.current = comparisonsCount
+        try {
+          const comparisonsCount = await databaseClientService.getTotalComparisonsCount()
+          if (comparisonsCount !== lastComparisonCount.current) {
+            // Update dashboard metrics when a new comparison is made
+            updateDashboardMetrics()
+            lastComparisonCount.current = comparisonsCount
+          }
+        } catch (error: any) {
+          console.error('Error checking for updates:', error.message || error)
         }
       }
     }, 5000) // Check every 5 seconds
@@ -268,49 +283,53 @@ export default function DashboardPage() {
   const updateDashboardMetrics = async () => {
     if (!user) return
     
-    // Get updated data from the database
-    const comparisonsCount = await databaseClientService.getTotalComparisonsCount()
-    const modelsAnalyzed = await databaseClientService.getModelsAnalyzedCount()
-    const accuracyScore = await databaseClientService.getAverageAccuracyScore()
-    const apiUsage = await databaseClientService.getApiUsagePercentage()
-    
-    setTotalComparisons(comparisonsCount)
-    setHasComparisons(comparisonsCount > 0)
-    
-    setMetrics([
-      {
-        title: 'Total Comparisons',
-        value: comparisonsCount.toLocaleString(),
-        change: '+12.5%',
-        trend: 'up',
-        icon: GitCompare,
-        color: 'blue'
-      },
-      {
-        title: 'Models Analyzed',
-        value: modelsAnalyzed.toString(),
-        change: '+8.2%',
-        trend: 'up',
-        icon: Brain,
-        color: 'purple'
-      },
-      {
-        title: 'Accuracy Score',
-        value: accuracyScore > 0 ? `${accuracyScore}%` : '0%',
-        change: '+2.1%',
-        trend: 'up',
-        icon: TrendingUp,
-        color: 'green'
-      },
-      {
-        title: 'API Usage',
-        value: `${apiUsage}%`,
-        change: '-5.4%',
-        trend: 'down',
-        icon: Activity,
-        color: 'orange'
-      }
-    ])
+    try {
+      // Get updated data from the database
+      const comparisonsCount = await databaseClientService.getTotalComparisonsCount()
+      const modelsAnalyzed = await databaseClientService.getModelsAnalyzedCount()
+      const accuracyScore = await databaseClientService.getAverageAccuracyScore()
+      const apiUsage = await databaseClientService.getApiUsagePercentage()
+      
+      setTotalComparisons(comparisonsCount)
+      setHasComparisons(comparisonsCount > 0)
+      
+      setMetrics([
+        {
+          title: 'Total Comparisons',
+          value: comparisonsCount.toLocaleString(),
+          change: '+12.5%',
+          trend: 'up',
+          icon: GitCompare,
+          color: 'blue'
+        },
+        {
+          title: 'Models Analyzed',
+          value: modelsAnalyzed.toString(),
+          change: '+8.2%',
+          trend: 'up',
+          icon: Brain,
+          color: 'purple'
+        },
+        {
+          title: 'Accuracy Score',
+          value: accuracyScore > 0 ? `${accuracyScore}%` : '0%',
+          change: '+2.1%',
+          trend: 'up',
+          icon: TrendingUp,
+          color: 'green'
+        },
+        {
+          title: 'API Usage',
+          value: `${apiUsage}%`,
+          change: '-5.4%',
+          trend: 'down',
+          icon: Activity,
+          color: 'orange'
+        }
+      ])
+    } catch (error) {
+      console.error('Error updating dashboard metrics:', error)
+    }
   }
 
   // Close export dropdown when clicking outside

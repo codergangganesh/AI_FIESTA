@@ -10,6 +10,7 @@ import ModelSelector from './ModelSelector'
 import ProfileDropdown from '../layout/ProfileDropdown'
 import DeleteAccountDialog from '../auth/DeleteAccountDialog'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
 
 interface ChatResponse {
   model: string
@@ -136,6 +137,20 @@ export default function ModernChatInterface() {
     setMessage('')
 
     try {
+      // Update API usage counter before making the API call
+      if (user) {
+        const supabase = createClient()
+        const { error: usageError } = await supabase.rpc('update_user_usage', {
+          p_user_id: user.id,
+          p_type: 'apiCalls',
+          p_amount: 1
+        })
+        
+        if (usageError) {
+          console.error('Error updating API usage:', usageError)
+        }
+      }
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {

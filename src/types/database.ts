@@ -73,6 +73,79 @@ export interface Database {
           created_at?: string
         }
       }
+      user_plans: {
+        Row: {
+          id: string
+          user_id: string
+          plan_type: string
+          usage: Record<string, number> | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          plan_type?: string
+          usage?: Record<string, number> | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          plan_type?: string
+          usage?: Record<string, number> | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      model_comparisons: {
+        Row: {
+          id: string
+          user_id: string
+          name: string
+          models: string[]
+          prompt: string
+          responses: Record<string, any>[] | null
+          metrics: Record<string, any> | null
+          status: string
+          execution_time_ms: number | null
+          total_tokens: number | null
+          cost_usd: number | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          name: string
+          models: string[]
+          prompt: string
+          responses?: Record<string, any>[] | null
+          metrics?: Record<string, any> | null
+          status?: string
+          execution_time_ms?: number | null
+          total_tokens?: number | null
+          cost_usd?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          name?: string
+          models?: string[]
+          prompt?: string
+          responses?: Record<string, any>[] | null
+          metrics?: Record<string, any> | null
+          status?: string
+          execution_time_ms?: number | null
+          total_tokens?: number | null
+          cost_usd?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

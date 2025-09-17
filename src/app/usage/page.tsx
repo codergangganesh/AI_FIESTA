@@ -20,6 +20,7 @@ import {
   Crown,
   Plus
 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 interface UsageMetric {
   title: string
@@ -49,99 +50,157 @@ export default function UsagePage() {
   const [usageMetrics, setUsageMetrics] = useState<UsageMetric[]>([])
   const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [planType, setPlanType] = useState('free')
 
   useEffect(() => {
     const loadUsageData = async () => {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      setUsageMetrics([
-        {
-          title: 'API Calls',
-          current: 1247,
-          limit: 2000,
-          unit: 'calls',
-          percentage: 62,
-          trend: 'up',
-          change: '+12%',
-          icon: Zap,
-          color: 'blue'
-        },
-        {
-          title: 'Model Comparisons',
-          current: 156,
-          limit: 500,
-          unit: 'comparisons',
-          percentage: 31,
-          trend: 'up',
-          change: '+8%',
-          icon: GitCompare,
-          color: 'purple'
-        },
-        {
-          title: 'Storage Used',
-          current: 2.3,
-          limit: 5,
-          unit: 'GB',
-          percentage: 46,
-          trend: 'stable',
-          change: '0%',
-          icon: Database,
-          color: 'green'
-        },
-        {
-          title: 'Processing Time',
-          current: 24.7,
-          limit: 100,
-          unit: 'hours',
-          percentage: 25,
-          trend: 'down',
-          change: '-5%',
-          icon: Clock,
-          color: 'orange'
-        }
-      ])
+      if (!user) return
 
-      setRecentActivity([
-        {
-          id: '1',
-          type: 'Model Comparison',
-          description: 'GPT-4 vs Claude-3 comparison on sentiment analysis',
-          timestamp: '2 minutes ago',
-          cost: 0.15,
-          status: 'success'
-        },
-        {
-          id: '2',
-          type: 'Dataset Processing',
-          description: 'Processed customer reviews dataset (5,000 records)',
-          timestamp: '15 minutes ago',
-          cost: 0.08,
-          status: 'success'
-        },
-        {
-          id: '4',
-          type: 'API Call',
-          description: 'Batch inference on 1,000 text samples',
-          timestamp: '2 hours ago',
-          cost: 0.12,
-          status: 'success'
-        },
-        {
-          id: '5',
-          type: 'Model Export',
-          description: 'Downloaded comparison report (PDF)',
-          timestamp: '3 hours ago',
-          cost: 0.02,
-          status: 'success'
-        }
-      ])
+      try {
+        const supabase = createClient()
+        
+        // Get user plan and usage data
+        const { data: planData, error: planError } = await supabase
+          .from('user_plans')
+          .select('plan_type, usage')
+          .eq('user_id', user.id)
+          .single()
 
-      setIsLoading(false)
+        if (planError) {
+          console.error('Error fetching plan data:', planError)
+          return
+        }
+
+        setPlanType(planData.plan_type)
+        
+        // Extract usage data
+        const usage = planData.usage as Record<string, number>
+        const apiCalls = usage.apiCalls || 0
+        const comparisons = usage.comparisons || 0
+        const storage = usage.storage || 0
+
+        // Define limits based on plan type
+        let apiCallsLimit = 100
+        let comparisonsLimit = 10
+        let storageLimit = 1
+        
+        switch (planData.plan_type) {
+          case 'pro':
+            apiCallsLimit = 5000
+            comparisonsLimit = 500
+            storageLimit = 10
+            break
+          case 'pro_plus':
+            apiCallsLimit = 50000
+            comparisonsLimit = -1 // unlimited
+            storageLimit = 100
+            break
+        }
+
+        // Calculate percentages
+        const apiCallsPercentage = apiCallsLimit > 0 
+          ? Math.round((apiCalls / apiCallsLimit) * 100) 
+          : 0
+          
+        const comparisonsPercentage = comparisonsLimit > 0 
+          ? Math.round((comparisons / comparisonsLimit) * 100) 
+          : 100 // For unlimited plans
+          
+        const storagePercentage = storageLimit > 0 
+          ? Math.round((storage / storageLimit) * 100) 
+          : 0
+
+        setUsageMetrics([
+          {
+            title: 'API Calls',
+            current: apiCalls,
+            limit: apiCallsLimit,
+            unit: 'calls',
+            percentage: apiCallsPercentage,
+            trend: 'up',
+            change: '+12%',
+            icon: Zap,
+            color: 'blue'
+          },
+          {
+            title: 'Model Comparisons',
+            current: comparisons,
+            limit: comparisonsLimit === -1 ? Infinity : comparisonsLimit,
+            unit: comparisonsLimit === -1 ? 'unlimited' : 'comparisons',
+            percentage: comparisonsPercentage,
+            trend: 'up',
+            change: '+8%',
+            icon: GitCompare,
+            color: 'purple'
+          },
+          {
+            title: 'Storage Used',
+            current: storage,
+            limit: storageLimit,
+            unit: 'GB',
+            percentage: storagePercentage,
+            trend: 'stable',
+            change: '0%',
+            icon: Database,
+            color: 'green'
+          },
+          {
+            title: 'Processing Time',
+            current: 24.7,
+            limit: 100,
+            unit: 'hours',
+            percentage: 25,
+            trend: 'down',
+            change: '-5%',
+            icon: Clock,
+            color: 'orange'
+          }
+        ])
+
+        setRecentActivity([
+          {
+            id: '1',
+            type: 'Model Comparison',
+            description: 'GPT-4 vs Claude-3 comparison on sentiment analysis',
+            timestamp: '2 minutes ago',
+            cost: 0.15,
+            status: 'success'
+          },
+          {
+            id: '2',
+            type: 'Dataset Processing',
+            description: 'Processed customer reviews dataset (5,000 records)',
+            timestamp: '15 minutes ago',
+            cost: 0.08,
+            status: 'success'
+          },
+          {
+            id: '4',
+            type: 'API Call',
+            description: 'Batch inference on 1,000 text samples',
+            timestamp: '2 hours ago',
+            cost: 0.12,
+            status: 'success'
+          },
+          {
+            id: '5',
+            type: 'Model Export',
+            description: 'Downloaded comparison report (PDF)',
+            timestamp: '3 hours ago',
+            cost: 0.02,
+            status: 'success'
+          }
+        ])
+
+        setIsLoading(false)
+      } catch (error) {
+        console.error('Error loading usage data:', error)
+        setIsLoading(false)
+      }
     }
 
     loadUsageData()
-  }, [timeRange])
+  }, [timeRange, user])
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -257,7 +316,7 @@ export default function UsagePage() {
                     <span className={`text-sm font-medium ${
                       darkMode ? 'text-blue-300' : 'text-blue-700'
                     }`}>
-                      Pro Plan
+                      {planType.charAt(0).toUpperCase() + planType.slice(1)} Plan
                     </span>
                   </div>
                 </div>
@@ -318,7 +377,7 @@ export default function UsagePage() {
                   <div className="space-y-2">
                     <div className="flex justify-between text-xs">
                       <span className={darkMode ? 'text-gray-400' : 'text-slate-600'}>
-                        {metric.current} / {metric.limit} {metric.unit}
+                        {metric.current} / {metric.limit === Infinity ? '∞' : metric.limit.toLocaleString()} {metric.unit}
                       </span>
                       <span className={darkMode ? 'text-gray-400' : 'text-slate-600'}>
                         {metric.percentage}%

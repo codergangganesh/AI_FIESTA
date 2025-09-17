@@ -18,6 +18,7 @@ import {
   Star
 } from 'lucide-react'
 import Link from 'next/link'
+import { useApiUsage } from '@/hooks/useApiUsage'
 
 interface NavigationItem {
   id: string
@@ -38,6 +39,10 @@ export default function AdvancedSidebar({ className = '' }: AdvancedSidebarProps
   const [isExpanded, setIsExpanded] = useState(false)
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
   const [isMobile, setIsMobile] = useState(false)
+  const { apiUsage, loading } = useApiUsage()
+  
+  // Add error state for API usage
+  const [apiUsageError, setApiUsageError] = useState<string | null>(null)
 
   const navigationItems: NavigationItem[] = [
     {
@@ -306,8 +311,8 @@ export default function AdvancedSidebar({ className = '' }: AdvancedSidebarProps
           })}
         </nav>
 
-        {/* Bottom Section */}
-        {/* <div className="p-4 border-t border-current border-opacity-10">
+        {/* Bottom Section - API Usage Card */}
+        <div className="p-4 border-t border-current border-opacity-10">
           <div
             className={`rounded-xl p-3 transition-colors duration-200 ${
               darkMode
@@ -335,19 +340,23 @@ export default function AdvancedSidebar({ className = '' }: AdvancedSidebarProps
                     darkMode ? 'text-white' : 'text-slate-900'
                   }`}
                 >
-                  Pro Plan
+                  API Usage
                 </p>
                 <p
                   className={`text-xs ${
                     darkMode ? 'text-gray-400' : 'text-slate-500'
                   }`}
                 >
-                  Advanced Features
+                  {loading ? (
+                    'Loading...'
+                  ) : (
+                    <>{apiUsage.apiCalls !== undefined ? `${apiUsage.apiCalls || 0} calls` : '0 calls'}</>
+                  )}
                 </p>
               </div>
             </div>
           </div>
-        </div> */}
+        </div>
       </div>
 
       </div>
