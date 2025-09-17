@@ -8,8 +8,17 @@ class DatabaseClientService {
   async getTotalComparisonsCount(): Promise<number> {
     try {
       const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return 0
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      
+      if (authError) {
+        console.error('Authentication error in getTotalComparisonsCount:', authError.message || authError)
+        return 0
+      }
+      
+      if (!user) {
+        console.error('No user found in getTotalComparisonsCount')
+        return 0
+      }
 
       const { count, error } = await supabase
         .from('model_comparisons')
@@ -17,13 +26,13 @@ class DatabaseClientService {
         .eq('user_id', user.id)
 
       if (error) {
-        console.error('Error fetching total comparisons count:', error)
+        console.error('Error fetching total comparisons count:', error.message || error)
         return 0
       }
 
       return count || 0
-    } catch (error) {
-      console.error('Error in getTotalComparisonsCount:', error)
+    } catch (error: any) {
+      console.error('Error in getTotalComparisonsCount:', error.message || error)
       return 0
     }
   }
@@ -31,8 +40,17 @@ class DatabaseClientService {
   async getModelsAnalyzedCount(): Promise<number> {
     try {
       const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return 0
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      
+      if (authError) {
+        console.error('Authentication error in getModelsAnalyzedCount:', authError.message || authError)
+        return 0
+      }
+      
+      if (!user) {
+        console.error('No user found in getModelsAnalyzedCount')
+        return 0
+      }
 
       // Get distinct models from model_comparisons table
       const { data, error } = await supabase
@@ -41,7 +59,7 @@ class DatabaseClientService {
         .eq('user_id', user.id)
 
       if (error) {
-        console.error('Error fetching models analyzed:', error)
+        console.error('Error fetching models analyzed:', error.message || error)
         return 0
       }
 
@@ -54,8 +72,8 @@ class DatabaseClientService {
       })
 
       return uniqueModels.size
-    } catch (error) {
-      console.error('Error in getModelsAnalyzedCount:', error)
+    } catch (error: any) {
+      console.error('Error in getModelsAnalyzedCount:', error.message || error)
       return 0
     }
   }
@@ -63,8 +81,17 @@ class DatabaseClientService {
   async getAverageAccuracyScore(): Promise<number> {
     try {
       const supabase = createClient()
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) return 0
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      
+      if (authError) {
+        console.error('Authentication error in getAverageAccuracyScore:', authError.message || authError)
+        return 0
+      }
+      
+      if (!user) {
+        console.error('No user found in getAverageAccuracyScore')
+        return 0
+      }
 
       // Get average accuracy from model_comparisons metrics
       const { data, error } = await supabase
@@ -74,7 +101,7 @@ class DatabaseClientService {
         .not('metrics', 'is', null)
 
       if (error) {
-        console.error('Error fetching accuracy scores:', error)
+        console.error('Error fetching accuracy scores:', error.message || error)
         return 0
       }
 
@@ -99,8 +126,8 @@ class DatabaseClientService {
       })
 
       return validEntries > 0 ? Math.round((totalAccuracy / validEntries) * 100) / 100 : 0
-    } catch (error) {
-      console.error('Error in getAverageAccuracyScore:', error)
+    } catch (error: any) {
+      console.error('Error in getAverageAccuracyScore:', error.message || error)
       return 0
     }
   }
@@ -111,12 +138,12 @@ class DatabaseClientService {
       const { data: { user }, error: authError } = await supabase.auth.getUser()
       
       if (authError) {
-        console.error('Authentication error:', authError.message)
+        console.error('Authentication error in getApiUsagePercentage:', authError.message || authError)
         return 0
       }
       
       if (!user) {
-        console.error('No user found')
+        console.error('No user found in getApiUsagePercentage')
         return 0
       }
 
@@ -128,9 +155,9 @@ class DatabaseClientService {
         .single()
 
       if (error) {
-        console.error('Error fetching API usage from user_plans:', error.message)
+        console.error('Error fetching API usage from user_plans:', error.message || error)
         // If the user_plans entry doesn't exist, create it
-        if (error.code === 'PGRST116' || error.message.includes('relation') || error.message.includes('not found')) {
+        if (error.code === 'PGRST116' || error.message?.includes('relation') || error.message?.includes('not found') || error.message?.includes('Results contain 0 rows')) {
           console.log('User plans entry not found, creating default entry')
           const defaultUsage = {
             apiCalls: 0,
@@ -142,12 +169,13 @@ class DatabaseClientService {
             .from('user_plans')
             .insert({
               user_id: user.id,
+              user_email: user.email || '',
               usage: defaultUsage,
               plan_type: 'free'
             })
           
           if (insertError) {
-            console.error('Error creating initial user plan entry:', insertError.message)
+            console.error('Error creating initial user plan entry:', insertError.message || insertError)
           }
         }
         return 0

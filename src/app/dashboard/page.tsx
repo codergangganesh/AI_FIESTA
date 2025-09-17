@@ -133,8 +133,8 @@ export default function DashboardPage() {
           .single()
 
         if (planError) {
-          console.error('Error fetching plan data:', planError)
-        } else {
+          console.error('Error fetching plan data:', planError.message || planError)
+        } else if (planData) {
           setUserPlan(planData.plan_type)
         }
 
@@ -345,8 +345,8 @@ export default function DashboardPage() {
           color: 'orange'
         }
       ])
-    } catch (error) {
-      console.error('Error updating dashboard metrics:', error)
+    } catch (error: any) {
+      console.error('Error updating dashboard metrics:', error.message || error)
     }
   }
 

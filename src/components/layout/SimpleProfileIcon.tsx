@@ -5,6 +5,8 @@ import { ChevronUp, Crown, User, Settings, LogOut, CreditCard, BarChart3, Messag
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
+import md5 from 'crypto-js/md5'
 
 interface SimpleProfileIconProps {
   darkMode?: boolean
@@ -15,6 +17,7 @@ export default function SimpleProfileIcon({ darkMode = false }: SimpleProfileIco
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const [position, setPosition] = useState<'top' | 'bottom'>('bottom')
+  const [profilePicture, setProfilePicture] = useState<string | null>(null)
   
   const dropdownRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -48,6 +51,64 @@ export default function SimpleProfileIcon({ darkMode = false }: SimpleProfileIco
     }
   }, [isOpen])
 
+  // Function to generate Gravatar URL
+  const getGravatarUrl = (email: string) => {
+    if (!email) return null;
+    const hash = md5(email.toLowerCase().trim()).toString();
+    return `https://www.gravatar.com/avatar/${hash}?d=identicon&s=200`;
+  }
+
+  // Fetch profile picture from user_settings table
+  useEffect(() => {
+    const fetchProfilePicture = async () => {
+      if (!user) return;
+      
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from('user_settings')
+          .select('profile_picture_url')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (error) {
+          console.error('Error fetching profile picture:', error.message);
+          // Fallback to avatar_url in user metadata if available
+          if (user?.user_metadata?.avatar_url) {
+            setProfilePicture(user.user_metadata.avatar_url);
+            return;
+          }
+          // Fallback to Gravatar if no avatar_url in metadata
+          if (user?.email) {
+            setProfilePicture(getGravatarUrl(user.email));
+          }
+          return;
+        }
+        
+        if (data?.profile_picture_url) {
+          setProfilePicture(data.profile_picture_url);
+        } else if (user?.user_metadata?.avatar_url) {
+          // Fallback to avatar_url in user metadata
+          setProfilePicture(user.user_metadata.avatar_url);
+        } else if (user?.email) {
+          // Fallback to Gravatar if no profile picture set
+          setProfilePicture(getGravatarUrl(user.email));
+        }
+      } catch (error) {
+        console.error('Error fetching profile picture:', error);
+        // Fallback to avatar_url in user metadata if available
+        if (user?.user_metadata?.avatar_url) {
+          setProfilePicture(user.user_metadata.avatar_url);
+        } else if (user?.email) {
+          // Fallback to Gravatar if no avatar_url in metadata
+          setProfilePicture(getGravatarUrl(user.email));
+        }
+      }
+    };
+    
+    fetchProfilePicture();
+  }, [user]);
+
   // Removed mouse enter/leave handlers to only use click functionality
 
   const handleSignOut = async () => {
@@ -68,18 +129,7 @@ export default function SimpleProfileIcon({ darkMode = false }: SimpleProfileIco
     return user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'User'
   }
 
-  const getProfilePicture = () => {
-    // Check if avatar_url exists in user_metadata
-    if (user?.user_metadata?.avatar_url) {
-      return user.user_metadata.avatar_url
-    }
-    // If not, return null
-    return null
-  }
-
   if (!user) return null
-
-  const profilePicture = getProfilePicture()
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -101,7 +151,17 @@ export default function SimpleProfileIcon({ darkMode = false }: SimpleProfileIco
             : 'bg-gradient-to-br from-blue-500 to-purple-600 text-white'
         }`}>
           {profilePicture ? (
-            <img src={profilePicture} alt="Profile" className="w-full h-full rounded-full object-cover" />
+            <img 
+              src={profilePicture} 
+              alt="Profile" 
+              className="w-full h-full rounded-full object-cover" 
+              onError={(e) => {
+                // Fallback to initials if image fails to load
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                target.parentElement!.innerHTML = getUserInitials();
+              }}
+            />
           ) : (
             getUserInitials()
           )}
@@ -132,7 +192,17 @@ export default function SimpleProfileIcon({ darkMode = false }: SimpleProfileIco
                 darkMode ? 'bg-opacity-90' : 'bg-opacity-100'
               }`}>
                 {profilePicture ? (
-                  <img src={profilePicture} alt="Profile" className="w-full h-full rounded-full object-cover" />
+                  <img 
+                    src={profilePicture} 
+                    alt="Profile" 
+                    className="w-full h-full rounded-full object-cover" 
+                    onError={(e) => {
+                      // Fallback to initials if image fails to load
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      target.parentElement!.innerHTML = getUserInitials();
+                    }}
+                  />
                 ) : (
                   getUserInitials()
                 )}

@@ -26,7 +26,7 @@ export const useApiUsage = () => {
           .single()
         
         // If not found, create default entry
-        if (error && (error.code === 'PGRST116' || error.message.includes('Results contain 0 rows'))) {
+        if (error && (error.code === 'PGRST116' || error.message?.includes('Results contain 0 rows') || error.message?.includes('relation') || error.message?.includes('not found'))) {
           console.log('Creating default user plan for user:', userId)
           const defaultUsage = {
             apiCalls: 0,
@@ -38,12 +38,13 @@ export const useApiUsage = () => {
             .from('user_plans')
             .insert({
               user_id: userId,
+              user_email: '', // Will be updated by the database trigger
               usage: defaultUsage,
               plan_type: 'free'
             })
           
           if (insertError) {
-            console.error('Error creating initial user plan entry:', insertError.message)
+            console.error('Error creating initial user plan entry:', insertError.message || insertError)
           } else {
             console.log('Default user plan created successfully')
           }
@@ -61,7 +62,7 @@ export const useApiUsage = () => {
         if (!isMounted) return
         
         if (authError) {
-          console.error('Authentication error in useApiUsage:', authError.message)
+          console.error('Authentication error in useApiUsage:', authError.message || authError)
           if (isMounted) setLoading(false)
           return
         }
@@ -85,7 +86,7 @@ export const useApiUsage = () => {
         if (!isMounted) return
 
         if (error) {
-          console.error('Error fetching API usage in useApiUsage:', error.message)
+          console.error('Error fetching API usage in useApiUsage:', error.message || error)
           if (isMounted) setLoading(false)
           return
         }
@@ -139,6 +140,8 @@ export const useApiUsage = () => {
                   console.error('Error subscribing to API usage changes:', err?.message || 'Unknown error')
                 } else if (status === 'CLOSED') {
                   console.log('API usage subscription closed')
+                } else if (status === 'TIMED_OUT') {
+                  console.error('API usage subscription timed out')
                 }
               })
           } catch (subscriptionError: any) {
@@ -157,8 +160,12 @@ export const useApiUsage = () => {
     return () => {
       isMounted = false
       if (channel) {
-        const supabase = createClient()
-        supabase.removeChannel(channel)
+        try {
+          const supabase = createClient()
+          supabase.removeChannel(channel)
+        } catch (error: any) {
+          console.error('Error removing channel:', error.message || error)
+        }
       }
     }
   }, [])
