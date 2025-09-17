@@ -1,3 +1,8 @@
-// This file is no longer needed as we're using the client from src/utils/supabase/client.ts
-// All functionality has been moved to the utils directory
-// This file is kept for backward compatibility
+import { createBrowserClient } from '@supabase/ssr'
+
+export function createClient() {
+  return createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+}

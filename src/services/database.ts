@@ -221,6 +221,29 @@ class DatabaseService {
     }
   }
 
+  async getTotalComparisonsCount(): Promise<number> {
+    try {
+      const supabase = await createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return 0
+
+      const { count, error } = await supabase
+        .from('model_comparisons')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+
+      if (error) {
+        console.error('Error fetching total comparisons count:', error)
+        return 0
+      }
+
+      return count || 0
+    } catch (error) {
+      console.error('Error in getTotalComparisonsCount:', error)
+      return 0
+    }
+  }
+
   private generateTitle(message: string): string {
     // Generate a title from the first few words of the message
     const words = message.trim().split(' ').slice(0, 6)

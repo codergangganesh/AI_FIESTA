@@ -8,6 +8,7 @@ import { AI_MODELS } from '@/config/ai-models'
 import AIResponseCard from './AIResponseCard'
 import ModelSelector from './ModelSelector'
 import ProfileDropdown from '../layout/ProfileDropdown'
+import DeleteAccountDialog from '../auth/DeleteAccountDialog'
 import Link from 'next/link'
 
 interface ChatResponse {
@@ -37,6 +38,7 @@ export default function ModernChatInterface() {
     AI_MODELS.slice(0, 3).map(model => model.id)
   )
   const [showModelSelector, setShowModelSelector] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   
   // Create a ref to store the user ID
@@ -362,6 +364,7 @@ export default function ModernChatInterface() {
           <ProfileDropdown 
             darkMode={darkMode}
             onToggleDarkMode={toggleDarkMode}
+            onDeleteAccount={() => setIsDeleteDialogOpen(true)}
           />
         </div>
       </div>
@@ -627,6 +630,12 @@ export default function ModernChatInterface() {
           </div>
         </div>
       </div>
+
+      {/* Delete Account Dialog - Now rendered at the app level to overlay the entire chat interface */}
+      <DeleteAccountDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+      />
     </div>
   )
 }

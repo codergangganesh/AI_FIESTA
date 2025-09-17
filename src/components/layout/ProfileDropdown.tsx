@@ -19,18 +19,17 @@ import {
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
-import DeleteAccountDialog from '@/components/auth/DeleteAccountDialog'
 
 interface ProfileDropdownProps {
   darkMode?: boolean
   onToggleDarkMode?: () => void
+  onDeleteAccount?: () => void
 }
 
-export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: ProfileDropdownProps) {
+export default function ProfileDropdown({ darkMode = false, onToggleDarkMode, onDeleteAccount }: ProfileDropdownProps) {
   const { user, signOut, deleteAccount } = useAuth() // Now properly typed
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -81,7 +80,7 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
 
   const handleDeleteAccount = () => {
     setIsOpen(false)
-    setIsDeleteDialogOpen(true)
+    onDeleteAccount?.()
   }
 
   const handlePricing = () => {
@@ -372,14 +371,6 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode }: 
           </div>
         )}
       </div>
-
-      {/* Delete Account Dialog */}
-      {isDeleteDialogOpen && (
-        <DeleteAccountDialog
-          isOpen={isDeleteDialogOpen}
-          onClose={() => setIsDeleteDialogOpen(false)}
-        />
-      )}
     </>
   )
 }

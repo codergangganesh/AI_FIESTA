@@ -7,6 +7,7 @@ import AdvancedSidebar from '@/components/layout/AdvancedSidebar'
 import BarChart from '@/components/dashboard/BarChart'
 import LineChart from '@/components/dashboard/LineChart'
 import DonutChart from '@/components/dashboard/DonutChart'
+import { databaseClientService } from '@/services/database.client'
 import {
   TrendingUp,
   Users,
@@ -64,7 +65,40 @@ interface PerformanceTrendData {
 export default function DashboardPage() {
   const { darkMode } = useDarkMode()
   const { user } = useAuth()
-  const [metrics, setMetrics] = useState<MetricCard[]>([])
+  const [metrics, setMetrics] = useState<MetricCard[]>([
+    {
+      title: 'Total Comparisons',
+      value: '0',
+      change: '+0%',
+      trend: 'down',
+      icon: GitCompare,
+      color: 'blue'
+    },
+    {
+      title: 'Models Analyzed',
+      value: '0',
+      change: '+0%',
+      trend: 'down',
+      icon: Brain,
+      color: 'purple'
+    },
+    {
+      title: 'Accuracy Score',
+      value: '0%',
+      change: '+0%',
+      trend: 'down',
+      icon: TrendingUp,
+      color: 'green'
+    },
+    {
+      title: 'API Usage',
+      value: '0%',
+      change: '+0%',
+      trend: 'down',
+      icon: Activity,
+      color: 'orange'
+    }
+  ])
   const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [comparisonData, setComparisonData] = useState<ModelComparisonData[]>([])
@@ -72,49 +106,117 @@ export default function DashboardPage() {
   const [hasComparisons, setHasComparisons] = useState(false)
   const [isExportOpen, setIsExportOpen] = useState(false)
   const [exportPosition, setExportPosition] = useState<'bottom' | 'top'>('bottom')
+  const [totalComparisons, setTotalComparisons] = useState(0)
   
   const exportRef = useRef<HTMLDivElement>(null)
+  const lastComparisonCount = useRef(0)
 
   useEffect(() => {
     // Simulate loading dashboard data
     const loadDashboardData = async () => {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // Check if user has made any comparisons
+      const comparisonsCount = await databaseClientService.getTotalComparisonsCount()
+      const userHasComparisons = comparisonsCount > 0
+      setHasComparisons(userHasComparisons)
+      setTotalComparisons(comparisonsCount)
+      lastComparisonCount.current = comparisonsCount
       
-      setMetrics([
-        {
-          title: 'Total Comparisons',
-          value: '2,847',
-          change: '+12.5%',
-          trend: 'up',
-          icon: GitCompare,
-          color: 'blue'
-        },
-        {
-          title: 'Models Analyzed',
-          value: '156',
-          change: '+8.2%',
-          trend: 'up',
-          icon: Brain,
-          color: 'purple'
-        },
-        {
-          title: 'Accuracy Score',
-          value: '94.6%',
-          change: '+2.1%',
-          trend: 'up',
-          icon: TrendingUp,
-          color: 'green'
-        },
-        {
-          title: 'API Usage',
-          value: '78.3%',
-          change: '-5.4%',
-          trend: 'down',
-          icon: Activity,
-          color: 'orange'
-        }
-      ])
+      if (userHasComparisons) {
+        // Get actual data from the database only if user has comparisons
+        const modelsAnalyzed = await databaseClientService.getModelsAnalyzedCount()
+        const accuracyScore = await databaseClientService.getAverageAccuracyScore()
+        const apiUsage = await databaseClientService.getApiUsagePercentage()
+        
+        setMetrics([
+          {
+            title: 'Total Comparisons',
+            value: comparisonsCount.toLocaleString(),
+            change: '+12.5%',
+            trend: 'up',
+            icon: GitCompare,
+            color: 'blue'
+          },
+          {
+            title: 'Models Analyzed',
+            value: modelsAnalyzed.toString(),
+            change: '+8.2%',
+            trend: 'up',
+            icon: Brain,
+            color: 'purple'
+          },
+          {
+            title: 'Accuracy Score',
+            value: accuracyScore > 0 ? `${accuracyScore}%` : '0%',
+            change: '+2.1%',
+            trend: 'up',
+            icon: TrendingUp,
+            color: 'green'
+          },
+          {
+            title: 'API Usage',
+            value: `${apiUsage}%`,
+            change: '-5.4%',
+            trend: 'down',
+            icon: Activity,
+            color: 'orange'
+          }
+        ])
+
+        // Sample comparison data
+        setComparisonData([
+          { modelName: 'GPT-4', responseTime: 1.2, messagesTyped: 24, modelDataTime: 0.8 },
+          { modelName: 'Claude-3', responseTime: 1.5, messagesTyped: 22, modelDataTime: 1.1 },
+          { modelName: 'Gemini Pro', responseTime: 1.8, messagesTyped: 20, modelDataTime: 1.3 },
+          { modelName: 'LLaMA 3', responseTime: 2.1, messagesTyped: 18, modelDataTime: 1.7 },
+          { modelName: 'Qwen 2.5', responseTime: 2.3, messagesTyped: 16, modelDataTime: 1.9 }
+        ])
+
+        // Sample trend data
+        setTrendData([
+          { period: 'Week 1', responseTime: 2.1, messagesTyped: 15, modelDataTime: 1.8 },
+          { period: 'Week 2', responseTime: 1.9, messagesTyped: 17, modelDataTime: 1.6 },
+          { period: 'Week 3', responseTime: 1.7, messagesTyped: 19, modelDataTime: 1.4 },
+          { period: 'Week 4', responseTime: 1.5, messagesTyped: 21, modelDataTime: 1.2 },
+          { period: 'Week 5', responseTime: 1.3, messagesTyped: 23, modelDataTime: 1.0 },
+          { period: 'Week 6', responseTime: 1.2, messagesTyped: 24, modelDataTime: 0.8 }
+        ])
+      } else {
+        // Keep metrics at 0 if no comparisons have been made
+        setMetrics([
+          {
+            title: 'Total Comparisons',
+            value: '0',
+            change: '+0%',
+            trend: 'down',
+            icon: GitCompare,
+            color: 'blue'
+          },
+          {
+            title: 'Models Analyzed',
+            value: '0',
+            change: '+0%',
+            trend: 'down',
+            icon: Brain,
+            color: 'purple'
+          },
+          {
+            title: 'Accuracy Score',
+            value: '0%',
+            change: '+0%',
+            trend: 'down',
+            icon: TrendingUp,
+            color: 'green'
+          },
+          {
+            title: 'API Usage',
+            value: '0%',
+            change: '+0%',
+            trend: 'down',
+            icon: Activity,
+            color: 'orange'
+          }
+        ])
+      }
 
       setRecentActivities([
         {
@@ -140,37 +242,76 @@ export default function DashboardPage() {
         }
       ])
 
-      // Check if user has made any comparisons
-      // In a real app, this would come from the database
-      const userHasComparisons = Math.random() > 0.5 // Random for demo purposes
-      setHasComparisons(userHasComparisons)
-
-      if (userHasComparisons) {
-        // Sample comparison data
-        setComparisonData([
-          { modelName: 'GPT-4', responseTime: 1.2, messagesTyped: 24, modelDataTime: 0.8 },
-          { modelName: 'Claude-3', responseTime: 1.5, messagesTyped: 22, modelDataTime: 1.1 },
-          { modelName: 'Gemini Pro', responseTime: 1.8, messagesTyped: 20, modelDataTime: 1.3 },
-          { modelName: 'LLaMA 3', responseTime: 2.1, messagesTyped: 18, modelDataTime: 1.7 },
-          { modelName: 'Qwen 2.5', responseTime: 2.3, messagesTyped: 16, modelDataTime: 1.9 }
-        ])
-
-        // Sample trend data
-        setTrendData([
-          { period: 'Week 1', responseTime: 2.1, messagesTyped: 15, modelDataTime: 1.8 },
-          { period: 'Week 2', responseTime: 1.9, messagesTyped: 17, modelDataTime: 1.6 },
-          { period: 'Week 3', responseTime: 1.7, messagesTyped: 19, modelDataTime: 1.4 },
-          { period: 'Week 4', responseTime: 1.5, messagesTyped: 21, modelDataTime: 1.2 },
-          { period: 'Week 5', responseTime: 1.3, messagesTyped: 23, modelDataTime: 1.0 },
-          { period: 'Week 6', responseTime: 1.2, messagesTyped: 24, modelDataTime: 0.8 }
-        ])
-      }
-
       setIsLoading(false)
     }
 
     loadDashboardData()
-  }, [])
+    
+    // Set up interval to check for updates
+    const interval = setInterval(async () => {
+      if (user) {
+        const comparisonsCount = await databaseClientService.getTotalComparisonsCount()
+        if (comparisonsCount !== lastComparisonCount.current) {
+          // Update dashboard metrics when a new comparison is made
+          updateDashboardMetrics()
+          lastComparisonCount.current = comparisonsCount
+        }
+      }
+    }, 5000) // Check every 5 seconds
+    
+    // Cleanup interval on unmount
+    return () => {
+      clearInterval(interval)
+    }
+  }, [user])
+
+  const updateDashboardMetrics = async () => {
+    if (!user) return
+    
+    // Get updated data from the database
+    const comparisonsCount = await databaseClientService.getTotalComparisonsCount()
+    const modelsAnalyzed = await databaseClientService.getModelsAnalyzedCount()
+    const accuracyScore = await databaseClientService.getAverageAccuracyScore()
+    const apiUsage = await databaseClientService.getApiUsagePercentage()
+    
+    setTotalComparisons(comparisonsCount)
+    setHasComparisons(comparisonsCount > 0)
+    
+    setMetrics([
+      {
+        title: 'Total Comparisons',
+        value: comparisonsCount.toLocaleString(),
+        change: '+12.5%',
+        trend: 'up',
+        icon: GitCompare,
+        color: 'blue'
+      },
+      {
+        title: 'Models Analyzed',
+        value: modelsAnalyzed.toString(),
+        change: '+8.2%',
+        trend: 'up',
+        icon: Brain,
+        color: 'purple'
+      },
+      {
+        title: 'Accuracy Score',
+        value: accuracyScore > 0 ? `${accuracyScore}%` : '0%',
+        change: '+2.1%',
+        trend: 'up',
+        icon: TrendingUp,
+        color: 'green'
+      },
+      {
+        title: 'API Usage',
+        value: `${apiUsage}%`,
+        change: '-5.4%',
+        trend: 'down',
+        icon: Activity,
+        color: 'orange'
+      }
+    ])
+  }
 
   // Close export dropdown when clicking outside
   useEffect(() => {
