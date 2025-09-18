@@ -231,7 +231,7 @@ export default function ModernFeedbackAndPricing() {
       // Create Stripe checkout session
       const checkoutData = await createStripeCheckout({
         planType,
-        billingCycle: 'yearly', // Default to yearly billing
+        billingCycle: 'monthly', // Changed to monthly billing by default
         amount: planType === 'pro' ? 69900 : 129900, // Amount in paise
         currency: 'INR',
         userEmail: user.email || '',
