@@ -194,6 +194,26 @@ class DatabaseService {
     }
   }
 
+  // Add method to delete all conversations for a user
+  async deleteAllConversations(): Promise<boolean> {
+    try {
+      const supabase = await createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return false
+
+      const { error } = await supabase
+        .from('conversations')
+        .delete()
+        .eq('user_id', user.id)
+
+      if (error) throw error
+      return true
+    } catch (error) {
+      console.error('Error deleting all conversations:', error)
+      return false
+    }
+  }
+
   async updateBestResponse(conversationId: string, responseId: string): Promise<boolean> {
     try {
       const supabase = await createClient()

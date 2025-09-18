@@ -72,3 +72,31 @@ export async function GET() {
     )
   }
 }
+
+// Add DELETE method to delete all conversations for a user
+export async function DELETE() {
+  try {
+    console.log('📝 API Route: DELETE /api/conversations called')
+    
+    const success = await databaseService.deleteAllConversations()
+    console.log('📝 Delete all conversations result:', { success })
+    
+    if (!success) {
+      return NextResponse.json(
+        { error: 'Failed to delete conversations' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json({ success: true, message: 'History deleted successfully' })
+  } catch (error) {
+    console.error('❌ Error deleting all conversations:', {
+      error,
+      message: error instanceof Error ? error.message : 'Unknown error'
+    })
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
+  }
+}

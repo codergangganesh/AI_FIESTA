@@ -9,6 +9,18 @@ import Link from 'next/link'
 import { useDarkMode } from '@/contexts/DarkModeContext'
 import ProfileDropdown from '@/components/layout/ProfileDropdown'
 
+// Add CSS for the fade-in animation
+const fadeInKeyframes = `
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+`
+
 export default function ModernConversationHistory() {
   const { darkMode, toggleDarkMode } = useDarkMode()
   const [conversations, setConversations] = useState<Conversation[]>([])
@@ -18,6 +30,8 @@ export default function ModernConversationHistory() {
   const [searchTerm, setSearchTerm] = useState('')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [sortBy, setSortBy] = useState<'recent' | 'oldest' | 'responses'>('recent')
+  // Add state for delete confirmation message
+  const [showDeleteSuccess, setShowDeleteSuccess] = useState(false)
 
   useEffect(() => {
     fetchConversations()
@@ -53,6 +67,28 @@ export default function ModernConversationHistory() {
       }
     } catch (error) {
       console.error('Error deleting conversation:', error)
+    }
+  }
+
+  // Add function to delete all conversations
+  const deleteAllConversations = async () => {
+    if (!confirm('Are you sure you want to delete all conversations? This action cannot be undone.')) return
+
+    try {
+      const response = await fetch('/api/conversations', {
+        method: 'DELETE'
+      })
+      
+      if (response.ok) {
+        setConversations([])
+        setSelectedConversation(null)
+        // Show success message
+        setShowDeleteSuccess(true)
+        // Hide success message after 3 seconds
+        setTimeout(() => setShowDeleteSuccess(false), 3000)
+      }
+    } catch (error) {
+      console.error('Error deleting all conversations:', error)
     }
   }
 
@@ -122,6 +158,9 @@ export default function ModernConversationHistory() {
         ? 'bg-gradient-to-br from-gray-900 via-blue-900 to-indigo-900' 
         : 'bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50'
     }`}>
+      {/* Add CSS for fade-in animation */}
+      <style>{fadeInKeyframes}</style>
+      
       {/* Left Sidebar - Same as Chat */}
       <div className={`w-80 backdrop-blur-xl border-r transition-colors duration-200 relative ${
         darkMode 
@@ -255,6 +294,16 @@ export default function ModernConversationHistory() {
                 darkMode ? 'text-gray-300' : 'text-slate-600'
               }`}>Explore your AI conversations and insights</p>
             </div>
+            {/* Add Delete All button on the right side */}
+            {conversations.length > 0 && (
+              <button
+                onClick={deleteAllConversations}
+                className="flex items-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors duration-200"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>Delete All</span>
+              </button>
+            )}
           </div>
           
           {/* Search and Filters */}
@@ -552,6 +601,22 @@ export default function ModernConversationHistory() {
                   }`}>No responses found</p>
                 )}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Success Message */}
+      {showDeleteSuccess && (
+        <div className="fixed top-4 right-4 z-50">
+          <div className={`px-6 py-4 rounded-xl shadow-lg backdrop-blur-sm border transition-all duration-300 transform animate-fade-in ${
+            darkMode 
+              ? 'bg-green-900/80 border-green-700/50 text-green-100' 
+              : 'bg-green-100/80 border-green-200/50 text-green-800'
+          }`}>
+            <div className="flex items-center">
+              <Check className="w-5 h-5 mr-2" />
+              <span className="font-medium">History deleted successfully</span>
             </div>
           </div>
         </div>
