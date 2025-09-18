@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ArrowLeft, User, Lock, Mail, Moon, Sun, Bell, Shield, CreditCard, Database, Settings as SettingsIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
@@ -26,6 +26,18 @@ export default function AccountSettingsPage() {
     securityAlerts: true
   })
 
+  // Keep form data in sync with user data
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        fullName: user.user_metadata?.full_name || '',
+        username: user.user_metadata?.username || '',
+        email: user.email || '',
+      }));
+    }
+  }, [user]);
+
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState('')
 
@@ -36,7 +48,13 @@ export default function AccountSettingsPage() {
   const handleSaveProfile = async () => {
     setIsLoading(true)
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      // In a real implementation, this would update the user's profile in the database
+      // For now, we're just showing a success message
+      // The profile will always be consistent with the email ID as it's directly sourced from the user object
+      
+      // Update user metadata if needed (in a real implementation)
+      // This would involve calling Supabase to update user metadata
+      
       setMessage('Profile updated successfully!')
       setTimeout(() => setMessage(''), 3000)
     } catch (error) {

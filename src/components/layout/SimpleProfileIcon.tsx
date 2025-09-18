@@ -109,6 +109,17 @@ export default function SimpleProfileIcon({ darkMode = false }: SimpleProfileIco
     fetchProfilePicture();
   }, [user]);
 
+  // Ensure profile picture is always consistent with email
+  useEffect(() => {
+    if (user?.email) {
+      // If we don't have a profile picture yet, or if we're using Gravatar,
+      // update it when email changes
+      if (!profilePicture || profilePicture.includes('gravatar.com')) {
+        setProfilePicture(getGravatarUrl(user.email));
+      }
+    }
+  }, [user?.email, profilePicture]);
+
   // Removed mouse enter/leave handlers to only use click functionality
 
   const handleSignOut = async () => {

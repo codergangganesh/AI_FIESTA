@@ -40,6 +40,32 @@ A comprehensive, modern web application for comparing AI model responses side-by
 - **Real-time Notifications**: Toast notifications system
 - **Account Settings**: Comprehensive user profile management
 
+## 🧑‍💼 Profile Management
+
+This application ensures that user profiles are always consistent with their email IDs. The profile system:
+
+1. Uses the user's email ID as the primary identifier for profile information
+2. Automatically generates Gravatar profile pictures based on email addresses
+3. Maintains consistency between profile data and email IDs through:
+   - Real-time synchronization in the UI components
+   - Database-level consistency checks
+   - Automated scripts for validation and correction
+
+### Key Features
+
+- **Email-based Profile Pictures**: Profile pictures are automatically generated using Gravatar service based on the user's email address
+- **Fallback System**: If a custom profile picture is not set, the system falls back to:
+  1. Custom profile picture from user_settings table
+  2. Avatar URL from OAuth provider metadata
+  3. Gravatar image generated from email ID
+- **Automatic Consistency**: Profile information automatically updates when email changes
+- **Validation Scripts**: Automated scripts ensure all profiles remain consistent with email IDs
+
+### Scripts
+
+- `scripts/ensure-user-settings.js` - Ensures all users have proper entries in the user_settings table
+- `scripts/test-email-profile-consistency.js` - Tests that all profiles are consistent with their email IDs
+
 ## 🚀 Quick Start
 
 ### Prerequisites

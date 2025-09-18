@@ -1,15 +1,23 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Star, Send, DollarSign, Crown, Zap, Check } from 'lucide-react'
 import { useDarkMode } from '@/contexts/DarkModeContext'
+import { useAuth } from '@/contexts/AuthContext'
+import { useToast } from '@/contexts/NotificationContext'
+import { createStripeCheckout, redirectToCheckout } from '@/lib/stripe'
 import { createClient } from '@/utils/supabase/client'
 import type { Database } from '@/types/database'
 
 type FeedbackMessage = Database['public']['Tables']['feedback_messages']['Row']
 
 export default function ModernFeedbackAndPricing() {
+  const router = useRouter()
   const { darkMode } = useDarkMode()
+  const { user } = useAuth()
+  const { success, error } = useToast()
   const [activeTab, setActiveTab] = useState<'feedback' | 'pricing'>('pricing')
   const [hoveredPlan, setHoveredPlan] = useState<string | null>(null)
   const [formData, setFormData] = useState({
@@ -23,6 +31,7 @@ export default function ModernFeedbackAndPricing() {
   const [showSuccess, setShowSuccess] = useState(false)
   const [feedbackList, setFeedbackList] = useState<FeedbackMessage[]>([])
   const [loading, setLoading] = useState(true)
+  const [isProcessing, setIsProcessing] = useState<string | null>(null)
 
   const supabase = createClient()
 
@@ -198,6 +207,49 @@ export default function ModernFeedbackAndPricing() {
     }
   }
 
+  const handleChoosePlan = async (planId: string) => {
+    // If it's the free plan, no need to redirect to Stripe
+    if (planId === 'free') {
+      success('Free Plan Selected', 'You can get started with the free plan right away!')
+      return
+    }
+
+    // Check if user is authenticated
+    if (!user) {
+      error('Authentication Required', 'Please log in to choose a paid plan')
+      router.push('/auth/signin?redirect=/#pricing')
+      return
+    }
+
+    // Set processing state
+    setIsProcessing(planId)
+
+    try {
+      // Map plan IDs to Stripe plan types
+      const planType = planId === 'pro' ? 'pro' : 'pro_plus'
+      
+      // Create Stripe checkout session
+      const checkoutData = await createStripeCheckout({
+        planType,
+        billingCycle: 'yearly', // Default to yearly billing
+        amount: planType === 'pro' ? 69900 : 129900, // Amount in paise
+        currency: 'INR',
+        userEmail: user.email || '',
+        userName: user.user_metadata?.full_name || user.email?.split('@')[0] || '',
+        trialDays: 7 // 7-day free trial
+      })
+
+      // Redirect to Stripe checkout
+      await redirectToCheckout(checkoutData.sessionId)
+    } catch (err) {
+      console.error('Payment error:', err)
+      const errorMessage = err instanceof Error ? err.message : 'Payment failed. Please try again.'
+      error('Payment Error', errorMessage)
+    } finally {
+      setIsProcessing(null)
+    }
+  }
+
   const renderStars = () => {
     return [1, 2, 3, 4, 5].map((star) => (
       <button
@@ -351,16 +403,31 @@ export default function ModernFeedbackAndPricing() {
                     ))}
                   </ul>
                   
-                  <button className={`w-full py-2 px-4 sm:py-3 sm:px-6 rounded-xl font-semibold transition-all duration-300 relative overflow-hidden group text-sm sm:text-base ${
-                    plan.popular
-                      ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:shadow-lg'
-                      : darkMode
-                        ? 'bg-gray-600 text-white hover:bg-gray-500'
-                        : 'bg-slate-200 text-slate-900 hover:bg-slate-300'
-                  }`}>
+                  <button 
+                    onClick={() => handleChoosePlan(plan.id)}
+                    disabled={isProcessing === plan.id}
+                    className={`w-full py-2 px-4 sm:py-3 sm:px-6 rounded-xl font-semibold transition-all duration-300 relative overflow-hidden group text-sm sm:text-base ${
+                      plan.popular
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:shadow-lg'
+                        : darkMode
+                          ? 'bg-gray-600 text-white hover:bg-gray-500'
+                          : 'bg-slate-200 text-slate-900 hover:bg-slate-300'
+                    }`}>
                     <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <span className="relative z-10">
-                      {plan.id === 'free' ? 'Get Started' : 'Choose Plan'}
+                      {isProcessing === plan.id ? (
+                        <span className="flex items-center justify-center">
+                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Processing...
+                        </span>
+                      ) : plan.id === 'free' ? (
+                        'Get Started'
+                      ) : (
+                        'Choose Plan'
+                      )}
                     </span>
                   </button>
                 </div>
@@ -376,14 +443,14 @@ export default function ModernFeedbackAndPricing() {
               }`}>
                 Need a custom plan for your team?
               </p>
-              <button className={`px-4 py-2 sm:px-6 sm:py-3 rounded-xl font-semibold transition-all duration-300 relative overflow-hidden group text-sm sm:text-base ${
+              <Link href="/contact" className={`px-4 py-2 sm:px-6 sm:py-3 rounded-xl font-semibold transition-all duration-300 relative overflow-hidden group text-sm sm:text-base block w-fit mx-auto ${
                 darkMode
                   ? 'bg-gray-700 text-white hover:bg-gray-600'
                   : 'bg-slate-200 text-slate-900 hover:bg-slate-300'
               }`}>
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <span className="relative z-10">Contact Sales</span>
-              </button>
+              </Link>
             </div>
           </div>
         </div>
