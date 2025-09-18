@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useDarkMode } from '@/contexts/DarkModeContext'
-import { useRouter } from 'next/navigation'
+import { usePopup } from '@/contexts/PopupContext'
+import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { 
   MessageSquare, 
@@ -21,7 +22,9 @@ import ProfileDropdown from './layout/ProfileDropdown'
 export default function Navigation() {
   const { user } = useAuth()
   const { darkMode, toggleDarkMode } = useDarkMode()
+  const { openPaymentPopup } = usePopup()
   const router = useRouter()
+  const pathname = usePathname()
   const [showMobileMenu, setShowMobileMenu] = useState(false)
 
   // Close mobile menu when clicking outside
@@ -36,6 +39,9 @@ export default function Navigation() {
     }
   }, [showMobileMenu])
 
+  // Check if we're on the payment cancel page
+  const isCancelPage = pathname === '/payment/cancel'
+
   if (!user) return null
 
   const menuItems = [
@@ -43,8 +49,13 @@ export default function Navigation() {
     { icon: History, label: 'History', href: '/history', description: 'Browse conversation history' },
     { icon: MessageCircle, label: 'Feedback', href: '/feedback', description: 'Share your experience' },
     { icon: Mail, label: 'Contact', href: '/contact', description: 'Contact support' },
-    { icon: DollarSign, label: 'Pricing', href: '/payment', description: 'View pricing and upgrade plans' },
+    // We'll handle Pricing separately to open the popup instead of navigating
   ]
+
+  const handlePricingClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    openPaymentPopup()
+  }
 
   return (
     <nav className={`relative backdrop-blur-xl border-b shadow-sm sticky top-0 z-50 transition-colors duration-200 ${
@@ -76,19 +87,22 @@ export default function Navigation() {
           </div>
 
           {/* Center Navigation - Simplified for logged-in users */}
-          <div className="hidden md:flex items-center space-x-1">
-            <Link
-              href="/chat"
-              className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 group ${
-                darkMode 
-                  ? 'text-gray-300 hover:text-white hover:bg-gray-800/50' 
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
-              }`}
-            >
-              <MessageSquare className="w-4 h-4 transition-transform group-hover:scale-110" />
-              <span className="font-medium">New Chat</span>
-            </Link>
-          </div>
+          {/* Hide chat link on cancel page */}
+          {!isCancelPage && (
+            <div className="hidden md:flex items-center space-x-1">
+              <Link
+                href="/chat"
+                className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 group ${
+                  darkMode 
+                    ? 'text-gray-300 hover:text-white hover:bg-gray-800/50' 
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
+                }`}
+              >
+                <MessageSquare className="w-4 h-4 transition-transform group-hover:scale-110" />
+                <span className="font-medium">New Chat</span>
+              </Link>
+            </div>
+          )}
 
           {/* Mobile Menu Button */}
           <div className="md:hidden">
@@ -125,18 +139,21 @@ export default function Navigation() {
             : 'bg-white/95 border-slate-200/50'
         }`}>
           <div className="px-4 py-4 space-y-2">
-            <Link
-              href="/chat"
-              onClick={() => setShowMobileMenu(false)}
-              className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                darkMode 
-                  ? 'text-gray-300 hover:text-white hover:bg-gray-800/50' 
-                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
-              }`}
-            >
-              <MessageSquare className="w-5 h-5" />
-              <span className="font-medium">New Chat</span>
-            </Link>
+            {/* Hide chat link on cancel page */}
+            {!isCancelPage && (
+              <Link
+                href="/chat"
+                onClick={() => setShowMobileMenu(false)}
+                className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                  darkMode 
+                    ? 'text-gray-300 hover:text-white hover:bg-gray-800/50' 
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
+                }`}
+              >
+                <MessageSquare className="w-5 h-5" />
+                <span className="font-medium">New Chat</span>
+              </Link>
+            )}
             
             {menuItems.map((item) => {
               const Icon = item.icon
@@ -157,6 +174,23 @@ export default function Navigation() {
               )
             })}
             
+            {/* Pricing link that opens popup */}
+            <button
+              onClick={(e) => {
+                e.preventDefault()
+                setShowMobileMenu(false)
+                openPaymentPopup()
+              }}
+              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 text-left ${
+                darkMode 
+                  ? 'text-gray-300 hover:text-white hover:bg-gray-800/50' 
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
+              }`}
+            >
+              <DollarSign className="w-5 h-5" />
+              <span className="font-medium">Pricing</span>
+            </button>
+            
             {/* Mobile Profile Dropdown */}
             <div className="pt-2 border-t border-gray-700">
               <ProfileDropdown 
@@ -165,6 +199,23 @@ export default function Navigation() {
               />
             </div>
           </div>
+        </div>
+      )}
+      
+      {/* Desktop Pricing Link */}
+      {!isCancelPage && (
+        <div className="hidden md:flex justify-center py-3 border-t border-gray-700">
+          <button
+            onClick={handlePricingClick}
+            className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 group ${
+              darkMode 
+                ? 'text-gray-300 hover:text-white hover:bg-gray-800/50' 
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/70'
+            }`}
+          >
+            <DollarSign className="w-4 h-4 transition-transform group-hover:scale-110" />
+            <span className="font-medium">Pricing</span>
+          </button>
         </div>
       )}
     </nav>

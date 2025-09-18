@@ -8,11 +8,13 @@ import ModernModelShowcase from './ModernModelShowcase'
 import ModernFeedbackAndPricing from './ModernFeedbackAndPricing'
 import { useEffect, useState } from 'react'
 import { useDarkMode } from '@/contexts/DarkModeContext'
+import { usePopup } from '@/contexts/PopupContext'
 import AllModelsOverlay from './AllModelsOverlay' // Fixed the import path
 
 export default function LandingPage() {
   const { user, signOut } = useAuth()
   const { darkMode, toggleDarkMode } = useDarkMode()
+  const { openPaymentPopup } = usePopup()
   const [showSuccessPopup, setShowSuccessPopup] = useState(false)
   const [popupMessage, setPopupMessage] = useState('')
   const [showAllModels, setShowAllModels] = useState(false)
@@ -219,9 +221,9 @@ export default function LandingPage() {
             <div className="flex items-center space-x-4">
               {user ? (
                 <>
-                  {/* Pricing link with modern text design */}
-                  <Link
-                    href="/payment"
+                  {/* Pricing button with modern text design */}
+                  <button
+                    onClick={openPaymentPopup}
                     className="relative px-4 py-2 rounded-full font-bold transition-all duration-300 group overflow-hidden flex items-center space-x-2"
                   >
                     {/* Animated gradient background */}
@@ -237,7 +239,7 @@ export default function LandingPage() {
                     } bg-clip-text text-transparent transition-all duration-300`}>
                       Pricing
                     </span>
-                  </Link>
+                  </button>
                   
                   {/* Feedback link with modern text design */}
                   <Link

@@ -4,6 +4,8 @@ import { AuthProvider } from '@/contexts/AuthContext'
 import { DarkModeProvider } from '@/contexts/DarkModeContext'
 import { PlanProvider } from '@/contexts/PlanContext'
 import { NotificationProvider } from '@/contexts/NotificationContext'
+import { PopupProvider } from '@/contexts/PopupContext'
+import PaymentPopup from '@/components/payment/PaymentPopup'
 import ToastContainer from '@/components/ui/ToastContainer'
 import "./globals.css";
 
@@ -36,8 +38,11 @@ export default function RootLayout({
           <DarkModeProvider>
             <PlanProvider>
               <NotificationProvider>
-                {children}
-                <ToastContainer />
+                <PopupProvider>
+                  {children}
+                  <PaymentPopup />
+                  <ToastContainer />
+                </PopupProvider>
               </NotificationProvider>
             </PlanProvider>
           </DarkModeProvider>

@@ -3,21 +3,25 @@
 import { useState, useRef, useEffect } from 'react'
 import { ChevronUp, Crown, User, Settings, LogOut, CreditCard, BarChart3, MessageSquare, Mail } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
+import { useDarkMode } from '@/contexts/DarkModeContext'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { usePopup } from '@/contexts/PopupContext'
 import md5 from 'crypto-js/md5'
 
 interface SimpleProfileIconProps {
-  darkMode?: boolean
+  // darkMode prop is no longer needed as we're using the useDarkMode hook
 }
 
-export default function SimpleProfileIcon({ darkMode = false }: SimpleProfileIconProps) {
+export default function SimpleProfileIcon() {
   const { user, signOut } = useAuth()
+  const { darkMode } = useDarkMode()
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const [position, setPosition] = useState<'top' | 'bottom'>('bottom')
   const [profilePicture, setProfilePicture] = useState<string | null>(null)
+  const { openPaymentPopup } = usePopup()
   
   const dropdownRef = useRef<HTMLDivElement>(null)
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -278,8 +282,8 @@ export default function SimpleProfileIcon({ darkMode = false }: SimpleProfileIco
               <span className="font-medium">Usage</span>
             </Link>
             
-            <Link
-              href="/payment"
+            <button
+              onClick={openPaymentPopup}
               className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
                 darkMode 
                   ? 'hover:bg-gray-700/50 text-gray-300 hover:text-white' 
@@ -287,7 +291,7 @@ export default function SimpleProfileIcon({ darkMode = false }: SimpleProfileIco
               }`}>
               <CreditCard className="w-5 h-5" />
               <span className="font-medium">Billing</span>
-            </Link>
+            </button>
             
             <Link
               href="/account-settings"
@@ -311,29 +315,7 @@ export default function SimpleProfileIcon({ darkMode = false }: SimpleProfileIco
               <span className="font-medium">Contact</span>
             </Link>
           </div>
-
-          {/* CEO Information Section */}
-          <div className={`p-4 border-t ${
-            darkMode ? 'border-gray-700' : 'border-slate-200/50'
-          }`}>
-            <div className="flex items-center space-x-3">
-              <div className={`w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-600 flex items-center justify-center text-white font-bold shadow-lg`}>
-                M
-              </div>
-              <div>
-                <h4 className={`font-semibold text-sm ${
-                  darkMode ? 'text-white' : 'text-slate-900'
-                }`}>
-                  Mannam Ganesh Babu
-                </h4>
-                <p className={`text-xs ${
-                  darkMode ? 'text-gray-400' : 'text-slate-500'
-                }`}>
-                  CEO & Founder
-                </p>
-              </div>
-            </div>
-          </div>
+          
 
           {/* Sign Out Button */}
           <div className="p-3">

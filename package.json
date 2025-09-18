@@ -23,7 +23,8 @@
     "razorpay": "^2.9.6",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "stripe": "^18.5.0"
+    "stripe": "^18.5.0",
+    "framer-motion": "^11.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

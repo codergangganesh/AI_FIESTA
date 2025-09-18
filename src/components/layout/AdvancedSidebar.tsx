@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { useDarkMode } from '@/contexts/DarkModeContext'
+import { usePopup } from '@/contexts/PopupContext'
 import NotificationBell from '@/components/ui/NotificationBell'
 import {
   Home,
@@ -27,6 +28,7 @@ interface NavigationItem {
   icon: any
   href: string
   description: string
+  isPopup?: boolean // New property to indicate if the item should open as a popup
 }
 
 interface AdvancedSidebarProps {
@@ -36,6 +38,7 @@ interface AdvancedSidebarProps {
 export default function AdvancedSidebar({ className = '' }: AdvancedSidebarProps) {
   const { darkMode } = useDarkMode()
   const { user } = useAuth() // Get user from AuthContext
+  const { openPaymentPopup } = usePopup() // Get popup context
   const router = useRouter()
   const pathname = usePathname()
   const [isExpanded, setIsExpanded] = useState(false)
@@ -79,8 +82,9 @@ export default function AdvancedSidebar({ className = '' }: AdvancedSidebarProps
       id: 'pricing',
       label: 'Pricing',
       icon: DollarSign,
-      href: '/payment',
-      description: 'Plans & Billing'
+      href: '/pricing',
+      description: 'Plans & Billing',
+      isPopup: true
     },
     // Only show usage link if user is authenticated
     ...(user ? [{
@@ -149,10 +153,22 @@ export default function AdvancedSidebar({ className = '' }: AdvancedSidebarProps
     if (href === '/chat' && (pathname === '/chat' || pathname === '/history')) {
       return true
     }
-    if (href === '/payment' && (pathname === '/payment' || pathname === '/pricing')) {
+    if (href === '/pricing' && (pathname === '/pricing' || pathname === '/payment')) {
       return true
     }
     return pathname === href
+  }
+
+  const handleNavigation = (href: string, isPopup?: boolean, e?: React.MouseEvent) => {
+    if (isPopup) {
+      // Prevent default navigation for popup items
+      e?.preventDefault()
+      // Open the payment popup
+      openPaymentPopup()
+      // Don't navigate, just open the popup
+      return
+    }
+    // For non-popup items, navigation happens normally through the Link component
   }
 
   return (
@@ -247,6 +263,7 @@ export default function AdvancedSidebar({ className = '' }: AdvancedSidebarProps
                 }`}
                 onMouseEnter={() => setHoveredItem(item.id)}
                 onMouseLeave={() => setHoveredItem(null)}
+                onClick={(e) => handleNavigation(item.href, item.isPopup, e)}
               >
                 {/* Icon */}
                 <div className="flex-shrink-0">

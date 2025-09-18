@@ -18,6 +18,7 @@ import {
   Phone
 } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
+import { usePopup } from '@/contexts/PopupContext'
 import { useRouter } from 'next/navigation'
 import md5 from 'crypto-js/md5'
 import { createClient } from '@/lib/supabase/client'
@@ -30,6 +31,7 @@ interface ProfileDropdownProps {
 
 export default function ProfileDropdown({ darkMode = false, onToggleDarkMode, onDeleteAccount }: ProfileDropdownProps) {
   const { user, signOut, deleteAccount } = useAuth() // Now properly typed
+  const { openPaymentPopup } = usePopup()
   const router = useRouter()
   const [isOpen, setIsOpen] = useState(false)
   const [position, setPosition] = useState<'top' | 'bottom'>('bottom')
@@ -167,7 +169,7 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode, on
 
   const handlePricing = () => {
     setIsOpen(false)
-    router.push('/payment')
+    openPaymentPopup()
   }
 
   const handleUsage = () => {
@@ -317,7 +319,7 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode, on
               <button
                 onClick={() => {
                   setIsOpen(false)
-                  router.push('/payment')
+                  openPaymentPopup()
                 }}
                 className={`w-full flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
                   darkMode 

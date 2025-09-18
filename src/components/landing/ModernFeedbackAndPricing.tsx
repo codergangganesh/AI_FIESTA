@@ -7,6 +7,7 @@ import { Star, Send, DollarSign, Crown, Zap, Check } from 'lucide-react'
 import { useDarkMode } from '@/contexts/DarkModeContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { useToast } from '@/contexts/NotificationContext'
+import { usePopup } from '@/contexts/PopupContext' // Added import for usePopup
 import { createStripeCheckout, redirectToCheckout } from '@/lib/stripe'
 import { createClient } from '@/utils/supabase/client'
 import type { Database } from '@/types/database'
@@ -18,6 +19,7 @@ export default function ModernFeedbackAndPricing() {
   const { darkMode } = useDarkMode()
   const { user } = useAuth()
   const { success, error } = useToast()
+  const { openPaymentPopup } = usePopup() // Added hook for popup
   const [activeTab, setActiveTab] = useState<'feedback' | 'pricing'>('pricing')
   const [hoveredPlan, setHoveredPlan] = useState<string | null>(null)
   const [formData, setFormData] = useState({
@@ -214,40 +216,8 @@ export default function ModernFeedbackAndPricing() {
       return
     }
 
-    // Check if user is authenticated
-    if (!user) {
-      error('Authentication Required', 'Please log in to choose a paid plan')
-      router.push('/auth/signin?redirect=/#pricing')
-      return
-    }
-
-    // Set processing state
-    setIsProcessing(planId)
-
-    try {
-      // Map plan IDs to Stripe plan types
-      const planType = planId === 'pro' ? 'pro' : 'pro_plus'
-      
-      // Create Stripe checkout session
-      const checkoutData = await createStripeCheckout({
-        planType,
-        billingCycle: 'monthly', // Changed to monthly billing by default
-        amount: planType === 'pro' ? 69900 : 129900, // Amount in paise
-        currency: 'INR',
-        userEmail: user.email || '',
-        userName: user.user_metadata?.full_name || user.email?.split('@')[0] || '',
-        trialDays: 7 // 7-day free trial
-      })
-
-      // Redirect to Stripe checkout
-      await redirectToCheckout(checkoutData.sessionId)
-    } catch (err) {
-      console.error('Payment error:', err)
-      const errorMessage = err instanceof Error ? err.message : 'Payment failed. Please try again.'
-      error('Payment Error', errorMessage)
-    } finally {
-      setIsProcessing(null)
-    }
+    // Instead of processing payment directly, open the payment popup
+    openPaymentPopup()
   }
 
   const renderStars = () => {

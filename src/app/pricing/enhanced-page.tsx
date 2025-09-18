@@ -23,13 +23,10 @@ type BillingCycle = 'monthly' | 'yearly'
 
 const planFeatures = [
   { name: 'Model Comparisons', free: '10/month', pro: '500/month', pro_plus: 'Unlimited' },
-  { name: 'AI Models Access', free: '2 models', pro: '4 models', pro_plus: '6+ models' },
+  { name: 'AI Models Access', free: '3 models', pro: '6 models', pro_plus: '8+ models' },
   { name: 'Storage', free: '1 GB', pro: '10 GB', pro_plus: '100 GB' },
   { name: 'API Calls', free: '100/month', pro: '5,000/month', pro_plus: '50,000/month' },
   { name: 'Export Options', free: false, pro: true, pro_plus: true },
-  { name: 'Advanced Charts', free: false, pro: true, pro_plus: true },
-  { name: 'Model Explainability', free: false, pro: false, pro_plus: true },
-  { name: 'Custom Models', free: false, pro: false, pro_plus: true },
   { name: 'Priority Support', free: 'Community', pro: 'Email', pro_plus: '24/7 Priority' }
 ]
 
@@ -51,13 +48,10 @@ export default function PricingPage() {
   // Keep the same pricing data in both modes
   const planFeatures = [
     { name: 'Model Comparisons', free: '10/month', pro: '500/month', pro_plus: 'Unlimited' },
-    { name: 'AI Models Access', free: '2 models', pro: '4 models', pro_plus: '6+ models' },
+    { name: 'AI Models Access', free: '3 models', pro: '6 models', pro_plus: '8+ models' },
     { name: 'Storage', free: '1 GB', pro: '10 GB', pro_plus: '100 GB' },
     { name: 'API Calls', free: '100/month', pro: '5,000/month', pro_plus: '50,000/month' },
     { name: 'Export Options', free: false, pro: true, pro_plus: true },
-    { name: 'Advanced Charts', free: false, pro: true, pro_plus: true },
-    { name: 'Model Explainability', free: false, pro: false, pro_plus: true },
-    { name: 'Custom Models', free: false, pro: false, pro_plus: true },
     { name: 'Priority Support', free: 'Community', pro: 'Email', pro_plus: '24/7 Priority' }
   ]
 

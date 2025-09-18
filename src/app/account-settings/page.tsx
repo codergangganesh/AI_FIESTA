@@ -5,6 +5,7 @@ import { ArrowLeft, User, Lock, Mail, Moon, Sun, Bell, Shield, CreditCard, Datab
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
 import { useDarkMode } from '@/contexts/DarkModeContext'
+import { usePopup } from '@/contexts/PopupContext'
 import AdvancedSidebar from '@/components/layout/AdvancedSidebar'
 import Link from 'next/link'
 
@@ -12,6 +13,7 @@ export default function AccountSettingsPage() {
   const router = useRouter()
   const { user } = useAuth()
   const { darkMode, toggleDarkMode } = useDarkMode()
+  const { openPaymentPopup } = usePopup()
   const [activeTab, setActiveTab] = useState('profile')
   
   const [formData, setFormData] = useState({
@@ -557,13 +559,13 @@ export default function AccountSettingsPage() {
                         Upgrade to Pro for unlimited access to all AI models and advanced features.
                       </p>
                       
-                      <Link
-                        href="/pricing"
+                      <button
+                        onClick={openPaymentPopup}
                         className="inline-flex items-center space-x-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg"
                       >
                         <CreditCard className="w-4 h-4" />
                         <span>Upgrade Plan</span>
-                      </Link>
+                      </button>
                     </div>
                   </div>
                 )}
