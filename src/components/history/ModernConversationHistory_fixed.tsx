@@ -146,7 +146,7 @@ export default function ModernConversationHistory() {
           <div className="bg-blue-50/50 border border-blue-200/30 rounded-xl p-4">
             <h3 className="text-sm font-semibold text-slate-700 mb-3 flex items-center">
               <Sparkles className="w-4 h-4 mr-2 text-blue-600" />
-              Your Stats
+              Your Status
             </h3>
             <div className="space-y-2">
               <div className="flex justify-between text-xs">

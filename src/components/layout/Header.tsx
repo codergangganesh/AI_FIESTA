@@ -62,10 +62,6 @@ export default function Header({ darkMode, toggleDarkMode }: HeaderProps) {
       await signOut()
     } catch (error) {
       console.error('Error during sign out:', error)
-      // Even if there's an error, redirect to auth page
-      if (typeof window !== 'undefined') {
-        window.location.href = '/auth'
-      }
     } finally {
       setShowProfileDropdown(false)
     }

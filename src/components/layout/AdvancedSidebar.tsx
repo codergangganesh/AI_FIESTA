@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
+import { useAuth } from '@/contexts/AuthContext'
 import { useDarkMode } from '@/contexts/DarkModeContext'
 import NotificationBell from '@/components/ui/NotificationBell'
 import {
@@ -34,6 +35,7 @@ interface AdvancedSidebarProps {
 
 export default function AdvancedSidebar({ className = '' }: AdvancedSidebarProps) {
   const { darkMode } = useDarkMode()
+  const { user } = useAuth() // Get user from AuthContext
   const router = useRouter()
   const pathname = usePathname()
   const [isExpanded, setIsExpanded] = useState(false)
@@ -80,13 +82,14 @@ export default function AdvancedSidebar({ className = '' }: AdvancedSidebarProps
       href: '/payment',
       description: 'Plans & Billing'
     },
-    {
+    // Only show usage link if user is authenticated
+    ...(user ? [{
       id: 'usage',
       label: 'Usage',
       icon: Activity,
       href: '/usage',
       description: 'API & Quota Stats'
-    },
+    }] : []),
     {
       id: 'settings',
       label: 'Account Settings',

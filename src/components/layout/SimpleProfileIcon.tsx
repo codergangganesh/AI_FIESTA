@@ -114,9 +114,11 @@ export default function SimpleProfileIcon({ darkMode = false }: SimpleProfileIco
   const handleSignOut = async () => {
     try {
       await signOut()
-      router.push('/auth/signin')
     } catch (error) {
       console.error('Error signing out:', error)
+    } finally {
+      // Use router for navigation instead of window.location
+      router.push('/auth')
     }
   }
 

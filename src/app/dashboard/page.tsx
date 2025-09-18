@@ -347,6 +347,18 @@ export default function DashboardPage() {
       ])
     } catch (error: any) {
       console.error('Error updating dashboard metrics:', error.message || error)
+      // Add more detailed error logging
+      if (error && typeof error === 'object') {
+        console.error('Error details:', {
+          message: error.message,
+          stack: error.stack,
+          name: error.name
+        })
+      }
+      // Handle network errors specifically
+      if (error?.message?.includes('Failed to fetch') || error?.message?.includes('NetworkError')) {
+        console.error('Network connectivity issue detected while updating dashboard metrics.')
+      }
     }
   }
 

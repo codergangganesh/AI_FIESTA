@@ -77,7 +77,17 @@ export interface Database {
         Row: {
           id: string
           user_id: string
+          user_email: string
           plan_type: string
+          billing_cycle: string | null
+          subscription_id: string | null
+          customer_id: string | null
+          status: string
+          current_period_start: string | null
+          current_period_end: string | null
+          trial_end: string | null
+          payment_id: string | null
+          subscription_end: string | null
           usage: Record<string, number> | null
           created_at: string
           updated_at: string
@@ -85,7 +95,17 @@ export interface Database {
         Insert: {
           id?: string
           user_id: string
+          user_email: string
           plan_type?: string
+          billing_cycle?: string | null
+          subscription_id?: string | null
+          customer_id?: string | null
+          status?: string
+          current_period_start?: string | null
+          current_period_end?: string | null
+          trial_end?: string | null
+          payment_id?: string | null
+          subscription_end?: string | null
           usage?: Record<string, number> | null
           created_at?: string
           updated_at?: string
@@ -93,7 +113,17 @@ export interface Database {
         Update: {
           id?: string
           user_id?: string
+          user_email?: string
           plan_type?: string
+          billing_cycle?: string | null
+          subscription_id?: string | null
+          customer_id?: string | null
+          status?: string
+          current_period_start?: string | null
+          current_period_end?: string | null
+          trial_end?: string | null
+          payment_id?: string | null
+          subscription_end?: string | null
           usage?: Record<string, number> | null
           created_at?: string
           updated_at?: string

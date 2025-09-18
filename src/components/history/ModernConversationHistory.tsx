@@ -199,7 +199,7 @@ export default function ModernConversationHistory() {
               darkMode ? 'text-gray-300' : 'text-slate-700'
             }`}>
               <Sparkles className="w-4 h-4 mr-2 text-blue-600" />
-              Your Stats
+              Your Status
             </h3>
             <div className="space-y-2">
               <div className="flex justify-between text-xs">

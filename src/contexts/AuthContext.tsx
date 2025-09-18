@@ -256,11 +256,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // Clear chat sessions from localStorage
       localStorage.removeItem('aiFiestaChatSessions');
-    } finally {
-      // Redirect to auth page to ensure clean state
-      if (typeof window !== 'undefined') {
-        window.location.href = '/auth';
-      }
     }
   };
 

@@ -12,6 +12,18 @@ class DatabaseClientService {
       
       if (authError) {
         console.error('Authentication error in getTotalComparisonsCount:', authError.message || authError)
+        // Add more detailed error logging
+        if (authError && typeof authError === 'object') {
+          console.error('Auth error details:', {
+            message: authError.message,
+            stack: authError.stack,
+            name: authError.name
+          })
+        }
+        // Handle network errors specifically
+        if (authError?.message?.includes('Failed to fetch') || authError?.message?.includes('NetworkError')) {
+          console.error('Network connectivity issue detected in getTotalComparisonsCount authentication.')
+        }
         return 0
       }
       
@@ -27,12 +39,36 @@ class DatabaseClientService {
 
       if (error) {
         console.error('Error fetching total comparisons count:', error.message || error)
+        // Add more detailed error logging
+        if (error && typeof error === 'object') {
+          console.error('Database error details:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+          })
+        }
+        // Handle network errors specifically
+        if (error?.message?.includes('Failed to fetch') || error?.message?.includes('NetworkError')) {
+          console.error('Network connectivity issue detected while fetching total comparisons count.')
+        }
         return 0
       }
 
       return count || 0
     } catch (error: any) {
       console.error('Error in getTotalComparisonsCount:', error.message || error)
+      // Add more detailed error logging
+      if (error && typeof error === 'object') {
+        console.error('Error details:', {
+          message: error.message,
+          stack: error.stack,
+          name: error.name
+        })
+      }
+      // Handle network errors specifically
+      if (error?.message?.includes('Failed to fetch') || error?.message?.includes('NetworkError')) {
+        console.error('Network connectivity issue detected in getTotalComparisonsCount.')
+      }
       return 0
     }
   }
@@ -44,6 +80,18 @@ class DatabaseClientService {
       
       if (authError) {
         console.error('Authentication error in getModelsAnalyzedCount:', authError.message || authError)
+        // Add more detailed error logging
+        if (authError && typeof authError === 'object') {
+          console.error('Auth error details:', {
+            message: authError.message,
+            stack: authError.stack,
+            name: authError.name
+          })
+        }
+        // Handle network errors specifically
+        if (authError?.message?.includes('Failed to fetch') || authError?.message?.includes('NetworkError')) {
+          console.error('Network connectivity issue detected in getModelsAnalyzedCount authentication.')
+        }
         return 0
       }
       
@@ -60,6 +108,18 @@ class DatabaseClientService {
 
       if (error) {
         console.error('Error fetching models analyzed:', error.message || error)
+        // Add more detailed error logging
+        if (error && typeof error === 'object') {
+          console.error('Database error details:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+          })
+        }
+        // Handle network errors specifically
+        if (error?.message?.includes('Failed to fetch') || error?.message?.includes('NetworkError')) {
+          console.error('Network connectivity issue detected while fetching models analyzed.')
+        }
         return 0
       }
 
@@ -74,6 +134,18 @@ class DatabaseClientService {
       return uniqueModels.size
     } catch (error: any) {
       console.error('Error in getModelsAnalyzedCount:', error.message || error)
+      // Add more detailed error logging
+      if (error && typeof error === 'object') {
+        console.error('Error details:', {
+          message: error.message,
+          stack: error.stack,
+          name: error.name
+        })
+      }
+      // Handle network errors specifically
+      if (error?.message?.includes('Failed to fetch') || error?.message?.includes('NetworkError')) {
+        console.error('Network connectivity issue detected in getModelsAnalyzedCount.')
+      }
       return 0
     }
   }
@@ -85,6 +157,18 @@ class DatabaseClientService {
       
       if (authError) {
         console.error('Authentication error in getAverageAccuracyScore:', authError.message || authError)
+        // Add more detailed error logging
+        if (authError && typeof authError === 'object') {
+          console.error('Auth error details:', {
+            message: authError.message,
+            stack: authError.stack,
+            name: authError.name
+          })
+        }
+        // Handle network errors specifically
+        if (authError?.message?.includes('Failed to fetch') || authError?.message?.includes('NetworkError')) {
+          console.error('Network connectivity issue detected in getAverageAccuracyScore authentication.')
+        }
         return 0
       }
       
@@ -102,6 +186,18 @@ class DatabaseClientService {
 
       if (error) {
         console.error('Error fetching accuracy scores:', error.message || error)
+        // Add more detailed error logging
+        if (error && typeof error === 'object') {
+          console.error('Database error details:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+          })
+        }
+        // Handle network errors specifically
+        if (error?.message?.includes('Failed to fetch') || error?.message?.includes('NetworkError')) {
+          console.error('Network connectivity issue detected while fetching accuracy scores.')
+        }
         return 0
       }
 
@@ -128,6 +224,18 @@ class DatabaseClientService {
       return validEntries > 0 ? Math.round((totalAccuracy / validEntries) * 100) / 100 : 0
     } catch (error: any) {
       console.error('Error in getAverageAccuracyScore:', error.message || error)
+      // Add more detailed error logging
+      if (error && typeof error === 'object') {
+        console.error('Error details:', {
+          message: error.message,
+          stack: error.stack,
+          name: error.name
+        })
+      }
+      // Handle network errors specifically
+      if (error?.message?.includes('Failed to fetch') || error?.message?.includes('NetworkError')) {
+        console.error('Network connectivity issue detected in getAverageAccuracyScore.')
+      }
       return 0
     }
   }
@@ -139,6 +247,18 @@ class DatabaseClientService {
       
       if (authError) {
         console.error('Authentication error in getApiUsagePercentage:', authError.message || authError)
+        // Add more detailed error logging
+        if (authError && typeof authError === 'object') {
+          console.error('Auth error details:', {
+            message: authError.message,
+            stack: authError.stack,
+            name: authError.name
+          })
+        }
+        // Handle network errors specifically
+        if (authError?.message?.includes('Failed to fetch') || authError?.message?.includes('NetworkError')) {
+          console.error('Network connectivity issue detected in getApiUsagePercentage authentication.')
+        }
         return 0
       }
       
@@ -156,6 +276,18 @@ class DatabaseClientService {
 
       if (error) {
         console.error('Error fetching API usage from user_plans:', error.message || error)
+        // Add more detailed error logging
+        if (error && typeof error === 'object') {
+          console.error('Database error details:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+          })
+        }
+        // Handle network errors specifically
+        if (error?.message?.includes('Failed to fetch') || error?.message?.includes('NetworkError')) {
+          console.error('Network connectivity issue detected while fetching API usage from user_plans.')
+        }
         // If the user_plans entry doesn't exist, create it
         if (error.code === 'PGRST116' || error.message?.includes('relation') || error.message?.includes('not found') || error.message?.includes('Results contain 0 rows')) {
           console.log('User plans entry not found, creating default entry')
@@ -176,6 +308,18 @@ class DatabaseClientService {
           
           if (insertError) {
             console.error('Error creating initial user plan entry:', insertError.message || insertError)
+            // Add more detailed error logging
+            if (insertError && typeof insertError === 'object') {
+              console.error('Insert error details:', {
+                message: insertError.message,
+                stack: insertError.stack,
+                name: insertError.name
+              })
+            }
+            // Handle network errors specifically
+            if (insertError?.message?.includes('Failed to fetch') || insertError?.message?.includes('NetworkError')) {
+              console.error('Network connectivity issue detected while creating initial user plan entry.')
+            }
           }
         }
         return 0
@@ -218,6 +362,18 @@ class DatabaseClientService {
       return planLimit > 0 ? Math.round((apiCalls / planLimit) * 100) : 0
     } catch (error: any) {
       console.error('Error in getApiUsagePercentage:', error.message || error)
+      // Add more detailed error logging
+      if (error && typeof error === 'object') {
+        console.error('Error details:', {
+          message: error.message,
+          stack: error.stack,
+          name: error.name
+        })
+      }
+      // Handle network errors specifically
+      if (error?.message?.includes('Failed to fetch') || error?.message?.includes('NetworkError')) {
+        console.error('Network connectivity issue detected in getApiUsagePercentage.')
+      }
       return 0
     }
   }

@@ -134,8 +134,8 @@ export default function ProfileDropdown({ darkMode = false, onToggleDarkMode, on
       console.error('Error during sign out:', error)
     } finally {
       setIsOpen(false)
-      // Redirect to home page after sign out
-      router.push('/')
+      // Redirect to auth page after sign out
+      router.push('/auth')
     }
   }
 
