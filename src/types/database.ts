@@ -176,6 +176,41 @@ export interface Database {
           updated_at?: string
         }
       }
+      feedback_messages: {
+        Row: {
+          id: string
+          user_id: string | null
+          name: string
+          email: string
+          message: string
+          rating: number | null
+          status: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          name: string
+          email: string
+          message: string
+          rating?: number | null
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          name?: string
+          email?: string
+          message?: string
+          rating?: number | null
+          status?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

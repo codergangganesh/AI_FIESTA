@@ -8,18 +8,15 @@ export async function POST(request: NextRequest) {
     // Create a Supabase client with the user's cookies
     const supabase = createServerSupabaseClient();
 
-    // Get user session
+    // Get user session (may be null for unauthenticated users)
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
-    }
 
     // Insert feedback into database
     const { data, error } = await supabase
       .from('feedback_messages')
       .insert([
         {
-          user_id: user.id,
+          user_id: user?.id || null, // Allow null for unauthenticated users
           name,
           email,
           message,

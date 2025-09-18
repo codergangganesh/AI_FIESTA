@@ -3,6 +3,10 @@
 import { useState, useEffect } from 'react'
 import { Star, Send, DollarSign, Crown, Zap, Check } from 'lucide-react'
 import { useDarkMode } from '@/contexts/DarkModeContext'
+import { createClient } from '@/utils/supabase/client'
+import type { Database } from '@/types/database'
+
+type FeedbackMessage = Database['public']['Tables']['feedback_messages']['Row']
 
 export default function ModernFeedbackAndPricing() {
   const { darkMode } = useDarkMode()
@@ -17,6 +21,50 @@ export default function ModernFeedbackAndPricing() {
   const [hoverRating, setHoverRating] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
+  const [feedbackList, setFeedbackList] = useState<FeedbackMessage[]>([])
+  const [loading, setLoading] = useState(true)
+
+  const supabase = createClient()
+
+  // Fetch feedback from database
+  useEffect(() => {
+    const fetchFeedback = async () => {
+      setLoading(true)
+      const { data, error } = await supabase
+        .from('feedback_messages')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(3) // Show only the latest 3 feedbacks on the landing page
+
+      if (!error && data) {
+        setFeedbackList(data)
+      }
+      setLoading(false)
+    }
+
+    fetchFeedback()
+
+    // Subscribe to new feedback in real-time
+    const channel = supabase
+      .channel('landing-feedback-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'feedback_messages'
+        },
+        (payload: any) => {
+          // Add the new feedback to the top of the list and keep only 3 items
+          setFeedbackList(prev => [payload.new, ...prev.slice(0, 2)])
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [])
 
   // Pricing data
   const plans = [
@@ -72,42 +120,65 @@ export default function ModernFeedbackAndPricing() {
     }
   ]
 
-  // Sample feedback data
-  const feedbackList = [
-    {
-      id: '1',
-      name: 'Dr. Sarah Chen',
-      rating: 5,
-      message: 'AI Fiesta has revolutionized how I compare model outputs for my research. The side-by-side comparison saves me hours every day.',
-      date: '2024-05-15'
-    },
-    {
-      id: '2',
-      name: 'Marcus Rodriguez',
-      rating: 5,
-      message: 'The universal input feature is a game-changer. I can test prompts across multiple models instantly and find the best responses.',
-      date: '2024-06-22'
-    },
-    {
-      id: '3',
-      name: 'Emily Zhang',
-      rating: 4,
-      message: 'Perfect tool for evaluating AI models for our product. The history feature helps us track which models work best for different use cases.',
-      date: '2024-07-10'
-    }
-  ]
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
-    setFormData(prev => ({ ...prev, [name]: value }))
+    setFormData(prev => {
+      const newData = { ...prev, [name]: value }
+      return newData
+    })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleRatingChange = (rating: number) => {
+    setFormData(prev => {
+      const newData = { ...prev, rating }
+      return newData
+    })
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    // Simple validation
+    if (!formData.name.trim()) {
+      alert('Please enter your name')
+      return
+    }
+    
+    if (!formData.email.trim() || !/\S+@\S+\.\S+/.test(formData.email)) {
+      alert('Please enter a valid email')
+      return
+    }
+    
+    if (formData.rating === 0) {
+      alert('Please select a rating')
+      return
+    }
+    
+    if (!formData.message.trim()) {
+      alert('Please enter your feedback message')
+      return
+    }
+    
     setIsSubmitting(true)
     
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const response = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      })
+      
+      if (!response.ok) {
+        throw new Error('Failed to submit feedback')
+      }
+      
+      const result = await response.json()
+      
+      // Add the new feedback to the list immediately
+      setFeedbackList(prev => [result.data, ...prev.slice(0, 2)])
+      
       setIsSubmitting(false)
       setShowSuccess(true)
       setFormData({
@@ -119,7 +190,12 @@ export default function ModernFeedbackAndPricing() {
       
       // Hide success message after 3 seconds
       setTimeout(() => setShowSuccess(false), 3000)
-    }, 1500)
+    } catch (error) {
+      console.error('Error submitting feedback:', error)
+      alert('Error submitting feedback. Please try again.')
+      setIsSubmitting(false)
+      // You might want to show an error message to the user here
+    }
   }
 
   const renderStars = () => {
@@ -127,7 +203,7 @@ export default function ModernFeedbackAndPricing() {
       <button
         key={star}
         type="button"
-        onClick={() => setFormData(prev => ({ ...prev, rating: star }))}
+        onClick={() => handleRatingChange(star)}
         onMouseEnter={() => setHoverRating(star)}
         onMouseLeave={() => setHoverRating(0)}
         className={`p-1 focus:outline-none transition-all duration-200 transform hover:scale-110 ${
@@ -289,7 +365,7 @@ export default function ModernFeedbackAndPricing() {
                       <textarea
                         name="message"
                         value={formData.message}
-                        onChange={handleInputChange}
+                        onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
                         placeholder="Share your thoughts..."
                         rows={4}
                         className={`w-full px-4 py-3 rounded-xl border transition-all duration-200 focus:outline-none focus:ring-2 resize-none ${
@@ -324,67 +400,98 @@ export default function ModernFeedbackAndPricing() {
                         </>
                       )}
                     </button>
+                    
+                    <div className="text-center mt-4">
+                      <a 
+                        href="/feedback" 
+                        className={`text-sm font-medium transition-colors duration-200 ${
+                          darkMode 
+                            ? 'text-blue-400 hover:text-blue-300' 
+                            : 'text-blue-600 hover:text-blue-700'
+                        }`}
+                      >
+                        View All Feedback
+                      </a>
+                    </div>
                   </form>
                 )}
               </div>
               
               {/* Feedback List */}
               <div>
-                <h3 className={`text-2xl font-bold mb-6 transition-colors duration-200 ${
-                  darkMode ? 'text-white' : 'text-slate-900'
-                }`}>
-                  What Users Say
-                </h3>
-                
-                <div className="space-y-6">
-                  {feedbackList.map((feedback) => (
-                    <div 
-                      key={feedback.id}
-                      className={`p-6 rounded-2xl transition-all duration-300 relative overflow-hidden group ${
-                        darkMode 
-                          ? 'bg-gray-700/30 border border-gray-600/50 hover:border-blue-500/30' 
-                          : 'bg-white border border-slate-200/50 hover:border-blue-300/50'
-                      }`}
-                    >
-                      {/* Glowing effect on hover */}
-                      <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                      
-                      <div className="relative z-10">
-                        <div className="flex items-center justify-between mb-4">
-                          <div>
-                            <h4 className={`font-bold ${
-                              darkMode ? 'text-white' : 'text-slate-900'
-                            }`}>
-                              {feedback.name}
-                            </h4>
-                            <p className={`text-sm ${
-                              darkMode ? 'text-gray-400' : 'text-slate-500'
-                            }`}>
-                              {new Date(feedback.date).toLocaleDateString()}
-                            </p>
-                          </div>
-                          <div className="flex">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`w-4 h-4 ${
-                                  i < feedback.rating 
-                                    ? 'text-yellow-400 fill-current' 
-                                    : darkMode ? 'text-gray-600' : 'text-gray-300'
-                                }`}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                        <p className={`${
-                          darkMode ? 'text-gray-300' : 'text-slate-700'
-                        }`}>
-                          {feedback.message}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className={`text-2xl font-bold transition-colors duration-200 ${
+                    darkMode ? 'text-white' : 'text-slate-900'
+                  }`}>
+                    What Users Say
+                  </h3>
+                  <a 
+                    href="/feedback" 
+                    className={`text-sm font-medium transition-colors duration-200 ${
+                      darkMode 
+                        ? 'text-blue-400 hover:text-blue-300' 
+                        : 'text-blue-600 hover:text-blue-700'
+                    }`}
+                  >
+                    View All
+                  </a>
                 </div>
+                
+                {loading ? (
+                  <div className="flex justify-center items-center h-32">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {feedbackList.map((feedback) => (
+                      <div 
+                        key={feedback.id}
+                        className={`p-6 rounded-2xl transition-all duration-300 relative overflow-hidden group ${
+                          darkMode 
+                            ? 'bg-gray-700/30 border border-gray-600/50 hover:border-blue-500/30' 
+                            : 'bg-white border border-slate-200/50 hover:border-blue-300/50'
+                        }`}
+                      >
+                        {/* Glowing effect on hover */}
+                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/10 to-purple-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                        
+                        <div className="relative z-10">
+                          <div className="flex items-center justify-between mb-4">
+                            <div>
+                              <h4 className={`font-bold ${
+                                darkMode ? 'text-white' : 'text-slate-900'
+                              }`}>
+                                {feedback.name}
+                              </h4>
+                              <p className={`text-sm ${
+                                darkMode ? 'text-gray-400' : 'text-slate-500'
+                              }`}>
+                                {new Date(feedback.created_at).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <div className="flex">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`w-4 h-4 ${
+                                    i < (feedback.rating || 0) 
+                                      ? 'text-yellow-400 fill-current' 
+                                      : darkMode ? 'text-gray-600' : 'text-gray-300'
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+                          <p className={`${
+                            darkMode ? 'text-gray-300' : 'text-slate-700'
+                          }`}>
+                            {feedback.message}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}

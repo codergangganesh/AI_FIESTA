@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Brain, MessageSquare, Clock, Settings, LogOut, Users, BarChart3 } from 'lucide-react'
+import { Brain, MessageSquare, Clock, Settings, LogOut, Users, BarChart3, MessageCircle } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 
 export default function Navigation() {
@@ -14,6 +14,7 @@ export default function Navigation() {
     { name: 'History', href: '/history', icon: Clock },
     { name: 'Models', href: '/model-showcase', icon: Brain },
     { name: 'Analytics', href: '/analytics', icon: BarChart3 },
+    { name: 'Feedback', href: '/feedback', icon: MessageCircle },
     { name: 'Settings', href: '/account-settings', icon: Settings },
   ]
 

@@ -13,7 +13,8 @@ import {
   Brain,
   Menu,
   X,
-  DollarSign
+  DollarSign,
+  MessageCircle
 } from 'lucide-react'
 import ProfileDropdown from './layout/ProfileDropdown'
 
@@ -40,6 +41,7 @@ export default function Navigation() {
   const menuItems = [
     { icon: BarChart3, label: 'Chart', href: '/analytics', description: 'View analytics and insights' },
     { icon: History, label: 'History', href: '/history', description: 'Browse conversation history' },
+    { icon: MessageCircle, label: 'Feedback', href: '/feedback', description: 'Share your experience' },
     { icon: Mail, label: 'Contact', href: '/contact', description: 'Contact support' },
     { icon: DollarSign, label: 'Pricing', href: '/payment', description: 'View pricing and upgrade plans' },
   ]
