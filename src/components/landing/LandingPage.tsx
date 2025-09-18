@@ -669,7 +669,9 @@ export default function LandingPage() {
       <ModernModelShowcase />
       
       {/* Modern Feedback and Pricing Section */}
-      <ModernFeedbackAndPricing />
+      <div className="px-4 sm:px-6">
+        <ModernFeedbackAndPricing />
+      </div>
       
       {/* Testimonials Section */}
       <section className={`py-24 relative ${
