@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Conversation } from '@/types/app'
 import { AI_MODELS } from '@/config/ai-models'
 import { formatDistanceToNow } from 'date-fns'
-import { MessageSquare, Trash2, Star, Clock, Copy, Check, Search, Grid, List, ChevronDown, SortDesc, Plus, History, Brain, Sparkles } from 'lucide-react'
+import { MessageSquare, Trash2, Star, Clock, Copy, Check, Search, Grid, List, ChevronDown, SortDesc, Plus, History, Brain, Sparkles, X } from 'lucide-react'
 import Link from 'next/link'
 import { useDarkMode } from '@/contexts/DarkModeContext'
 import ProfileDropdown from '@/components/layout/ProfileDropdown'
@@ -32,6 +32,8 @@ export default function ModernConversationHistory() {
   const [sortBy, setSortBy] = useState<'recent' | 'oldest' | 'responses'>('recent')
   // Add state for delete confirmation message
   const [showDeleteSuccess, setShowDeleteSuccess] = useState(false)
+  // Add state for delete confirmation popup
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
 
   useEffect(() => {
     fetchConversations()
@@ -72,8 +74,6 @@ export default function ModernConversationHistory() {
 
   // Add function to delete all conversations
   const deleteAllConversations = async () => {
-    if (!confirm('Are you sure you want to delete all conversations? This action cannot be undone.')) return
-
     try {
       const response = await fetch('/api/conversations', {
         method: 'DELETE'
@@ -82,6 +82,8 @@ export default function ModernConversationHistory() {
       if (response.ok) {
         setConversations([])
         setSelectedConversation(null)
+        // Close confirmation popup
+        setShowDeleteConfirm(false)
         // Show success message
         setShowDeleteSuccess(true)
         // Hide success message after 3 seconds
@@ -276,7 +278,7 @@ export default function ModernConversationHistory() {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col relative">
         {/* Header */}
         <div className={`backdrop-blur-sm border-b p-6 transition-colors duration-200 ${
           darkMode 
@@ -297,7 +299,7 @@ export default function ModernConversationHistory() {
             {/* Add Delete All button on the right side */}
             {conversations.length > 0 && (
               <button
-                onClick={deleteAllConversations}
+                onClick={() => setShowDeleteConfirm(true)}
                 className="flex items-center space-x-2 px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors duration-200"
               >
                 <Trash2 className="w-4 h-4" />
@@ -600,6 +602,59 @@ export default function ModernConversationHistory() {
                     darkMode ? 'text-gray-400' : 'text-slate-500'
                   }`}>No responses found</p>
                 )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Popup - Moved to center of page */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className={`backdrop-blur-xl rounded-2xl shadow-2xl max-w-md w-full transition-all duration-300 transform animate-fade-in ${
+            darkMode ? 'bg-gray-800/90' : 'bg-white/90'
+          }`}>
+            <div className={`p-6 border-b transition-colors duration-200 ${
+              darkMode 
+                ? 'border-gray-600/50' 
+                : 'border-slate-200/50'
+            }`}>
+              <div className="flex items-center justify-between">
+                <h3 className={`text-xl font-bold transition-colors duration-200 ${
+                  darkMode ? 'text-white' : 'text-slate-900'
+                }`}>Confirm Delete All</h3>
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className={`p-2 rounded-lg hover:bg-white/50 transition-colors duration-200 ${
+                    darkMode ? 'text-gray-400 hover:text-gray-300' : 'text-slate-400 hover:text-slate-600'
+                  }`}
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            
+            <div className={`p-6 transition-colors duration-200 ${
+              darkMode ? 'text-gray-300' : 'text-slate-600'
+            }`}>
+              <p className="mb-6">Are you sure you want to delete all conversations? This action cannot be undone.</p>
+              <div className="flex justify-end space-x-4">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                    darkMode 
+                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' 
+                      : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
+                  }`}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={deleteAllConversations}
+                  className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors duration-200"
+                >
+                  Delete All
+                </button>
               </div>
             </div>
           </div>
