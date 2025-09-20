@@ -23,6 +23,13 @@ export default function ApiCallHistoryChart({ data, title, unit = '', isLoading 
   const [showAll, setShowAll] = useState(false)
   const [displayedData, setDisplayedData] = useState<any[]>([])
   const [maxValue, setMaxValue] = useState(0)
+  // Add state for tooltip
+  const [tooltip, setTooltip] = useState<{visible: boolean, x: number, y: number, data: ApiCallHistoryData | null}>({
+    visible: false,
+    x: 0,
+    y: 0,
+    data: null
+  })
 
   // Process data for visualization
   useEffect(() => {
@@ -65,6 +72,35 @@ export default function ApiCallHistoryChart({ data, title, unit = '', isLoading 
       setMaxValue(0)
     }
   }, [data, showAll])
+
+  // Handle mouse enter on bar
+  const handleBarMouseEnter = (e: React.MouseEvent, item: ApiCallHistoryData) => {
+    setTooltip({
+      visible: true,
+      x: e.clientX,
+      y: e.clientY,
+      data: item
+    })
+  }
+
+  // Handle mouse move on bar
+  const handleBarMouseMove = (e: React.MouseEvent) => {
+    setTooltip(prev => ({
+      ...prev,
+      x: e.clientX,
+      y: e.clientY
+    }))
+  }
+
+  // Handle mouse leave on bar
+  const handleBarMouseLeave = () => {
+    setTooltip({
+      visible: false,
+      x: 0,
+      y: 0,
+      data: null
+    })
+  }
 
   if (isLoading) {
     return (
@@ -149,7 +185,7 @@ export default function ApiCallHistoryChart({ data, title, unit = '', isLoading 
       </div>
       
       {/* Modern Bar Chart Visualization */}
-      <div className="flex-1 flex flex-col min-h-0">
+      <div className="flex-1 flex flex-col min-h-0 relative">
         <div className="flex-1 flex items-end justify-between space-x-2 md:space-x-4 pt-4">
           {displayedData.map((item, index) => (
             <div key={index} className="flex flex-col items-center flex-1 h-full">
@@ -157,12 +193,15 @@ export default function ApiCallHistoryChart({ data, title, unit = '', isLoading 
               <div className="flex flex-col items-center w-full flex-1">
                 <div className="flex items-end justify-center w-full h-full">
                   <div 
-                    className="w-3/4 rounded-t-md transition-all duration-500 ease-out hover:opacity-90"
+                    className="w-3/4 rounded-t-md transition-all duration-500 ease-out hover:opacity-90 cursor-pointer"
                     style={{ 
                       height: `${(item.value / maxValue) * 100}%`,
                       backgroundColor: darkMode ? '#60A5FA' : '#3B82F6',
                       minHeight: '4px'
                     }}
+                    onMouseEnter={(e) => handleBarMouseEnter(e, item)}
+                    onMouseMove={handleBarMouseMove}
+                    onMouseLeave={handleBarMouseLeave}
                   ></div>
                 </div>
               </div>
@@ -220,6 +259,30 @@ export default function ApiCallHistoryChart({ data, title, unit = '', isLoading 
           >
             View all {data.length} records
           </button>
+        </div>
+      )}
+      
+      {/* Tooltip */}
+      {tooltip.visible && tooltip.data && (
+        <div 
+          className={`absolute p-3 rounded-lg shadow-lg pointer-events-none ${
+            darkMode 
+              ? 'bg-gray-800 border border-gray-700' 
+              : 'bg-white border border-slate-200'
+          }`}
+          style={{
+            left: `${tooltip.x + 10}px`,
+            top: `${tooltip.y - 10}px`,
+            transform: 'translateY(-100%)',
+            zIndex: 50
+          }}
+        >
+          <div className={`font-bold text-sm ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+            {tooltip.data.period}
+          </div>
+          <div className={`text-sm ${darkMode ? 'text-gray-300' : 'text-slate-700'}`}>
+            {tooltip.data.value}{unit}
+          </div>
         </div>
       )}
     </div>
