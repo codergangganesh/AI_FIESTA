@@ -241,6 +241,26 @@ export default function LandingPage() {
                     </span>
                   </button>
                   
+                  {/* Documentation link with modern text design */}
+                  <Link
+                    href="/docs"
+                    className="relative px-4 py-2 rounded-full font-bold transition-all duration-300 group overflow-hidden flex items-center space-x-2"
+                  >
+                    {/* Animated gradient background */}
+                    <div className="absolute inset-0 rounded-full">
+                      <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    </div>
+                      
+                    {/* Modern text styling */}
+                    <span className={`relative text-sm font-semibold bg-gradient-to-r ${
+                      darkMode 
+                        ? 'from-gray-300 to-gray-100 group-hover:from-blue-300 group-hover:to-purple-300' 
+                        : 'from-slate-700 to-slate-900 group-hover:from-blue-600 group-hover:to-purple-700'
+                    } bg-clip-text text-transparent transition-all duration-300`}>
+                      Documentation
+                    </span>
+                  </Link>
+                  
                   {/* Feedback link with modern text design */}
                   <Link
                     href="/public-feedback"
@@ -1148,8 +1168,7 @@ export default function LandingPage() {
                   {[
                     { name: 'Compare Models', href: '/chat' },
                     { name: 'View History', href: '/history' },
-                    // { name: 'API Access', href: '/api' },
-                    // { name: 'Documentation', href: '/docs' }
+                    { name: 'Documentation', href: '/docs' }
                   ].map((link, index) => (
                     <li key={index}>
                       <Link 
