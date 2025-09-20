@@ -8,10 +8,16 @@ class DatabaseService {
   async saveConversation(
     message: string, 
     responses: Array<{ model: string; content: string; success: boolean }>,
-    bestResponseModel?: string
+    bestResponseModel?: string,
+    responseTime?: number // Add responseTime parameter
   ): Promise<string | null> {
     try {
-      console.log('🔧 DatabaseService.saveConversation called with:', { message: message.substring(0, 50) + '...', responsesCount: responses.length, bestResponseModel })
+      console.log('🔧 DatabaseService.saveConversation called with:', { 
+        message: message.substring(0, 50) + '...', 
+        responsesCount: responses.length, 
+        bestResponseModel,
+        responseTime
+      })
       
       const supabase = await createClient()
       console.log('🔧 Supabase client created')
@@ -28,7 +34,8 @@ class DatabaseService {
       const conversationData = {
         user_id: user.id,
         title: this.generateTitle(message),
-        message: message
+        message: message,
+        response_time: responseTime || 0.0000 // Add response_time to conversation data
       }
       console.log('🔧 Inserting conversation:', conversationData)
       
@@ -116,6 +123,7 @@ class DatabaseService {
         message: conv.message,
         createdAt: conv.created_at,
         updatedAt: conv.updated_at,
+        responseTime: conv.response_time, // Add responseTime to the returned data
         responses: conv.ai_responses.map((resp: any) => ({
           id: resp.id,
           conversationId: resp.conversation_id,
@@ -159,6 +167,7 @@ class DatabaseService {
         message: data.message,
         createdAt: data.created_at,
         updatedAt: data.updated_at,
+        responseTime: data.response_time, // Add responseTime to the returned data
         responses: data.ai_responses.map((resp: { id: string; conversation_id: string; model_name: string; response: string; is_best_response: boolean; created_at: string }) => ({
           id: resp.id,
           conversationId: resp.conversation_id,

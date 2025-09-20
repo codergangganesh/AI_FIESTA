@@ -9,10 +9,11 @@ export async function POST(request: NextRequest) {
     console.log('📝 Request body:', {
       messageLength: requestBody.message?.length || 0,
       responsesCount: requestBody.responses?.length || 0,
-      bestResponseModel: requestBody.bestResponseModel
+      bestResponseModel: requestBody.bestResponseModel,
+      responseTime: requestBody.responseTime
     })
     
-    const { message, responses, bestResponseModel } = requestBody
+    const { message, responses, bestResponseModel, responseTime } = requestBody
 
     if (!message || !responses) {
       console.error('❌ Missing required fields:', { hasMessage: !!message, hasResponses: !!responses })
@@ -26,7 +27,8 @@ export async function POST(request: NextRequest) {
     const conversationId = await databaseService.saveConversation(
       message,
       responses,
-      bestResponseModel
+      bestResponseModel,
+      responseTime // Pass responseTime to the database service
     )
     console.log('📝 Database save result:', { conversationId })
 

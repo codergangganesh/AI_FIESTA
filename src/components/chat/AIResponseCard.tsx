@@ -21,6 +21,7 @@ interface AIResponseCardProps {
     latency: number
     cost: number
   }
+  responseTime?: number // Add response time prop
 }
 
 export default function AIResponseCard({
@@ -29,7 +30,8 @@ export default function AIResponseCard({
   loading,
   error,
   isBestResponse = false,
-  onMarkBest
+  onMarkBest,
+  responseTime // Destructure responseTime
 }: AIResponseCardProps) {
   const { darkMode } = useDarkMode()
   const [copied, setCopied] = useState(false)
@@ -159,9 +161,9 @@ export default function AIResponseCard({
                     ? darkMode
                       ? 'bg-amber-900/40 text-amber-300' 
                       : 'bg-amber-100 text-amber-700'
-                    : darkMode
-                      ? 'bg-gray-700 text-gray-300'
-                      : 'bg-slate-100 text-slate-600'
+                  : darkMode
+                    ? 'bg-gray-700 text-gray-300'
+                    : 'bg-slate-100 text-slate-600'
                 }`}>
                   {model.provider}
                 </span>
@@ -171,6 +173,16 @@ export default function AIResponseCard({
                   }`}>
                     <Sparkles className="w-3 h-3" />
                     <span className="text-xs font-semibold">Best</span>
+                  </div>
+                )}
+                {/* Display response time if available */}
+                {responseTime !== undefined && responseTime > 0 && (
+                  <div className={`text-xs font-medium px-2 py-1 rounded-full ${
+                    darkMode
+                      ? 'bg-blue-900/40 text-blue-300' 
+                      : 'bg-blue-100 text-blue-700'
+                  }`}>
+                    {responseTime.toFixed(2)}s
                   </div>
                 )}
               </div>

@@ -34,6 +34,7 @@ export interface Conversation {
   message: string
   createdAt: string
   updatedAt: string
+  responseTime?: number
   responses?: AIResponse[]
 }
 

@@ -17,6 +17,7 @@ interface ChatResponse {
   content: string
   error?: string
   success: boolean
+  responseTime?: number // Add response time to the interface
 }
 
 interface ChatSession {
@@ -26,6 +27,7 @@ interface ChatSession {
   timestamp: Date
   selectedModels: string[]  // Store selected models per session
   bestResponse?: string
+  responseTime?: number // Add response time to session
 }
 
 export default function ModernChatInterface() {
@@ -151,6 +153,8 @@ export default function ModernChatInterface() {
         }
       }
 
+      const startTime = Date.now() // Track start time
+
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
@@ -162,16 +166,23 @@ export default function ModernChatInterface() {
         })
       })
 
+      const endTime = Date.now() // Track end time
+      const responseTime = (endTime - startTime) / 1000 // Calculate response time in seconds
+
       if (!response.ok) {
         throw new Error('Failed to send message')
       }
 
       const data = await response.json()
       
-      // Update session with responses
+      // Update session with responses and response time
       setChatSessions(prev => prev.map(session => 
         session.id === newSessionId 
-          ? { ...session, responses: data.responses } 
+          ? { 
+              ...session, 
+              responses: data.responses,
+              responseTime: data.responseTime || responseTime // Use API response time or calculated time
+            } 
           : session
       ))
       
@@ -185,7 +196,8 @@ export default function ModernChatInterface() {
           body: JSON.stringify({
             message: currentMsg,
             responses: data.responses,
-            bestResponseModel: null
+            bestResponseModel: null,
+            responseTime: data.responseTime || responseTime // Include response time in saved conversation
           })
         })
         
@@ -484,11 +496,22 @@ export default function ModernChatInterface() {
                               <p className={`mt-2 transition-colors duration-200 ${
                                 darkMode ? 'text-gray-200' : 'text-slate-800'
                               }`}>{session.message}</p>
-                              <p className={`text-xs mt-1 transition-colors duration-200 ${
-                                darkMode ? 'text-gray-400' : 'text-slate-500'
-                              }`}>
-                                {session.timestamp.toLocaleString()}
-                              </p>
+                              <div className="flex items-center mt-1">
+                                <p className={`text-xs transition-colors duration-200 ${
+                                  darkMode ? 'text-gray-400' : 'text-slate-500'
+                                }`}>
+                                  {session.timestamp.toLocaleString()}
+                                </p>
+                                {session.responseTime && (
+                                  <span className={`text-xs ml-3 px-2 py-1 rounded-full transition-colors duration-200 ${
+                                    darkMode 
+                                      ? 'bg-green-900/30 text-green-400' 
+                                      : 'bg-green-100 text-green-700'
+                                  }`}>
+                                    Response Time: {session.responseTime.toFixed(2)}s
+                                  </span>
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -520,6 +543,7 @@ export default function ModernChatInterface() {
                                 error={response?.error}
                                 isBestResponse={session.bestResponse === modelId}
                                 onMarkBest={() => handleMarkBest(modelId)}
+                                responseTime={response?.responseTime} // Pass response time to the card
                               />
                             )
                           })}
