@@ -188,13 +188,17 @@ export default function DashboardPage() {
             }
           ])
 
-          // Sample comparison data
+          // Sample comparison data with 9 models
           setComparisonData([
             { modelName: 'GPT-4', responseTime: 1.2, messagesTyped: 24, modelDataTime: 0.8 },
             { modelName: 'Claude-3', responseTime: 1.5, messagesTyped: 22, modelDataTime: 1.1 },
             { modelName: 'Gemini Pro', responseTime: 1.8, messagesTyped: 20, modelDataTime: 1.3 },
             { modelName: 'LLaMA 3', responseTime: 2.1, messagesTyped: 18, modelDataTime: 1.7 },
-            { modelName: 'Qwen 2.5', responseTime: 2.3, messagesTyped: 16, modelDataTime: 1.9 }
+            { modelName: 'Qwen 2.5', responseTime: 2.3, messagesTyped: 16, modelDataTime: 1.9 },
+            { modelName: 'Mistral Large', responseTime: 1.9, messagesTyped: 21, modelDataTime: 1.4 },
+            { modelName: 'Command R+', responseTime: 2.0, messagesTyped: 19, modelDataTime: 1.6 },
+            { modelName: 'Dolphin 2.9', responseTime: 2.5, messagesTyped: 17, modelDataTime: 2.0 },
+            { modelName: 'DeepSeek Coder', responseTime: 2.2, messagesTyped: 15, modelDataTime: 1.8 }
           ])
 
           // Sample trend data

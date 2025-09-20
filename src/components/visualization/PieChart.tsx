@@ -59,7 +59,7 @@ export default function PieChart({ data, title }: PieChartProps) {
   }
 
   return (
-    <div className={`rounded-2xl p-6 transition-colors duration-200 ${
+    <div className={`rounded-2xl p-6 transition-colors duration-200 h-full ${
       darkMode 
         ? 'bg-gray-800/60 border border-gray-700/50' 
         : 'bg-white/80 border border-slate-200/50'
@@ -70,7 +70,7 @@ export default function PieChart({ data, title }: PieChartProps) {
         {title}
       </h3>
       
-      <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-6 h-[calc(100%-3rem)]">
         <div className="relative w-64 h-64">
           <svg width="100%" height="100%" viewBox="0 0 200 200">
             {segments.map((segment, index) => (
@@ -83,6 +83,16 @@ export default function PieChart({ data, title }: PieChartProps) {
               />
             ))}
             <circle cx="100" cy="100" r="30" fill={darkMode ? "#1f2937" : "#ffffff"} />
+            {/* Center text showing total */}
+            <text 
+              x="100" 
+              y="100" 
+              textAnchor="middle" 
+              dy=".3em" 
+              className={`text-lg font-bold ${darkMode ? 'fill-white' : 'fill-slate-900'}`}
+            >
+              {total > 0 ? Math.round(total) : 0}
+            </text>
           </svg>
         </div>
         
@@ -101,11 +111,18 @@ export default function PieChart({ data, title }: PieChartProps) {
                     {segment.name}
                   </span>
                 </div>
-                <span className={`text-sm font-bold transition-colors duration-200 ${
-                  darkMode ? 'text-white' : 'text-slate-900'
-                }`}>
-                  {segment.percentage.toFixed(1)}%
-                </span>
+                <div className="text-right">
+                  <span className={`text-sm font-bold transition-colors duration-200 ${
+                    darkMode ? 'text-white' : 'text-slate-900'
+                  }`}>
+                    {segment.value}
+                  </span>
+                  <span className={`text-xs block transition-colors duration-200 ${
+                    darkMode ? 'text-gray-400' : 'text-slate-500'
+                  }`}>
+                    {segment.percentage.toFixed(1)}%
+                  </span>
+                </div>
               </div>
             ))}
           </div>

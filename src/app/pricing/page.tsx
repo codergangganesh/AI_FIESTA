@@ -327,7 +327,7 @@ export default function PricingPage() {
           border-radius: 1.4rem;
           height: 100%;
         }
-        
+         
         .feature-item {
           display: flex;
           align-items: flex-start;

@@ -4,6 +4,11 @@ import { useState, useEffect } from 'react'
 import { useDarkMode } from '@/contexts/DarkModeContext'
 import { useAuth } from '@/contexts/AuthContext'
 import AdvancedSidebar from '@/components/layout/AdvancedSidebar'
+import TransparentBarChart from '@/components/visualization/TransparentBarChart'
+import PieChart from '@/components/visualization/PieChart'
+import StorageLineChart from '@/components/visualization/StorageLineChart'
+import ResponseTimeChart from '@/components/visualization/ResponseTimeChart'
+import HistoricalBarChart from '@/components/visualization/HistoricalBarChart'
 import {
   Activity,
   TrendingUp,
@@ -43,6 +48,12 @@ interface ActivityItem {
   status: 'success' | 'pending' | 'failed'
 }
 
+// Add this interface for chart data
+interface ChartDataPoint {
+  period: string
+  value: number
+}
+
 export default function UsagePage() {
   const { darkMode } = useDarkMode()
   const { user } = useAuth()
@@ -51,6 +62,10 @@ export default function UsagePage() {
   const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [planType, setPlanType] = useState('free')
+  // Add state for chart data
+  const [apiCallsData, setApiCallsData] = useState<ChartDataPoint[]>([])
+  const [storageData, setStorageData] = useState<ChartDataPoint[]>([])
+  const [responseTime, setResponseTime] = useState<number>(0)
 
   useEffect(() => {
     const loadUsageData = async () => {
@@ -78,6 +93,30 @@ export default function UsagePage() {
         const apiCalls = usage.apiCalls || 0
         const comparisons = usage.comparisons || 0
         const storage = usage.storage || 0
+        const responseTimeValue = usage.responseTime || 0
+
+        // Set response time
+        setResponseTime(responseTimeValue)
+
+        // Generate mock data for charts (in a real app, this would come from the database)
+        const mockApiCallsData: ChartDataPoint[] = [
+          { period: 'Comparison 1', value: Math.max(0, apiCalls - 4) },
+          { period: 'Comparison 2', value: Math.max(0, apiCalls - 3) },
+          { period: 'Comparison 3', value: Math.max(0, apiCalls - 2) },
+          { period: 'Comparison 4', value: Math.max(0, apiCalls - 1) },
+          { period: 'Comparison 5', value: apiCalls }
+        ]
+        
+        const mockStorageData: ChartDataPoint[] = [
+          { period: 'Comparison 1', value: Math.max(0, parseFloat((storage - 0.1).toFixed(3))) },
+          { period: 'Comparison 2', value: Math.max(0, parseFloat((storage - 0.075).toFixed(3))) },
+          { period: 'Comparison 3', value: Math.max(0, parseFloat((storage - 0.05).toFixed(3))) },
+          { period: 'Comparison 4', value: Math.max(0, parseFloat((storage - 0.025).toFixed(3))) },
+          { period: 'Comparison 5', value: storage }
+        ]
+        
+        setApiCallsData(mockApiCallsData)
+        setStorageData(mockStorageData)
 
         // Define limits based on plan type
         let apiCallsLimit = 100
@@ -145,15 +184,15 @@ export default function UsagePage() {
             color: 'green'
           },
           {
-            title: 'Processing Time',
-            current: 24.7,
+            title: 'Response Time',
+            current: responseTimeValue,
             limit: 100,
-            unit: 'hours',
-            percentage: 25,
-            trend: 'down',
-            change: '-5%',
+            unit: 'seconds',
+            percentage: responseTimeValue > 3 ? 90 : responseTimeValue > 1 ? 50 : 20,
+            trend: responseTimeValue > 3 ? 'down' : responseTimeValue > 1 ? 'stable' : 'up',
+            change: responseTimeValue > 3 ? '-15%' : responseTimeValue > 1 ? '+5%' : '+20%',
             icon: Clock,
-            color: 'orange'
+            color: responseTimeValue > 3 ? 'red' : responseTimeValue > 1 ? 'yellow' : 'green'
           }
         ])
 
@@ -221,6 +260,19 @@ export default function UsagePage() {
       </div>
     )
   }
+
+  // Prepare data for the pie chart (Model Comparisons)
+  const modelComparisonsData = [
+    { name: 'Used', value: usageMetrics[1]?.current || 0, color: '#8B5CF6' }, // purple
+    { name: 'Remaining', value: usageMetrics[1]?.limit === Infinity ? 100 : Math.max(0, (usageMetrics[1]?.limit || 100) - (usageMetrics[1]?.current || 0)), color: darkMode ? '#374151' : '#E5E7EB' } // gray
+  ]
+
+  // Prepare historical data for API calls bar chart
+  const apiCallsBarData = apiCallsData.map((item, index) => ({
+    name: item.period,
+    value: item.value,
+    color: '#3B82F6' // blue color
+  }))
 
   return (
     <div className={`min-h-screen transition-colors duration-200 ${
@@ -292,78 +344,174 @@ export default function UsagePage() {
         </div>
 
         {/* Main Content */}
-        <div className="p-6 space-y-6">
-          {/* Usage Metrics Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {usageMetrics.map((metric, index) => {
-              const Icon = metric.icon
-              return (
-                <div
-                  key={index}
-                  className={`rounded-2xl p-6 transition-all duration-200 hover:scale-105 ${
-                    darkMode 
-                      ? 'bg-gray-800/60 border border-gray-700/50' 
-                      : 'bg-white/80 border border-slate-200/50'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`p-3 rounded-xl ${
-                      darkMode ? 'bg-blue-600/20' : 'bg-blue-100'
-                    }`}>
-                      <Icon className={`w-6 h-6 ${
-                        darkMode ? 'text-blue-400' : 'text-blue-600'
-                      }`} />
+        <div className="p-6 space-y-8">
+          {/* Usage Summary - Moved to top */}
+          <div>
+            <h2 className={`text-2xl font-bold mb-4 transition-colors duration-200 ${
+              darkMode ? 'text-white' : 'text-slate-900'
+            }`}>
+              Usage Summary
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {usageMetrics.map((metric, index) => {
+                const Icon = metric.icon
+                return (
+                  <div
+                    key={index}
+                    className={`rounded-xl p-4 transition-all duration-200 ${
+                      darkMode 
+                        ? 'bg-gray-800/60 border border-gray-700/50' 
+                        : 'bg-white/80 border border-slate-200/50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <div className={`p-2 rounded-lg ${
+                        darkMode ? 'bg-blue-600/20' : 'bg-blue-100'
+                      }`}>
+                        <Icon className={`w-4 h-4 ${
+                          darkMode ? 'text-blue-400' : 'text-blue-600'
+                        }`} />
+                      </div>
+                      <div className="flex items-center space-x-1 text-xs">
+                        {getTrendIcon(metric.trend)}
+                        <span className={
+                          metric.trend === 'up' ? 'text-green-500' : 
+                          metric.trend === 'down' ? 'text-red-500' : 
+                          'text-gray-500'
+                        }>
+                          {metric.change}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-1 text-sm">
-                      {getTrendIcon(metric.trend)}
-                      <span className={
-                        metric.trend === 'up' ? 'text-green-500' : 
-                        metric.trend === 'down' ? 'text-red-500' : 
-                        'text-gray-500'
-                      }>
-                        {metric.change}
-                      </span>
+                    
+                    <div>
+                      <h3 className={`text-lg font-bold mb-1 transition-colors duration-200 ${
+                        darkMode ? 'text-white' : 'text-slate-900'
+                      }`}>
+                        {metric.current.toLocaleString()}
+                      </h3>
+                      <p className={`text-xs transition-colors duration-200 ${
+                        darkMode ? 'text-gray-400' : 'text-slate-600'
+                      }`}>
+                        {metric.title}
+                      </p>
                     </div>
                   </div>
-                  
-                  <div className="mb-4">
-                    <h3 className={`text-2xl font-bold mb-1 transition-colors duration-200 ${
+                )
+              })}
+            </div>
+          </div>
+
+          {/* API Usage Section */}
+          <div>
+            <h2 className={`text-2xl font-bold mb-4 transition-colors duration-200 ${
+              darkMode ? 'text-white' : 'text-slate-900'
+            }`}>
+              API Usage
+            </h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* API Calls - Historical Bar Chart */}
+              <div className={`rounded-2xl p-6 transition-colors duration-200 ${
+                darkMode 
+                  ? 'bg-gray-800/60 border border-gray-700/50' 
+                  : 'bg-white/80 border border-slate-200/50'
+              }`}>
+                <h3 className={`text-xl font-bold mb-6 transition-colors duration-200 ${
+                  darkMode ? 'text-white' : 'text-slate-900'
+                }`}>
+                  API Calls History
+                </h3>
+                <div className="h-80">
+                  <HistoricalBarChart 
+                    data={apiCallsBarData}
+                    title=""
+                    unit=" calls"
+                    isLoading={false}
+                  />
+                </div>
+              </div>
+              
+              {/* Model Comparisons - Donut Chart */}
+              <PieChart 
+                data={modelComparisonsData}
+                title="Model Comparisons"
+              />
+            </div>
+          </div>
+          
+          {/* Storage & Performance Section */}
+          <div>
+            <h2 className={`text-2xl font-bold mb-4 transition-colors duration-200 ${
+              darkMode ? 'text-white' : 'text-slate-900'
+            }`}>
+              Storage & Performance
+            </h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Storage Used - Enhanced Visualization */}
+              <div className={`rounded-2xl p-6 transition-colors duration-200 ${
+                darkMode 
+                  ? 'bg-gray-800/60 border border-gray-700/50' 
+                  : 'bg-white/80 border border-slate-200/50'
+              }`}>
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className={`text-xl font-bold transition-colors duration-200 ${
+                    darkMode ? 'text-white' : 'text-slate-900'
+                  }`}>
+                    Storage Used
+                  </h3>
+                  <div className={`text-right ${
+                    darkMode ? 'text-gray-300' : 'text-slate-600'
+                  }`}>
+                    <div className={`text-2xl font-bold ${
                       darkMode ? 'text-white' : 'text-slate-900'
                     }`}>
-                      {metric.current.toLocaleString()}
-                    </h3>
-                    <p className={`text-sm transition-colors duration-200 ${
-                      darkMode ? 'text-gray-400' : 'text-slate-600'
-                    }`}>
-                      {metric.title}
-                    </p>
-                  </div>
-
-                  {/* Progress Bar */}
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-xs">
-                      <span className={darkMode ? 'text-gray-400' : 'text-slate-600'}>
-                        {metric.current} / {metric.limit === Infinity ? '∞' : metric.limit.toLocaleString()} {metric.unit}
-                      </span>
-                      <span className={darkMode ? 'text-gray-400' : 'text-slate-600'}>
-                        {metric.percentage}%
-                      </span>
+                      {usageMetrics[2]?.current?.toFixed(2) || 0} GB
                     </div>
-                    <div className={`w-full rounded-full h-2 ${
-                      darkMode ? 'bg-gray-700' : 'bg-gray-200'
-                    }`}>
-                      <div 
-                        className={`h-2 rounded-full transition-all duration-300 ${getProgressColor(metric.percentage)}`}
-                        style={{width: `${metric.percentage}%`}}
-                      ></div>
+                    <div className="text-sm">
+                      of {usageMetrics[2]?.limit || 1} GB
                     </div>
                   </div>
                 </div>
-              )
-            })}
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="h-64">
+                  <StorageLineChart 
+                    data={storageData}
+                    title=""
+                  />
+                </div>
+                <div className="mt-4">
+                  <div className={`w-full rounded-full h-2 ${
+                    darkMode ? 'bg-gray-700' : 'bg-gray-200'
+                  }`}>
+                    <div 
+                      className="h-2 rounded-full bg-green-500"
+                      style={{ 
+                        width: `${usageMetrics[2]?.percentage || 0}%`,
+                        maxWidth: '100%'
+                      }}
+                    ></div>
+                  </div>
+                  <div className="flex justify-between mt-2 text-xs">
+                    <span className={darkMode ? 'text-gray-400' : 'text-slate-500'}>
+                      0 GB
+                    </span>
+                    <span className={`font-medium ${
+                      darkMode ? 'text-gray-300' : 'text-slate-700'
+                    }`}>
+                      {usageMetrics[2]?.percentage || 0}% used
+                    </span>
+                    <span className={darkMode ? 'text-gray-400' : 'text-slate-500'}>
+                      {usageMetrics[2]?.limit || 1} GB
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              {/* Response Time - Custom Visualization */}
+              <ResponseTimeChart 
+                responseTime={responseTime}
+                title="Response Time"
+              />
+            </div>
           </div>
         </div>
       </div>

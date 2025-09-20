@@ -2,36 +2,30 @@
 
 import { useState, useEffect } from 'react'
 import { useDarkMode } from '@/contexts/DarkModeContext'
-import { Eye } from 'lucide-react'
 
-interface BarChartData {
+interface TransparentBarChartData {
   name: string
   value: number
   color: string
 }
 
-interface BarChartProps {
-  data: BarChartData[]
+interface TransparentBarChartProps {
+  data: TransparentBarChartData[]
   title: string
   unit?: string
   isLoading?: boolean
 }
 
-export default function BarChart({ data, title, unit = '', isLoading = false }: BarChartProps) {
+export default function TransparentBarChart({ data, title, unit = '', isLoading = false }: TransparentBarChartProps) {
   const { darkMode } = useDarkMode()
   const [maxValue, setMaxValue] = useState(0)
-  const [displayedData, setDisplayedData] = useState<BarChartData[]>([])
-  const [showAll, setShowAll] = useState(false)
 
   useEffect(() => {
     if (data.length > 0) {
       const max = Math.max(...data.map(d => d.value))
       setMaxValue(max)
-      
-      // Show all items when "View All" is clicked, otherwise show first 5
-      setDisplayedData(showAll ? data : data.slice(0, 5))
     }
-  }, [data, showAll])
+  }, [data])
 
   if (isLoading) {
     return (
@@ -102,34 +96,21 @@ export default function BarChart({ data, title, unit = '', isLoading = false }: 
   }
 
   return (
-    <div className={`rounded-2xl p-6 transition-colors duration-200 ${
+    <div className={`rounded-2xl transition-colors duration-200 ${
       darkMode 
-        ? 'bg-gray-800/60 border border-gray-700/50' 
-        : 'bg-white/80 border border-slate-200/50'
+        ? 'bg-transparent border border-gray-700/50'  // Transparent background
+        : 'bg-transparent border border-slate-200/50'  // Transparent background
     }`}>
-      <div className="flex items-center justify-between mb-6">
-        <h3 className={`text-xl font-bold transition-colors duration-200 ${
+      {title && (
+        <h3 className={`text-xl font-bold mb-6 px-6 pt-6 transition-colors duration-200 ${
           darkMode ? 'text-white' : 'text-slate-900'
         }`}>
           {title}
         </h3>
-        
-        {data.length > 5 && (
-          <button
-            onClick={() => setShowAll(!showAll)}
-            className={`flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-200 ${
-              darkMode 
-                ? 'bg-gray-700 hover:bg-gray-600 text-gray-200' 
-                : 'bg-gray-200 hover:bg-gray-300 text-gray-700'
-            }`}
-          >
-            <Eye className="w-4 h-4" />
-          </button>
-        )}
-      </div>
+      )}
       
-      <div className="space-y-4">
-        {displayedData.map((item, index) => (
+      <div className="space-y-4 px-6 pb-6">
+        {data.map((item, index) => (
           <div key={index} className="space-y-2">
             <div className="flex justify-between items-center">
               <span className={`text-sm font-medium transition-colors duration-200 ${
@@ -144,13 +125,14 @@ export default function BarChart({ data, title, unit = '', isLoading = false }: 
               </span>
             </div>
             <div className={`w-full rounded-full h-3 ${
-              darkMode ? 'bg-gray-700' : 'bg-gray-200'
+              darkMode ? 'bg-gray-700/30' : 'bg-gray-200/30'  // Semi-transparent background
             }`}>
               <div 
                 className="h-3 rounded-full transition-all duration-1000 ease-out"
                 style={{
                   width: `${maxValue > 0 ? (item.value / maxValue) * 100 : 0}%`,
-                  backgroundColor: item.color
+                  backgroundColor: item.color,
+                  opacity: 0.7  // Transparent bar
                 }}
               ></div>
             </div>

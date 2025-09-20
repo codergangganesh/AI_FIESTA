@@ -118,11 +118,11 @@ export default function LineChart({ data, title, metrics, metricLabels }: LineCh
         {/* Chart content */}
         <div className="absolute inset-0 pl-8 pb-8">
           <div className="relative w-full h-full">
-            {/* Data lines */}
+            {/* Data lines with solid style (different from storage chart) */}
             {metrics.map((metric, metricIndex) => {
               // Create path for the line
               let pathData = ""
-              const points = []
+              const points: { x: number; y: number }[] = []
               
               data.forEach((point, index) => {
                 const value = typeof point[metric] === 'number' ? point[metric] as number : 0
@@ -139,12 +139,12 @@ export default function LineChart({ data, title, metrics, metricLabels }: LineCh
               return (
                 <div key={metricIndex} className="absolute inset-0">
                   <svg width="100%" height="100%" className="overflow-visible">
-                    {/* Line */}
+                    {/* Line with solid style */}
                     <path
                       d={pathData}
                       fill="none"
                       stroke={getColorForMetric(metric, metricIndex)}
-                      strokeWidth="2"
+                      strokeWidth="3"
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     />
@@ -156,16 +156,16 @@ export default function LineChart({ data, title, metrics, metricLabels }: LineCh
                           <circle
                             cx={`${point.x}%`}
                             cy={`${point.y}%`}
-                            r="5"
+                            r="6"
                             fill={getColorForMetric(metric, metricIndex)}
                             stroke={darkMode ? "#1f2937" : "#ffffff"}
                             strokeWidth="2"
                           />
                           <text
                             x={`${point.x}%`}
-                            y={`${point.y - 8}%`}
+                            y={`${point.y - 10}%`}
                             textAnchor="middle"
-                            className={`text-xs font-medium ${
+                            className={`text-xs font-bold ${
                               darkMode ? 'fill-white' : 'fill-slate-900'
                             }`}
                           >
@@ -174,46 +174,6 @@ export default function LineChart({ data, title, metrics, metricLabels }: LineCh
                         </g>
                       )
                     })}
-                  </svg>
-                </div>
-              )
-            })}
-            
-            {/* Area fill */}
-            {metrics.map((metric, metricIndex) => {
-              let areaPathData = ""
-              const firstPoint = calculateCoordinates(
-                typeof data[0][metric] === 'number' ? data[0][metric] as number : 0,
-                0,
-                maxValue,
-                minValue,
-                data.length
-              )
-              areaPathData += `M ${firstPoint.x} 100 `
-              
-              data.forEach((point, index) => {
-                const value = typeof point[metric] === 'number' ? point[metric] as number : 0
-                const coords = calculateCoordinates(value, index, maxValue, minValue, data.length)
-                areaPathData += `L ${coords.x} ${coords.y} `
-              })
-              
-              const lastPoint = calculateCoordinates(
-                typeof data[data.length - 1][metric] === 'number' ? data[data.length - 1][metric] as number : 0,
-                data.length - 1,
-                maxValue,
-                minValue,
-                data.length
-              )
-              areaPathData += `L ${lastPoint.x} 100 Z`
-              
-              return (
-                <div key={`area-${metricIndex}`} className="absolute inset-0">
-                  <svg width="100%" height="100%" className="overflow-visible">
-                    <path
-                      d={areaPathData}
-                      fill={getColorForMetric(metric, metricIndex)}
-                      fillOpacity="0.1"
-                    />
                   </svg>
                 </div>
               )
@@ -239,7 +199,7 @@ export default function LineChart({ data, title, metrics, metricLabels }: LineCh
         {metrics.map((metric, index) => (
           <div key={index} className="flex items-center space-x-2">
             <div 
-              className="w-3 h-3 rounded-full"
+              className="w-4 h-1 rounded-full"
               style={{ backgroundColor: getColorForMetric(metric, index) }}
             ></div>
             <span className={`text-sm transition-colors duration-200 ${

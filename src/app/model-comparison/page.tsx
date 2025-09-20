@@ -2,7 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { useDarkMode } from '@/contexts/DarkModeContext'
+import { useAuth } from '@/contexts/AuthContext'
 import AdvancedSidebar from '@/components/layout/AdvancedSidebar'
+import { recordModelComparison } from '@/utils/usage'
 import {
   GitCompare,
   BarChart3,
@@ -42,6 +44,7 @@ interface ComparisonConfig {
 
 export default function ModelComparisonPage() {
   const { darkMode } = useDarkMode()
+  const { user } = useAuth()
   const [models, setModels] = useState<ModelMetrics[]>([])
   const [config, setConfig] = useState<ComparisonConfig>({
     selectedModels: [],
@@ -178,7 +181,19 @@ export default function ModelComparisonPage() {
 
   const runComparison = async () => {
     setIsRunning(true)
+    const startTime = Date.now()
+    
+    // Simulate the comparison process
     await new Promise(resolve => setTimeout(resolve, 3000))
+    
+    const endTime = Date.now()
+    const responseTime = (endTime - startTime) / 1000  // Convert to seconds
+    
+    // Record the model comparison in usage data
+    if (user) {
+      await recordModelComparison(user.id, responseTime)
+    }
+    
     setIsRunning(false)
   }
 
