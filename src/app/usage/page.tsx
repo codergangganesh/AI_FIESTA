@@ -9,6 +9,8 @@ import PieChart from '@/components/visualization/PieChart'
 import StorageLineChart from '@/components/visualization/StorageLineChart'
 import ResponseTimeChart from '@/components/visualization/ResponseTimeChart'
 import HistoricalBarChart from '@/components/visualization/HistoricalBarChart'
+import ApiCallHistoryChart from '@/components/visualization/ApiCallHistoryChart'
+import ViewAllModal from '@/components/visualization/ViewAllModal'
 import {
   Activity,
   TrendingUp,
@@ -52,6 +54,7 @@ interface ActivityItem {
 interface ChartDataPoint {
   period: string
   value: number
+  timestamp?: string
 }
 
 export default function UsagePage() {
@@ -66,6 +69,9 @@ export default function UsagePage() {
   const [apiCallsData, setApiCallsData] = useState<ChartDataPoint[]>([])
   const [storageData, setStorageData] = useState<ChartDataPoint[]>([])
   const [responseTime, setResponseTime] = useState<number>(0)
+  // Add state for ViewAllModal
+  const [isViewAllModalOpen, setIsViewAllModalOpen] = useState(false)
+  const [viewAllModalData, setViewAllModalData] = useState<{data: ChartDataPoint[], unit: string} | null>(null)
 
   useEffect(() => {
     const loadUsageData = async () => {
@@ -100,11 +106,14 @@ export default function UsagePage() {
 
         // Generate mock data for charts (in a real app, this would come from the database)
         const mockApiCallsData: ChartDataPoint[] = [
-          { period: 'Comparison 1', value: Math.max(0, apiCalls - 4) },
-          { period: 'Comparison 2', value: Math.max(0, apiCalls - 3) },
-          { period: 'Comparison 3', value: Math.max(0, apiCalls - 2) },
-          { period: 'Comparison 4', value: Math.max(0, apiCalls - 1) },
-          { period: 'Comparison 5', value: apiCalls }
+          { period: 'Comparison 1', value: Math.max(0, apiCalls - 4), timestamp: new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString() },
+          { period: 'Comparison 2', value: Math.max(0, apiCalls - 3), timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() },
+          { period: 'Comparison 3', value: Math.max(0, apiCalls - 2), timestamp: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
+          { period: 'Comparison 4', value: Math.max(0, apiCalls - 1), timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString() },
+          { period: 'Comparison 5', value: apiCalls, timestamp: new Date().toISOString() },
+          { period: 'Comparison 6', value: Math.max(0, apiCalls - 1), timestamp: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString() },
+          { period: 'Comparison 7', value: Math.max(0, apiCalls - 2), timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() },
+          { period: 'Comparison 8', value: Math.max(0, apiCalls - 3), timestamp: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString() }
         ]
         
         const mockStorageData: ChartDataPoint[] = [
@@ -117,6 +126,9 @@ export default function UsagePage() {
         
         setApiCallsData(mockApiCallsData)
         setStorageData(mockStorageData)
+        
+        // Log data for debugging
+        console.log('Setting apiCallsData:', mockApiCallsData);
 
         // Define limits based on plan type
         let apiCallsLimit = 100
@@ -235,6 +247,18 @@ export default function UsagePage() {
     if (percentage < 50) return 'bg-green-500'
     if (percentage < 80) return 'bg-yellow-500'
     return 'bg-red-500'
+  }
+
+  // Function to open the ViewAllModal with data
+  const openViewAllModal = (data: ChartDataPoint[], unit: string) => {
+    setViewAllModalData({ data, unit })
+    setIsViewAllModalOpen(true)
+  }
+
+  // Function to close the ViewAllModal
+  const closeViewAllModal = () => {
+    setIsViewAllModalOpen(false)
+    setViewAllModalData(null)
   }
 
   if (isLoading) {
@@ -402,31 +426,34 @@ export default function UsagePage() {
             </div>
           </div>
 
-          {/* API Usage Section */}
+          {/* API Call History Section */}
           <div>
             <h2 className={`text-2xl font-bold mb-4 transition-colors duration-200 ${
               darkMode ? 'text-white' : 'text-slate-900'
             }`}>
-              API Usage
+            
             </h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* API Calls - Historical Bar Chart */}
-              <div className={`rounded-2xl p-6 transition-colors duration-200 ${
+              <div className={`rounded-2xl transition-colors duration-200 ${
                 darkMode 
                   ? 'bg-gray-800/60 border border-gray-700/50' 
                   : 'bg-white/80 border border-slate-200/50'
               }`}>
-                <h3 className={`text-xl font-bold mb-6 transition-colors duration-200 ${
-                  darkMode ? 'text-white' : 'text-slate-900'
-                }`}>
-                  API Calls History
-                </h3>
-                <div className="h-80">
-                  <HistoricalBarChart 
-                    data={apiCallsBarData}
+                <div className="p-6">
+                  <h3 className={`text-xl font-bold mb-6 transition-colors duration-200 ${
+                    darkMode ? 'text-white' : 'text-slate-900'
+                  }`}>
+                    API Calls History
+                  </h3>
+                </div>
+                <div className="h-96 px-6 pb-6">
+                  <ApiCallHistoryChart 
+                    data={apiCallsData}
                     title=""
                     unit=" calls"
-                    isLoading={false}
+                    isLoading={isLoading}
+                    onViewAll={openViewAllModal}
                   />
                 </div>
               </div>
@@ -515,6 +542,15 @@ export default function UsagePage() {
           </div>
         </div>
       </div>
+
+      {/* View All Modal - Rendered at the root level to avoid z-index issues */}
+      {isViewAllModalOpen && viewAllModalData && (
+        <ViewAllModal 
+          data={viewAllModalData.data}
+          unit={viewAllModalData.unit}
+          onClose={closeViewAllModal}
+        />
+      )}
     </div>
   )
 }
