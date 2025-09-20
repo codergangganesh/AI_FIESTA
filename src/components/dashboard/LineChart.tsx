@@ -121,7 +121,7 @@ export default function LineChart({ data, title, metrics, metricLabels, isLoadin
                     <div 
                       className="w-2 rounded-t transition-all duration-1000"
                       style={{ 
-                        height: `${maxValue > 0 ? ((point[metric] as number) / maxValue) * 192 : 0}px`,
+                        height: `${maxValue > 0 ? Math.min(192, Math.max(0, ((point[metric] as number) / maxValue) * 192)) : 0}px`,
                         backgroundColor: getColorForMetric(metric, metricIndex)
                       }}
                     ></div>

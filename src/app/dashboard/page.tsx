@@ -7,7 +7,9 @@ import AdvancedSidebar from '@/components/layout/AdvancedSidebar'
 import BarChart from '@/components/dashboard/BarChart'
 import LineChart from '@/components/dashboard/LineChart'
 import DonutChart from '@/components/dashboard/DonutChart'
+import ResponseTimeDistribution from '@/components/dashboard/ResponseTimeDistribution'
 import { databaseClientService } from '@/services/database.client'
+import { AI_MODELS } from '@/config/ai-models'
 import {
   TrendingUp,
   Users,
@@ -55,6 +57,7 @@ interface ModelComparisonData {
   responseTime: number
   messagesTyped: number
   modelDataTime: number
+  responseTimeDistribution: number[]
 }
 
 interface PerformanceTrendData {
@@ -151,6 +154,10 @@ export default function DashboardPage() {
           const accuracyScore = await databaseClientService.getAverageAccuracyScore()
           const apiUsage = await databaseClientService.getApiUsagePercentage()
           
+          // NEW: Fetch model comparison data for dashboard metrics
+          const modelComparisonData = await databaseClientService.getModelComparisonData()
+          const responseTimeTrends = await databaseClientService.getResponseTimeTrends()
+          
           if (!user) return; // Check if user is still available
           
           setMetrics([
@@ -188,28 +195,11 @@ export default function DashboardPage() {
             }
           ])
 
-          // Sample comparison data with 9 models
-          setComparisonData([
-            { modelName: 'GPT-4', responseTime: 1.2, messagesTyped: 24, modelDataTime: 0.8 },
-            { modelName: 'Claude-3', responseTime: 1.5, messagesTyped: 22, modelDataTime: 1.1 },
-            { modelName: 'Gemini Pro', responseTime: 1.8, messagesTyped: 20, modelDataTime: 1.3 },
-            { modelName: 'LLaMA 3', responseTime: 2.1, messagesTyped: 18, modelDataTime: 1.7 },
-            { modelName: 'Qwen 2.5', responseTime: 2.3, messagesTyped: 16, modelDataTime: 1.9 },
-            { modelName: 'Mistral Large', responseTime: 1.9, messagesTyped: 21, modelDataTime: 1.4 },
-            { modelName: 'Command R+', responseTime: 2.0, messagesTyped: 19, modelDataTime: 1.6 },
-            { modelName: 'Dolphin 2.9', responseTime: 2.5, messagesTyped: 17, modelDataTime: 2.0 },
-            { modelName: 'DeepSeek Coder', responseTime: 2.2, messagesTyped: 15, modelDataTime: 1.8 }
-          ])
-
-          // Sample trend data
-          setTrendData([
-            { period: 'Week 1', responseTime: 2.1, messagesTyped: 15, modelDataTime: 1.8 },
-            { period: 'Week 2', responseTime: 1.9, messagesTyped: 17, modelDataTime: 1.6 },
-            { period: 'Week 3', responseTime: 1.7, messagesTyped: 19, modelDataTime: 1.4 },
-            { period: 'Week 4', responseTime: 1.5, messagesTyped: 21, modelDataTime: 1.2 },
-            { period: 'Week 5', responseTime: 1.3, messagesTyped: 23, modelDataTime: 1.0 },
-            { period: 'Week 6', responseTime: 1.2, messagesTyped: 24, modelDataTime: 0.8 }
-          ])
+          // Set the fetched model comparison data
+          setComparisonData(modelComparisonData)
+          
+          // Set the fetched trend data
+          setTrendData(responseTimeTrends)
         } else {
           // Keep metrics at 0 if no comparisons have been made
           setMetrics([
@@ -312,6 +302,10 @@ export default function DashboardPage() {
       const accuracyScore = await databaseClientService.getAverageAccuracyScore()
       const apiUsage = await databaseClientService.getApiUsagePercentage()
       
+      // NEW: Fetch updated model comparison data
+      const modelComparisonData = await databaseClientService.getModelComparisonData()
+      const responseTimeTrends = await databaseClientService.getResponseTimeTrends()
+      
       setTotalComparisons(comparisonsCount)
       setHasComparisons(comparisonsCount > 0)
       
@@ -349,6 +343,12 @@ export default function DashboardPage() {
           color: 'orange'
         }
       ])
+      
+      // Update the model comparison data
+      setComparisonData(modelComparisonData)
+      
+      // Update the trend data
+      setTrendData(responseTimeTrends)
     } catch (error: any) {
       console.error('Error updating dashboard metrics:', error.message || error)
       // Add more detailed error logging
@@ -397,23 +397,56 @@ export default function DashboardPage() {
     }
   }, [isExportOpen])
 
+  // Function to get brand name from model name
+  const getBrandName = (modelName: string): string => {
+    // First try exact match
+    let model = AI_MODELS.find(m => m.name === modelName || m.id === modelName)
+    
+    // If no exact match, try partial match
+    if (!model) {
+      model = AI_MODELS.find(m => 
+        m.name.includes(modelName) || 
+        m.id.includes(modelName) ||
+        modelName.includes(m.name) ||
+        modelName.includes(m.id)
+      )
+    }
+    
+    // If still no match, try case insensitive match
+    if (!model) {
+      model = AI_MODELS.find(m => 
+        m.name.toLowerCase() === modelName.toLowerCase() || 
+        m.id.toLowerCase() === modelName.toLowerCase()
+      )
+    }
+    
+    return model ? model.displayName : modelName
+  }
+
   // Transform comparison data for bar charts
   const responseTimeData = comparisonData.map(item => ({
-    name: item.modelName,
+    name: getBrandName(item.modelName),
     value: item.responseTime,
     color: '#3B82F6' // Blue
   }))
 
   const messagesTypedData = comparisonData.map(item => ({
-    name: item.modelName,
+    name: getBrandName(item.modelName),
     value: item.messagesTyped,
     color: '#10B981' // Green
   }))
 
   const modelDataTimeData = comparisonData.map(item => ({
-    name: item.modelName,
+    name: getBrandName(item.modelName),
     value: item.modelDataTime,
     color: '#8B5CF6' // Purple
+  }))
+
+  // Transform data for response time distribution (average response time per model)
+  const responseTimeDistributionData = comparisonData.map(item => ({
+    name: getBrandName(item.modelName),
+    value: item.responseTime,
+    color: '#F59E0B' // Amber
   }))
 
   const getStatusIcon = (status: string) => {
@@ -640,7 +673,7 @@ export default function DashboardPage() {
                 <NotificationBell />
                 
                 {/* Simple Profile Icon */}
-                <SimpleProfileIcon darkMode={darkMode} />
+                <SimpleProfileIcon />
                 
                 {/* Export Dropdown - Modern Design */}
                 <div className="relative" ref={exportRef}>
@@ -835,15 +868,14 @@ export default function DashboardPage() {
             />
           </div>
 
-          {/* Response Time Donut Chart */}
+          {/* Response Time Distribution Chart */}
           <div className="grid grid-cols-1 gap-6">
-            <DonutChart 
-              data={responseTimeData} 
+            <ResponseTimeDistribution 
+              data={responseTimeDistributionData} 
               title="Response Time Distribution" 
               unit="s"
             />
           </div>
-
         </div>
       </div>
     </div>

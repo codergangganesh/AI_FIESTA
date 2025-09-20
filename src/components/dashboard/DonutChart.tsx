@@ -17,7 +17,7 @@ export default function DonutChart({ data, title, unit = '' }: DonutChartProps) 
   // Calculate angles for each segment
   let startAngle = 0
   const segments = data.map(item => {
-    const percentage = total > 0 ? (item.value / total) * 100 : 0
+    const percentage = total > 0 ? Math.min(100, Math.max(0, (item.value / total) * 100)) : 0
     const angle = (percentage / 100) * 360
     const endAngle = startAngle + angle
     const result = {

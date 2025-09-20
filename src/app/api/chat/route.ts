@@ -24,9 +24,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Track response time for each message
-    const startTime = Date.now()
-
     // Update API usage counter before making the API call
     try {
       const { error: usageError } = await supabase.rpc('update_user_usage', {
@@ -42,8 +39,29 @@ export async function POST(request: NextRequest) {
       console.error('Error updating API usage:', usageError.message || usageError)
     }
 
-    // Send message to multiple AI models
-    const results = await openRouterService.sendMessageToMultipleModels(models, message)
+    // Track response time for each model individually
+    const modelResponseTimes: Record<string, number> = {}
+    const startTime = Date.now()
+
+    // Send message to multiple AI models and track individual response times
+    const results = []
+    for (const model of models) {
+      const modelStartTime = Date.now()
+      try {
+        const modelResult = await openRouterService.sendMessageToMultipleModels([model], message)
+        const modelEndTime = Date.now()
+        modelResponseTimes[model] = (modelEndTime - modelStartTime) / 1000 // Convert to seconds
+        results.push(...modelResult)
+      } catch (error) {
+        const modelEndTime = Date.now()
+        modelResponseTimes[model] = (modelEndTime - modelStartTime) / 1000 // Convert to seconds
+        results.push({
+          model,
+          response: null,
+          error: error instanceof Error ? error.message : 'Unknown error'
+        })
+      }
+    }
 
     // Calculate total response time
     const endTime = Date.now()
@@ -54,18 +72,23 @@ export async function POST(request: NextRequest) {
       model: result.model,
       content: result.response?.choices?.[0]?.message?.content || '',
       error: result.error,
-      success: result.response !== null
-      // Note: Individual model response time tracking would require changes to the openRouterService
+      success: result.response !== null,
+      responseTime: modelResponseTimes[result.model] || 0 // Add individual model response time
     }))
 
     // Save model comparison to database
     try {
       // Calculate metrics for the comparison
       const successfulResponses = responses.filter(r => r.success && r.content)
+      
+      // Calculate average response time per model
+      const avgModelResponseTime = Object.values(modelResponseTimes).reduce((a, b) => a + b, 0) / Object.keys(modelResponseTimes).length
+      
       const metrics = {
         accuracy: 90 + Math.random() * 10, // Random accuracy between 90-100%
-        responseTime: totalResponseTime, // Use the actual measured response time
-        cost: successfulResponses.length * 0.001 // Approximate cost
+        responseTime: avgModelResponseTime, // Average response time per model
+        cost: successfulResponses.length * 0.001, // Approximate cost
+        modelResponseTimes: modelResponseTimes // Individual model response times
       }
 
       // Save to model_comparisons table

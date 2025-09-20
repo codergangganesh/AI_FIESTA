@@ -149,7 +149,7 @@ export default function BarChart({ data, title, unit = '', isLoading = false }: 
               <div 
                 className="h-3 rounded-full transition-all duration-1000 ease-out"
                 style={{
-                  width: `${maxValue > 0 ? (item.value / maxValue) * 100 : 0}%`,
+                  width: `${maxValue > 0 ? Math.min(100, Math.max(0, (item.value / maxValue) * 100)) : 0}%`,
                   backgroundColor: item.color
                 }}
               ></div>

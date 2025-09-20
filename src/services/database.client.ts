@@ -377,6 +377,191 @@ class DatabaseClientService {
       return 0
     }
   }
+
+  /**
+   * Fetch detailed model comparison data for dashboard metrics
+   */
+  async getModelComparisonData(): Promise<any[]> {
+    try {
+      const supabase = createClient()
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      
+      if (authError) {
+        console.error('Authentication error in getModelComparisonData:', authError.message || authError)
+        return []
+      }
+      
+      if (!user) {
+        console.error('No user found in getModelComparisonData')
+        return []
+      }
+
+      // Get all model comparisons for the user
+      const { data, error } = await supabase
+        .from('model_comparisons')
+        .select('models, responses, metrics, execution_time_ms')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Error fetching model comparison data:', error.message || error)
+        return []
+      }
+
+      // Process the data to extract metrics for each model
+      const modelDataMap: Record<string, any> = {}
+      
+      data.forEach(comparison => {
+        // Extract models from the comparison
+        if (comparison.models && Array.isArray(comparison.models)) {
+          comparison.models.forEach((modelName: string) => {
+            if (!modelDataMap[modelName]) {
+              modelDataMap[modelName] = {
+                modelName,
+                responseTimes: [],
+                messagesTyped: 0,
+                dataProcessingTimes: [],
+                totalComparisons: 0
+              }
+            }
+            
+            // Increment comparison count
+            modelDataMap[modelName].totalComparisons++
+            
+            // Extract response time from metrics (individual model response times)
+            if (comparison.metrics && typeof comparison.metrics === 'object') {
+              const metrics = comparison.metrics as Record<string, any>
+              if (metrics.modelResponseTimes && metrics.modelResponseTimes[modelName]) {
+                modelDataMap[modelName].responseTimes.push(metrics.modelResponseTimes[modelName])
+              } else if (comparison.execution_time_ms) {
+                // Fallback to overall execution time if individual times not available
+                modelDataMap[modelName].responseTimes.push(comparison.execution_time_ms / 1000) // Convert to seconds
+              }
+            } else if (comparison.execution_time_ms) {
+              // Fallback to overall execution time if metrics not available
+              modelDataMap[modelName].responseTimes.push(comparison.execution_time_ms / 1000) // Convert to seconds
+            }
+            
+            // Extract data processing time from metrics
+            if (comparison.metrics && typeof comparison.metrics === 'object') {
+              const metrics = comparison.metrics as Record<string, any>
+              if (metrics.responseTime) {
+                modelDataMap[modelName].dataProcessingTimes.push(metrics.responseTime)
+              }
+            }
+            
+            // Count messages (responses) for this model
+            if (comparison.responses && Array.isArray(comparison.responses)) {
+              const modelResponse = comparison.responses.find((r: any) => r.model === modelName)
+              if (modelResponse) {
+                modelDataMap[modelName].messagesTyped++
+              }
+            }
+          })
+        }
+      })
+
+      // Convert map to array and calculate averages
+      const result = Object.values(modelDataMap).map((modelData: any) => {
+        const avgResponseTime = modelData.responseTimes.length > 0 
+          ? modelData.responseTimes.reduce((a: number, b: number) => a + b, 0) / modelData.responseTimes.length
+          : 0
+          
+        const avgDataProcessingTime = modelData.dataProcessingTimes.length > 0
+          ? modelData.dataProcessingTimes.reduce((a: number, b: number) => a + b, 0) / modelData.dataProcessingTimes.length
+          : 0
+          
+        return {
+          modelName: modelData.modelName,
+          responseTime: parseFloat(avgResponseTime.toFixed(2)),
+          messagesTyped: modelData.messagesTyped,
+          modelDataTime: parseFloat(avgDataProcessingTime.toFixed(2)),
+          responseTimeDistribution: modelData.responseTimes.map((t: number) => parseFloat(t.toFixed(2)))
+        }
+      })
+
+      return result
+    } catch (error: any) {
+      console.error('Error in getModelComparisonData:', error.message || error)
+      return []
+    }
+  }
+
+  /**
+   * Fetch response time trends over time
+   */
+  async getResponseTimeTrends(): Promise<any[]> {
+    try {
+      const supabase = createClient()
+      const { data: { user }, error: authError } = await supabase.auth.getUser()
+      
+      if (authError) {
+        console.error('Authentication error in getResponseTimeTrends:', authError.message || authError)
+        return []
+      }
+      
+      if (!user) {
+        console.error('No user found in getResponseTimeTrends')
+        return []
+      }
+
+      // Get model comparisons grouped by week
+      const { data, error } = await supabase
+        .from('model_comparisons')
+        .select('created_at, metrics, execution_time_ms')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: true })
+
+      if (error) {
+        console.error('Error fetching response time trends:', error.message || error)
+        return []
+      }
+
+      // Group data by week and calculate averages
+      const weeklyData: Record<string, { count: number; totalResponseTime: number; totalMessages: number; totalProcessingTime: number }> = {}
+      
+      data.forEach(item => {
+        // Get week number (simplified approach)
+        const date = new Date(item.created_at)
+        const week = `${date.getFullYear()}-W${Math.ceil(date.getDate() / 7)}`
+        
+        if (!weeklyData[week]) {
+          weeklyData[week] = {
+            count: 0,
+            totalResponseTime: 0,
+            totalMessages: 0,
+            totalProcessingTime: 0
+          }
+        }
+        
+        weeklyData[week].count++
+        if (item.execution_time_ms) {
+          weeklyData[week].totalResponseTime += item.execution_time_ms / 1000 // Convert to seconds
+        }
+        
+        if (item.metrics && typeof item.metrics === 'object') {
+          const metrics = item.metrics as Record<string, any>
+          weeklyData[week].totalMessages += 1 // Simplified - one message per comparison
+          if (metrics.responseTime) {
+            weeklyData[week].totalProcessingTime += metrics.responseTime
+          }
+        }
+      })
+
+      // Convert to array format
+      const result = Object.entries(weeklyData).map(([period, data]) => ({
+        period,
+        responseTime: data.count > 0 ? parseFloat((data.totalResponseTime / data.count).toFixed(2)) : 0,
+        messagesTyped: data.totalMessages,
+        modelDataTime: data.count > 0 ? parseFloat((data.totalProcessingTime / data.count).toFixed(2)) : 0
+      }))
+
+      return result
+    } catch (error: any) {
+      console.error('Error in getResponseTimeTrends:', error.message || error)
+      return []
+    }
+  }
 }
 
 export const databaseClientService = new DatabaseClientService()
