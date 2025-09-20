@@ -257,7 +257,7 @@ export default function LandingPage() {
                         ? 'from-gray-300 to-gray-100 group-hover:from-blue-300 group-hover:to-purple-300' 
                         : 'from-slate-700 to-slate-900 group-hover:from-blue-600 group-hover:to-purple-700'
                     } bg-clip-text text-transparent transition-all duration-300`}>
-                      Documentation
+                      Docs
                     </span>
                   </Link>
                   
@@ -1122,7 +1122,7 @@ export default function LandingPage() {
         {/* Main footer content */}
         <div className="relative py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-7 gap-8">
               {/* Brand section */}
               <div className="md:col-span-2">
                 <div className="flex items-center space-x-3 mb-6">
@@ -1168,7 +1168,7 @@ export default function LandingPage() {
                   {[
                     { name: 'Compare Models', href: '/chat' },
                     { name: 'View History', href: '/history' },
-                    { name: 'Documentation', href: '/docs' }
+                    { name: 'Docs', href: '/docs' }
                   ].map((link, index) => (
                     <li key={index}>
                       <Link 
@@ -1214,6 +1214,62 @@ export default function LandingPage() {
                       >
                         <div className="w-2 h-2 bg-blue-400 rounded-full group-hover:bg-blue-300 transition-colors duration-200"></div>
                         <span className="hover:underline">{model}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
+              {/* Contact Details */}
+              <div>
+                <h4 className={`font-bold mb-4 ${
+                  darkMode ? 'text-white' : 'text-white'
+                }`}>
+                  Contact Details
+                </h4>
+                <ul className="space-y-2">
+                  {[
+                    { name: 'Contact Us', href: '/contact' },
+                    // { name: 'Support', href: '/support' },
+                    { name: 'E-mail', href: 'mailto:mannamganeshbabu8@gmail.com.com' }
+                  ].map((link, index) => (
+                    <li key={index}>
+                      <Link 
+                        href={link.href} 
+                        className={`hover:text-white transition-colors duration-200 text-sm flex items-center space-x-2 ${
+                          darkMode ? 'text-gray-400' : 'text-slate-400'
+                        }`}
+                      >
+                        <ChevronRight className="w-3 h-3" />
+                        <span>{link.name}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              
+              {/* Payment Details */}
+              <div>
+                <h4 className={`font-bold mb-4 ${
+                  darkMode ? 'text-white' : 'text-white'
+                }`}>
+                  Payment Details
+                </h4>
+                <ul className="space-y-2">
+                  {[
+                    { name: 'Pricing', href: '/pricing' },
+                    // { name: 'Payment Methods', href: '/payment' },
+                    // { name: 'Billing', href: '/account-settings#billing' }
+                  ].map((link, index) => (
+                    <li key={index}>
+                      <Link 
+                        href={link.href} 
+                        className={`hover:text-white transition-colors duration-200 text-sm flex items-center space-x-2 ${
+                          darkMode ? 'text-gray-400' : 'text-slate-400'
+                        }`}
+                      >
+                        <ChevronRight className="w-3 h-3" />
+                        <span>{link.name}</span>
                       </Link>
                     </li>
                   ))}

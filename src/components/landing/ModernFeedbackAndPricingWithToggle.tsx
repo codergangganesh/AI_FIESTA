@@ -14,7 +14,7 @@ import type { Database } from '@/types/database'
 
 type FeedbackMessage = Database['public']['Tables']['feedback_messages']['Row']
 
-export default function ModernFeedbackAndPricing() {
+export default function ModernFeedbackAndPricingWithToggle() {
   const router = useRouter()
   const { darkMode } = useDarkMode()
   const { user } = useAuth()
