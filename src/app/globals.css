@@ -24,3 +24,15 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Smooth theme transitions */
+html, body, #__next {
+  transition: background-color 200ms ease, color 200ms ease;
+}
+
+/* Dark theme violet accents */
+.dark .violet-bg {
+  background: radial-gradient(1200px 600px at 80% -10%, rgba(139,92,246,0.25), transparent),
+              radial-gradient(800px 400px at -10% 10%, rgba(168,85,247,0.2), transparent),
+              #000;
+}
